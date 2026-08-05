@@ -29,6 +29,7 @@ import Exam from "./Exam";
 import examsData from "./examData";
 
 import secondFreeCourse from "./assets/second-free-course.jpeg";
+import thirdFreeCourse from "./assets/third-free-course.jpeg";
 
 import "./AllCourses.css";
 
@@ -256,8 +257,7 @@ function AllCourses({ currentStudent }) {
   }, [courses, studentGrade]);
 
   function getDisplayedPrice(price) {
-    const numericPrice =
-      Number(price);
+    const numericPrice = Number(price);
 
     if (
       price === "" ||
@@ -275,6 +275,9 @@ function AllCourses({ currentStudent }) {
     return `${numericPrice} جنيه`;
   }
 
+  /*
+    تحديد صورة كل كورس
+  */
   function getCourseImage(course) {
     if (
       course.id ===
@@ -284,14 +287,21 @@ function AllCourses({ currentStudent }) {
     }
 
     if (
-      !course.image ||
-      course.image === "default" ||
-      !course.image.startsWith("http")
+      course.id ===
+      "free-third-course"
     ) {
-      return secondFreeCourse;
+      return thirdFreeCourse;
     }
 
-    return course.image;
+    if (
+      course.image &&
+      course.image !== "default" &&
+      course.image.startsWith("http")
+    ) {
+      return course.image;
+    }
+
+    return secondFreeCourse;
   }
 
   function getLessonProgress(
@@ -491,8 +501,7 @@ function AllCourses({ currentStudent }) {
           const savedStudent =
             studentSnapshot.data();
 
-          const now =
-            Timestamp.now();
+          const now = Timestamp.now();
 
           const courseProgress = {
             ...(savedStudent.courseProgress ||
@@ -1075,9 +1084,7 @@ function AllCourses({ currentStudent }) {
           <div className="all-courses-empty">
             <h2>حدث خطأ</h2>
 
-            <p>
-              {coursesError}
-            </p>
+            <p>{coursesError}</p>
           </div>
         ) : visibleCourses.length ===
           0 ? (
