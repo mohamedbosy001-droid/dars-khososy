@@ -1,0 +1,442 @@
+.my-lessons-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.my-lessons-title {
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 30px;
+  padding: 25px 35px;
+  border: 1px solid #8f6644;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #f7d9aa;
+  background: linear-gradient(
+    135deg,
+    #3d281c,
+    #67472f
+  );
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.22);
+}
+
+.my-lessons-title > svg {
+  flex-shrink: 0;
+  color: #efc681;
+  font-size: 36px;
+}
+
+.my-lessons-title h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.my-lessons-title p {
+  margin: 7px 0 0;
+  color: #e8cda3;
+}
+
+.my-lessons-empty {
+  width: min(720px, 95%);
+  min-height: 330px;
+  margin: 50px auto;
+  padding: 45px 30px;
+  border: 1px solid #dcc19e;
+  border-radius: 24px;
+  text-align: center;
+  background: #fffaf3;
+  box-shadow: 0 15px 40px rgba(74, 47, 31, 0.12);
+}
+
+.my-lessons-empty-icon {
+  width: 95px;
+  height: 95px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f5cf91;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #765238
+  );
+  box-shadow: 0 10px 25px rgba(74, 47, 31, 0.2);
+  font-size: 42px;
+}
+
+.my-lessons-empty h2 {
+  margin: 0 0 14px;
+  color: #4a2f1f;
+  font-size: 29px;
+}
+
+.my-lessons-empty p {
+  max-width: 520px;
+  margin: 0 auto;
+  color: #85664e;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.my-lessons-list {
+  display: grid;
+  gap: 26px;
+}
+
+.my-lesson-card {
+  padding: 26px;
+  border: 1px solid #dfc5a3;
+  border-radius: 22px;
+  background: #fffaf3;
+  box-shadow: 0 13px 34px rgba(74, 47, 31, 0.11);
+}
+
+.my-lesson-heading {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+}
+
+.my-lesson-number {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f6d69f;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #795439
+  );
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.my-lesson-heading span {
+  color: #a56f34;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.my-lesson-heading h2 {
+  margin: 7px 0 8px;
+  color: #4a2f1f;
+  font-size: 24px;
+}
+
+.my-lesson-heading p {
+  margin: 0;
+  color: #85664e;
+  line-height: 1.7;
+}
+
+.lesson-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.lesson-step-card {
+  min-height: 190px;
+  padding: 22px 16px;
+  border-radius: 18px;
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  font-family: inherit;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.lesson-step-card.available {
+  border: 1px solid #d7b889;
+  color: #4a2f1f;
+  background: #f8ead6;
+  cursor: pointer;
+}
+
+.lesson-step-card.available:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(74, 47, 31, 0.13);
+}
+
+.lesson-step-card.locked {
+  border: 1px solid #ded4c9;
+  color: #9b8d81;
+  background: #f2eee9;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.lesson-step-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+}
+
+.lesson-step-card.available .lesson-step-icon {
+  color: #f4ce92;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #795439
+  );
+}
+
+.lesson-step-card.locked .lesson-step-icon {
+  color: #8f8174;
+  background: #dfd7cf;
+}
+
+.lesson-step-card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.lesson-step-card span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lesson-completed-icon {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  color: #3f8550;
+  font-size: 20px;
+}
+
+@media (max-width: 1050px) {
+  .lesson-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .my-lessons-page {
+    padding: 18px;
+  }
+
+  .my-lessons-title {
+    min-height: 92px;
+    padding: 20px;
+  }
+
+  .my-lessons-title h1 {
+    font-size: 28px;
+  }
+
+  .lesson-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-lesson-card {
+    padding: 20px;
+  }
+}
+/* ===================================
+   MY LESSONS - DARK MODE
+=================================== */
+
+.dark-student-profile-page .my-lessons-page{
+    color:#f7ead9;
+}
+
+/* العنوان */
+.dark-student-profile-page .my-lessons-title{
+    background:linear-gradient(135deg,#2b1b13,#4f3424);
+    border-color:#7d5b40;
+}
+
+.dark-student-profile-page .my-lessons-title h1{
+    color:#ffe2b3;
+}
+
+.dark-student-profile-page .my-lessons-title p{
+    color:#e5c9a2;
+}
+
+.dark-student-profile-page .my-lessons-title svg{
+    color:#efc681;
+}
+
+/* لا يوجد دروس */
+.dark-student-profile-page .my-lessons-empty{
+    background:#30221a;
+    border-color:#735039;
+}
+
+.dark-student-profile-page .my-lessons-empty-icon{
+    background:linear-gradient(135deg,#4a2f1f,#765238);
+    color:#efc681;
+}
+
+.dark-student-profile-page .my-lessons-empty h2{
+    color:#fff4e4;
+}
+
+.dark-student-profile-page .my-lessons-empty p{
+    color:#d8c0a7;
+}
+
+/* كارت الدرس */
+.dark-student-profile-page .my-lesson-card{
+    background:#30221a;
+    border-color:#735039;
+}
+
+.dark-student-profile-page .my-lesson-number{
+    background:linear-gradient(135deg,#4a2f1f,#795439);
+    color:#ffd58d;
+}
+
+.dark-student-profile-page .my-lesson-heading span{
+    color:#efc681;
+}
+
+.dark-student-profile-page .my-lesson-heading h2{
+    color:#fff4e4;
+}
+
+.dark-student-profile-page .my-lesson-heading p{
+    color:#d8c0a7;
+}
+
+/* الكروت المفتوحة */
+.dark-student-profile-page .lesson-step-card.available{
+    background:#3a2b20;
+    border-color:#7b593f;
+    color:#fff4e4;
+}
+
+.dark-student-profile-page .lesson-step-card.available:hover{
+    background:#473327;
+    box-shadow:0 10px 24px rgba(0,0,0,.25);
+}
+
+.dark-student-profile-page .lesson-step-card.available .lesson-step-icon{
+    background:linear-gradient(135deg,#4a2f1f,#795439);
+    color:#ffd58d;
+}
+
+/* الكروت المقفولة */
+.dark-student-profile-page .lesson-step-card.locked{
+    background:#2c2c2c;
+    border-color:#555;
+    color:#9f9f9f;
+}
+
+.dark-student-profile-page .lesson-step-card.locked .lesson-step-icon{
+    background:#555;
+    color:#cfcfcf;
+}
+
+/* النصوص */
+.dark-student-profile-page .lesson-step-card h3{
+    color:inherit;
+}
+
+.dark-student-profile-page .lesson-step-card span{
+    color:inherit;
+}
+
+/* علامة الإنجاز */
+.dark-student-profile-page .lesson-completed-icon{
+    color:#58d07c;
+}
+.lesson-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lesson-video-modal {
+  width: min(920px, 100%);
+  max-height: 95vh;
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid #8b6546;
+  border-radius: 20px;
+  background: #2d2119;
+  color: #fff3df;
+  position: relative;
+  text-align: center;
+}
+
+.lesson-video-modal h2 {
+  margin: 0 45px 8px;
+  color: #fff3df;
+}
+
+.lesson-video-course-name {
+  margin: 0 0 18px;
+  color: #efc681;
+  font-weight: 700;
+}
+
+.lesson-video-close {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #5b4333;
+  color: #ffffff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lesson-video-player {
+  display: block;
+  width: 100%;
+  max-height: 68vh;
+  border-radius: 14px;
+  background: #000000;
+}
+
+.lesson-video-message {
+  margin: 18px 0 0;
+  color: #f3e4cf;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .lesson-video-overlay {
+    padding: 10px;
+  }
+
+  .lesson-video-modal {
+    padding: 22px 12px;
+  }
+
+  .lesson-video-modal h2 {
+    font-size: 21px;
+  }
+}

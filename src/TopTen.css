@@ -1,0 +1,340 @@
+.top-ten-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.top-ten-title {
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 30px;
+  padding: 25px 35px;
+  border: 1px solid #8f6644;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #f7d9aa;
+  background: linear-gradient(135deg, #3d281c, #67472f);
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.22);
+}
+
+.top-ten-title svg {
+  color: #efc681;
+  font-size: 35px;
+}
+
+.top-ten-title h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.top-ten-intro {
+  padding: 25px;
+  border: 1px solid #d8b784;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #f2dec1, #fff8ee);
+}
+
+.top-ten-intro > svg {
+  color: #a36b2f;
+  font-size: 48px;
+}
+
+.top-ten-intro h2 {
+  margin: 0 0 8px;
+  color: #4a2f1f;
+}
+
+.top-ten-intro p {
+  margin: 0;
+  color: #85664e;
+  line-height: 1.7;
+}
+
+.top-ten-list {
+  margin-top: 26px;
+  display: grid;
+  gap: 14px;
+}
+
+.top-ten-student {
+  min-height: 94px;
+  padding: 17px 22px;
+  border: 1px solid #dfc5a3;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: 65px 65px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  background: #fffaf3;
+  box-shadow: 0 9px 24px rgba(74, 47, 31, 0.09);
+}
+
+.top-ten-position {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f4ce8f;
+  background: #60412d;
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.top-ten-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #f5d29a;
+  background: linear-gradient(135deg, #4a2f1f, #765238);
+  font-size: 25px;
+}
+
+.top-ten-student-info h2 {
+  margin: 0 0 5px;
+  color: #4a2f1f;
+  font-size: 20px;
+}
+
+.top-ten-student-info p {
+  margin: 0;
+  color: #99785d;
+}
+
+.top-ten-points {
+  text-align: center;
+}
+
+.top-ten-points strong {
+  display: block;
+  color: #a86e30;
+  font-size: 25px;
+}
+
+.top-ten-points span {
+  color: #8c6a50;
+  font-size: 13px;
+}
+
+.top-position-1 {
+  border: 2px solid #c7923e;
+  background: linear-gradient(135deg, #fff6dd, #fffaf3);
+}
+
+.top-position-1 .top-ten-position {
+  background: linear-gradient(135deg, #9f681e, #d6a752);
+}
+
+.top-position-2 {
+  border: 2px solid #b6a58d;
+}
+
+.top-position-3 {
+  border: 2px solid #b87945;
+}
+
+.top-ten-empty {
+  width: min(700px, 95%);
+  min-height: 320px;
+  margin: 45px auto;
+  padding: 45px 30px;
+  border: 1px solid #dcc19e;
+  border-radius: 24px;
+  text-align: center;
+  background: #fffaf3;
+  box-shadow: 0 15px 40px rgba(74, 47, 31, 0.12);
+}
+
+.top-ten-empty-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f5cf91;
+  background: linear-gradient(135deg, #4a2f1f, #765238);
+  font-size: 40px;
+}
+
+.top-ten-empty h2 {
+  margin: 0 0 14px;
+  color: #4a2f1f;
+}
+
+.top-ten-empty p {
+  max-width: 520px;
+  margin: 0 auto;
+  color: #85664e;
+  line-height: 1.8;
+}
+
+.top-ten-note {
+  margin-top: 25px;
+  padding: 18px 22px;
+  border: 1px solid #dfc298;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: #68472f;
+  background: #f5e5cf;
+}
+
+.top-ten-note p {
+  margin: 0;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .top-ten-page {
+    padding: 18px;
+  }
+
+  .top-ten-title {
+    min-height: 90px;
+    padding: 20px;
+  }
+
+  .top-ten-student {
+    grid-template-columns: 52px 52px 1fr;
+  }
+
+  .top-ten-points {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}
+/* =========================================
+   TOP TEN PAGE - DARK MODE
+========================================= */
+
+.dark-student-profile-page .top-ten-page {
+  color: #f8ead9;
+}
+
+/* عنوان الصفحة */
+.dark-student-profile-page .top-ten-title {
+  background: linear-gradient(135deg, #2b1b13, #4f3424) !important;
+  border-color: #805a3d !important;
+  color: #ffe1aa !important;
+}
+
+.dark-student-profile-page .top-ten-title h1 {
+  color: #ffe1aa !important;
+}
+
+.dark-student-profile-page .top-ten-title svg {
+  color: #efc681 !important;
+}
+
+/* المقدمة */
+.dark-student-profile-page .top-ten-intro {
+  background: #30221a !important;
+  border-color: #735039 !important;
+}
+
+.dark-student-profile-page .top-ten-intro > svg {
+  color: #efc681 !important;
+}
+
+.dark-student-profile-page .top-ten-intro h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .top-ten-intro p {
+  color: #d6c0aa !important;
+}
+
+/* الطلاب */
+.dark-student-profile-page .top-ten-student {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,.25);
+}
+
+.dark-student-profile-page .top-ten-avatar {
+  background: linear-gradient(135deg,#523723,#795238) !important;
+  color: #f5cf91 !important;
+}
+
+.dark-student-profile-page .top-ten-position {
+  background: #5d3f2b !important;
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .top-ten-student-info h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .top-ten-student-info p {
+  color: #d6c0aa !important;
+}
+
+.dark-student-profile-page .top-ten-points strong {
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .top-ten-points span {
+  color: #d6c0aa !important;
+}
+
+/* أول 3 */
+.dark-student-profile-page .top-position-1 {
+  background: #3b2c1d !important;
+  border-color: #c7923e !important;
+}
+
+.dark-student-profile-page .top-position-1 .top-ten-position {
+  background: linear-gradient(135deg,#b97a2b,#e2b55f) !important;
+  color: #fff;
+}
+
+.dark-student-profile-page .top-position-2 {
+  background: #342820 !important;
+  border-color: #9b9386 !important;
+}
+
+.dark-student-profile-page .top-position-3 {
+  background: #34251d !important;
+  border-color: #b87945 !important;
+}
+
+/* رسالة عدم وجود بيانات */
+.dark-student-profile-page .top-ten-empty {
+  background: #30221a !important;
+  border-color: #735039 !important;
+}
+
+.dark-student-profile-page .top-ten-empty-icon {
+  background: linear-gradient(135deg,#523723,#795238) !important;
+  color: #f5cf91 !important;
+}
+
+.dark-student-profile-page .top-ten-empty h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .top-ten-empty p {
+  color: #d6c0aa !important;
+}
+
+/* الملاحظة */
+.dark-student-profile-page .top-ten-note {
+  background: #3a2b21 !important;
+  border-color: #735039 !important;
+  color: #f8ead9 !important;
+}
+
+.dark-student-profile-page .top-ten-note p {
+  color: #f8ead9 !important;
+}

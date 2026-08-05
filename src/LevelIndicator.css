@@ -1,0 +1,439 @@
+.level-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.level-title {
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 30px;
+  padding: 25px 35px;
+  border: 1px solid #8f6644;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #f7d9aa;
+  background: linear-gradient(
+    135deg,
+    #3d281c,
+    #67472f
+  );
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.22);
+}
+
+.level-title svg {
+  color: #efc681;
+  font-size: 35px;
+}
+
+.level-title h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.level-summary-card {
+  width: 100%;
+  padding: 35px;
+  border: 1px solid #dfc4a1;
+  border-radius: 24px;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  align-items: center;
+  gap: 40px;
+  background: #fffaf3;
+  box-shadow: 0 15px 38px rgba(74, 47, 31, 0.12);
+}
+
+.level-circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.level-circle-progress {
+  width: 190px;
+  height: 190px;
+  padding: 15px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.18);
+}
+
+.level-circle-inside {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf3;
+  border: 1px solid #ead4b7;
+}
+
+.level-circle-inside strong {
+  color: #4a2f1f;
+  font-size: 38px;
+}
+
+.level-circle-inside span {
+  margin-top: 5px;
+  color: #9c6b35;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.level-summary-content {
+  width: 100%;
+}
+
+.level-small-title {
+  color: #aa7640;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.level-summary-content h2 {
+  margin: 8px 0 12px;
+  color: #4a2f1f;
+  font-size: 34px;
+}
+
+.level-summary-content p {
+  max-width: 720px;
+  margin: 0 0 24px;
+  color: #806249;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.level-main-progress {
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+  border: 1px solid #dfc4a1;
+  border-radius: 999px;
+  background: #ead9c3;
+}
+
+.level-main-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #70492d,
+    #c99652,
+    #edcb93
+  );
+  transition: width 0.4s ease;
+}
+
+.level-progress-numbers {
+  margin-top: 9px;
+  display: flex;
+  justify-content: space-between;
+  color: #8e7058;
+  font-size: 14px;
+}
+
+.level-progress-numbers strong {
+  color: #65452e;
+}
+
+.level-indicators-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.level-indicator-card {
+  padding: 24px;
+  border: 1px solid #dfc5a3;
+  border-radius: 20px;
+  background: #fffaf3;
+  box-shadow: 0 10px 26px rgba(74, 47, 31, 0.09);
+}
+
+.level-indicator-icon {
+  width: 55px;
+  height: 55px;
+  margin-bottom: 18px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  color: #f4d097;
+  background: linear-gradient(
+    135deg,
+    #4b301f,
+    #795439
+  );
+  font-size: 24px;
+}
+
+.level-indicator-heading {
+  margin-bottom: 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.level-indicator-heading h3 {
+  margin: 0;
+  color: #4a2f1f;
+  font-size: 19px;
+}
+
+.level-indicator-heading strong {
+  color: #aa7136;
+  font-size: 22px;
+}
+
+.level-indicator-progress {
+  width: 100%;
+  height: 11px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ead9c4;
+}
+
+.level-indicator-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #7b5131,
+    #d0a05f
+  );
+}
+
+.level-advice-card {
+  margin-top: 28px;
+  padding: 24px 28px;
+  border: 1px solid #d6b17f;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: linear-gradient(
+    135deg,
+    #f5e4cc,
+    #fff8ef
+  );
+  box-shadow: 0 10px 26px rgba(74, 47, 31, 0.1);
+}
+
+.level-advice-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #5b3a26;
+  font-size: 28px;
+}
+
+.level-advice-card h2 {
+  margin: 0 0 6px;
+  color: #4a2f1f;
+  font-size: 21px;
+}
+
+.level-advice-card p {
+  margin: 0;
+  color: #806148;
+  line-height: 1.7;
+}
+
+@media (max-width: 800px) {
+  .level-page {
+    padding: 18px;
+  }
+
+  .level-title {
+    min-height: 90px;
+    padding: 20px;
+  }
+
+  .level-title h1 {
+    font-size: 28px;
+  }
+
+  .level-summary-card {
+    grid-template-columns: 1fr;
+    padding: 25px 18px;
+    gap: 25px;
+    text-align: center;
+  }
+
+  .level-summary-content p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .level-indicators-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .level-advice-card {
+    align-items: flex-start;
+  }
+}
+/* ===================================
+   LEVEL INDICATOR - DARK MODE
+=================================== */
+
+.dark-student-profile-page .level-page {
+  color: #f7ead9;
+}
+
+/* عنوان الصفحة */
+.dark-student-profile-page .level-title {
+  background: linear-gradient(
+    135deg,
+    #2b1b13,
+    #4f3424
+  ) !important;
+  border-color: #7d5b40 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.dark-student-profile-page .level-title h1 {
+  color: #ffe2b3 !important;
+}
+
+.dark-student-profile-page .level-title svg {
+  color: #efc681 !important;
+}
+
+/* الكارت الرئيسي */
+.dark-student-profile-page .level-summary-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 15px 38px rgba(0, 0, 0, 0.26);
+}
+
+/* الدائرة */
+.dark-student-profile-page .level-circle-progress {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.dark-student-profile-page .level-circle-inside {
+  background: #3a2a20 !important;
+  border-color: #735039 !important;
+}
+
+.dark-student-profile-page .level-circle-inside strong {
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .level-circle-inside span {
+  color: #e9bd77 !important;
+}
+
+/* بيانات المستوى */
+.dark-student-profile-page .level-small-title {
+  color: #e4b56f !important;
+}
+
+.dark-student-profile-page .level-summary-content h2 {
+  color: #fff4e4 !important;
+}
+
+.dark-student-profile-page .level-summary-content p {
+  color: #d8c0a7 !important;
+}
+
+/* شريط المستوى الرئيسي */
+.dark-student-profile-page .level-main-progress {
+  background: #513b2d !important;
+  border-color: #735039 !important;
+}
+
+.dark-student-profile-page .level-main-progress-fill {
+  background: linear-gradient(
+    90deg,
+    #8f6438,
+    #c99652,
+    #efcb91
+  ) !important;
+}
+
+.dark-student-profile-page .level-progress-numbers {
+  color: #d6c0aa !important;
+}
+
+.dark-student-profile-page .level-progress-numbers span {
+  color: #d6c0aa !important;
+}
+
+.dark-student-profile-page .level-progress-numbers strong {
+  color: #ffd58d !important;
+}
+
+/* كروت المؤشرات */
+.dark-student-profile-page .level-indicator-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.23);
+}
+
+.dark-student-profile-page .level-indicator-icon {
+  color: #f4d097 !important;
+  background: linear-gradient(
+    135deg,
+    #523723,
+    #795439
+  ) !important;
+}
+
+.dark-student-profile-page .level-indicator-heading h3 {
+  color: #fff4e4 !important;
+}
+
+.dark-student-profile-page .level-indicator-heading strong {
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .level-indicator-progress {
+  background: #513b2d !important;
+}
+
+.dark-student-profile-page .level-indicator-progress-fill {
+  background: linear-gradient(
+    90deg,
+    #8f6438,
+    #d0a05f
+  ) !important;
+}
+
+/* كارت النصيحة */
+.dark-student-profile-page .level-advice-card {
+  background: linear-gradient(
+    135deg,
+    #38281e,
+    #493326
+  ) !important;
+  border-color: #805a3d !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+}
+
+.dark-student-profile-page .level-advice-icon {
+  background: #5b3a26 !important;
+  color: #efc681 !important;
+}
+
+.dark-student-profile-page .level-advice-card h2 {
+  color: #fff4e4 !important;
+}
+
+.dark-student-profile-page .level-advice-card p {
+  color: #d8c0a7 !important;
+}

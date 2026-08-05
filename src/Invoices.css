@@ -1,0 +1,73 @@
+.invoices-page{
+    width:100%;
+    direction:rtl;
+    padding:30px;
+}
+
+.invoices-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:40px;
+    color:#5b4333;
+}
+
+.empty-invoices{
+    background:#fff;
+    border-radius:18px;
+    padding:60px 20px;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.invoice-icon{
+    font-size:70px;
+    color:#8b6b54;
+    margin-bottom:20px;
+}
+
+.empty-invoices h2{
+    margin-bottom:10px;
+    color:#5b4333;
+}
+
+.empty-invoices p{
+    color:#777;
+}
+/* ===================================
+   INVOICES PAGE - DARK MODE
+=================================== */
+
+.dark-student-profile-page .invoices-page{
+    color:#f7ead9;
+}
+
+.dark-student-profile-page .invoices-title{
+    color:#f6d7a4;
+}
+
+.dark-student-profile-page .invoices-title h1{
+    color:#f8e6c5;
+}
+
+.dark-student-profile-page .invoices-title svg{
+    color:#efc681;
+}
+
+.dark-student-profile-page .empty-invoices{
+    background:#30221a;
+    border:1px solid #735039;
+    box-shadow:0 12px 28px rgba(0,0,0,.28);
+}
+
+.dark-student-profile-page .invoice-icon{
+    color:#efc681;
+}
+
+.dark-student-profile-page .empty-invoices h2{
+    color:#fff4e4;
+}
+
+.dark-student-profile-page .empty-invoices p{
+    color:#d8c0a7;
+}

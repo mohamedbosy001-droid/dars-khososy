@@ -1,0 +1,661 @@
+.exam-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.exam-back-btn {
+  margin-bottom: 24px;
+  padding: 12px 18px;
+  border: 1px solid #8b6546;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #6b472f;
+  background: #fffaf3;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.exam-header {
+  width: 100%;
+  min-height: 125px;
+  margin-bottom: 28px;
+  padding: 25px 30px;
+  border: 1px solid #8f6644;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: #f7d9aa;
+  background: linear-gradient(
+    135deg,
+    #3d281c,
+    #67472f
+  );
+  box-shadow: 0 12px 28px
+    rgba(74, 47, 31, 0.22);
+}
+
+.exam-header > svg {
+  flex-shrink: 0;
+  color: #efc681;
+  font-size: 42px;
+}
+
+.exam-header h1 {
+  margin: 0;
+  color: #fff0d7;
+  font-size: 31px;
+}
+
+.exam-header p {
+  margin: 8px 0 0;
+  color: #e7cfaa;
+  line-height: 1.7;
+}
+
+.exam-questions-list {
+  display: grid;
+  gap: 18px;
+}
+
+.exam-question-card {
+  position: relative;
+  padding: 24px;
+  border: 1px solid #dfc5a3;
+  border-radius: 18px;
+  background: #fffaf3;
+  box-shadow: 0 9px 24px
+    rgba(74, 47, 31, 0.08);
+}
+
+.exam-question-number {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f6d69f;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #795439
+  );
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.exam-question-card h2 {
+  margin: 0 0 18px;
+  color: #4a2f1f;
+  font-size: 20px;
+  line-height: 1.8;
+}
+
+.exam-options-list {
+  display: grid;
+  gap: 11px;
+}
+
+.exam-option-btn {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 15px;
+  border: 1px solid #dcc19e;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: right;
+  color: #5c402c;
+  background: #fffdf9;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.exam-option-btn:hover {
+  transform: translateY(-1px);
+  border-color: #b9854c;
+  background: #fbf0e1;
+}
+
+.exam-option-btn.selected {
+  border-color: #a96e31;
+  color: #4a2f1f;
+  background: #f2d7b4;
+  box-shadow: inset 0 0 0 1px
+    rgba(169, 110, 49, 0.2);
+}
+
+.exam-option-letter {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f8ddb0;
+  background: #6f4930;
+  font-weight: 900;
+}
+
+.exam-submit-btn {
+  width: min(430px, 100%);
+  min-height: 58px;
+  margin: 30px auto 0;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    #188b50,
+    #34b36e
+  );
+  box-shadow: 0 10px 24px
+    rgba(24, 139, 80, 0.28);
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.exam-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.exam-result-card {
+  width: min(650px, 100%);
+  margin: 0 auto 28px;
+  padding: 34px 28px;
+  border: 1px solid #dfc5a3;
+  border-radius: 22px;
+  text-align: center;
+  background: #fffaf3;
+  box-shadow: 0 14px 35px
+    rgba(74, 47, 31, 0.12);
+}
+
+.exam-result-card > svg {
+  margin-bottom: 14px;
+  color: #a86e30;
+  font-size: 48px;
+}
+
+.exam-result-card h1 {
+  margin: 0 0 8px;
+  color: #4a2f1f;
+  font-size: 30px;
+}
+
+.exam-result-card h2 {
+  margin: 0 0 20px;
+  color: #7a5b43;
+  font-size: 19px;
+}
+
+.exam-result-card strong {
+  display: block;
+  color: #188b50;
+  font-size: 40px;
+}
+
+.exam-result-card span {
+  display: block;
+  margin-top: 6px;
+  color: #a86e30;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.exam-review-list {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.exam-review-list > h2 {
+  margin: 0 0 16px;
+  color: #4a2f1f;
+  font-size: 24px;
+}
+
+.exam-review-item {
+  margin-bottom: 12px;
+  padding: 17px;
+  border: 1px solid #dfc5a3;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: #fffaf3;
+}
+
+.exam-review-item > div:first-child {
+  font-size: 25px;
+}
+
+.exam-review-item.correct {
+  border-color: #87cba7;
+}
+
+.exam-review-item.correct
+  > div:first-child {
+  color: #28a963;
+}
+
+.exam-review-item.wrong {
+  border-color: #dda29a;
+}
+
+.exam-review-item.wrong
+  > div:first-child {
+  color: #c94d43;
+}
+
+.exam-review-item h3 {
+  margin: 0 0 4px;
+  color: #4a2f1f;
+  font-size: 17px;
+}
+
+.exam-review-item p {
+  margin: 0;
+  color: #80634d;
+}
+
+.exam-empty {
+  max-width: 620px;
+  margin: 60px auto;
+  padding: 35px;
+  border: 1px solid #dfc5a3;
+  border-radius: 18px;
+  text-align: center;
+  background: #fffaf3;
+}
+
+.exam-empty button {
+  margin-top: 18px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  background: #795035;
+  cursor: pointer;
+}
+
+/* الوضع الداكن */
+
+.dark-student-profile-page
+  .exam-page {
+  color: #f7ead9;
+}
+
+.dark-student-profile-page
+  .exam-back-btn {
+  color: #ffd9a1;
+  background: #34261d;
+  border-color: #7d5b40;
+}
+
+.dark-student-profile-page
+  .exam-header {
+  background: linear-gradient(
+    135deg,
+    #2b1b13,
+    #4f3424
+  );
+  border-color: #7d5b40;
+}
+
+.dark-student-profile-page
+  .exam-question-card,
+.dark-student-profile-page
+  .exam-result-card,
+.dark-student-profile-page
+  .exam-review-item,
+.dark-student-profile-page
+  .exam-empty {
+  background: #34261d;
+  border-color: #6b4b34;
+}
+
+.dark-student-profile-page
+  .exam-question-card h2,
+.dark-student-profile-page
+  .exam-result-card h1,
+.dark-student-profile-page
+  .exam-review-list > h2,
+.dark-student-profile-page
+  .exam-review-item h3 {
+  color: #fff4e4;
+}
+
+.dark-student-profile-page
+  .exam-option-btn {
+  color: #ead7c3;
+  background: #2d211a;
+  border-color: #644934;
+}
+
+.dark-student-profile-page
+  .exam-option-btn.selected {
+  color: #fff1d8;
+  background: #5a3e2b;
+  border-color: #d5a75f;
+}
+
+.dark-student-profile-page
+  .exam-review-item p,
+.dark-student-profile-page
+  .exam-result-card h2 {
+  color: #d6c0aa;
+}
+
+@media (max-width: 700px) {
+  .exam-page {
+    padding: 17px;
+  }
+
+  .exam-header {
+    padding: 21px 18px;
+  }
+
+  .exam-header > svg {
+    font-size: 34px;
+  }
+
+  .exam-header h1 {
+    font-size: 25px;
+  }
+
+  .exam-question-card {
+    padding: 18px;
+  }
+
+  .exam-question-card h2 {
+    font-size: 18px;
+  }
+
+  .exam-option-btn {
+    min-height: 50px;
+    padding: 10px 12px;
+  }
+
+  .exam-result-card {
+    padding: 27px 18px;
+  }
+}
+/* ===================================
+   تقدم الامتحان
+=================================== */
+
+.exam-progress-card {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid #dfc5a3;
+  border-radius: 16px;
+  background: #fffaf3;
+  box-shadow: 0 8px 20px
+    rgba(74, 47, 31, 0.08);
+}
+
+.exam-progress-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.exam-progress-info strong {
+  color: #4a2f1f;
+  font-size: 17px;
+}
+
+.exam-progress-info span {
+  color: #85664e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.exam-progress-bar {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ead9c6;
+}
+
+.exam-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    #188b50,
+    #34b36e
+  );
+  transition: width 0.3s ease;
+}
+
+.exam-progress-card > p {
+  margin: 9px 0 0;
+  color: #8b684d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ===================================
+   أرقام الأسئلة
+=================================== */
+
+.exam-question-numbers {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.exam-number-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d8bea0;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #68452e;
+  background: #fffaf3;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.exam-number-btn:hover {
+  transform: translateY(-1px);
+  border-color: #b9854c;
+}
+
+.exam-number-btn.answered {
+  color: #fff;
+  border-color: #238d58;
+  background: #238d58;
+}
+
+.exam-number-btn.current {
+  outline: 3px solid
+    rgba(213, 167, 95, 0.35);
+  border-color: #d5a75f;
+  background: #6f4930;
+  color: #fff;
+}
+
+/* ===================================
+   السابق والتالي
+=================================== */
+
+.exam-navigation-buttons {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.exam-navigation-btn {
+  min-height: 52px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.exam-navigation-btn.previous {
+  background: linear-gradient(
+    135deg,
+    #6f4930,
+    #9b6a45
+  );
+}
+
+.exam-navigation-btn.next {
+  background: linear-gradient(
+    135deg,
+    #188b50,
+    #34b36e
+  );
+}
+
+.exam-navigation-btn:hover:not(
+    :disabled
+  ) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.exam-navigation-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* زر التسليم داخل آخر سؤال */
+
+.exam-navigation-buttons
+  .exam-submit-btn {
+  width: auto;
+  min-width: 210px;
+  margin: 0;
+}
+
+/* ===================================
+   الوضع الداكن
+=================================== */
+
+.dark-student-profile-page
+  .exam-progress-card {
+  background: #34261d;
+  border-color: #6b4b34;
+}
+
+.dark-student-profile-page
+  .exam-progress-info strong {
+  color: #fff4e4;
+}
+
+.dark-student-profile-page
+  .exam-progress-info span,
+.dark-student-profile-page
+  .exam-progress-card > p {
+  color: #d6c0aa;
+}
+
+.dark-student-profile-page
+  .exam-progress-bar {
+  background: #4c382a;
+}
+
+.dark-student-profile-page
+  .exam-number-btn {
+  color: #ead7c3;
+  background: #2d211a;
+  border-color: #644934;
+}
+
+.dark-student-profile-page
+  .exam-number-btn.answered {
+  color: #fff;
+  background: #238d58;
+  border-color: #238d58;
+}
+
+.dark-student-profile-page
+  .exam-number-btn.current {
+  color: #fff;
+  background: #7a5134;
+  border-color: #d5a75f;
+}
+
+/* ===================================
+   الموبايل
+=================================== */
+
+@media (max-width: 700px) {
+  .exam-progress-info {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .exam-question-numbers {
+    gap: 7px;
+  }
+
+  .exam-number-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+  }
+
+  .exam-navigation-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .exam-navigation-btn,
+  .exam-navigation-buttons
+    .exam-submit-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .exam-navigation-buttons {
+    grid-template-columns: 1fr;
+  }
+}

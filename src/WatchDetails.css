@@ -1,0 +1,329 @@
+.watch-details-page {
+  width: 100%;
+  min-height: 600px;
+  padding: 30px;
+  direction: rtl;
+}
+
+.watch-details-heading {
+  width: 100%;
+  min-height: 90px;
+  padding: 20px 30px;
+  margin-bottom: 30px;
+  border-radius: 18px;
+  background: #5b4333;
+  color: #f4d2ae;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.watch-details-heading svg {
+  font-size: 30px;
+}
+
+.watch-details-heading h1 {
+  margin: 0;
+  font-size: 36px;
+}
+
+.watch-details-note {
+  width: min(100%, 620px);
+  margin: 0 auto 30px;
+  padding: 16px 22px;
+  border: 2px solid #c99a6b;
+  border-radius: 14px;
+  color: #5b4333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.watch-details-note svg {
+  flex-shrink: 0;
+  font-size: 21px;
+}
+
+.watch-details-note p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.watch-details-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d8c1aa;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(91, 67, 51, 0.1);
+}
+
+.watch-details-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.watch-details-table thead {
+  background: #5b4333;
+  color: #ffffff;
+}
+
+.watch-details-table th {
+  padding: 17px 12px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.watch-details-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eadfd4;
+  color: #5b4333;
+}
+
+.watch-details-table tbody tr:hover {
+  background: #faf5f0;
+}
+
+.watch-details-empty {
+  min-height: 320px;
+  padding: 55px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.watch-details-empty-icon {
+  width: 82px;
+  height: 82px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: #f1e5d9;
+  color: #8b5e3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+}
+
+.watch-details-empty h2 {
+  margin: 0 0 12px;
+  color: #5b4333;
+  font-size: 30px;
+}
+
+.watch-details-empty p {
+  margin: 0;
+  color: #85766a;
+  font-size: 17px;
+}
+
+.watch-details-footer {
+  padding: 18px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.watch-details-page-size {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #5b4333;
+  font-weight: 700;
+}
+
+.watch-details-page-size select {
+  padding: 8px 28px 8px 12px;
+  border: 1px solid #b98b63;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #5b4333;
+  outline: none;
+}
+
+.watch-details-count {
+  color: #756457;
+  font-weight: 700;
+}
+
+.watch-details-pagination {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.watch-details-pagination button {
+  min-width: 105px;
+  padding: 11px 18px;
+  border: 1px solid #8b5e3c;
+  border-radius: 10px;
+  background: transparent;
+  color: #8b5e3c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.watch-details-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .watch-details-page {
+    padding: 18px;
+  }
+
+  .watch-details-heading {
+    justify-content: center;
+    padding: 18px;
+  }
+
+  .watch-details-heading h1 {
+    font-size: 27px;
+  }
+
+  .watch-details-note {
+    align-items: flex-start;
+  }
+
+  .watch-details-empty {
+    min-height: 270px;
+  }
+
+  .watch-details-empty h2 {
+    font-size: 24px;
+  }
+
+  .watch-details-footer {
+    justify-content: center;
+  }
+}
+.watch-details-page-size select {
+  width: 90px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #b98b63;
+  border-radius: 8px;
+  background: #fff;
+  color: #5b4333;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* ===========================
+   WATCH DETAILS - DARK MODE
+=========================== */
+
+.dark-student-profile-page .watch-details-page{
+  color:#f7ead9;
+}
+
+.dark-student-profile-page .watch-details-heading{
+  background:linear-gradient(135deg,#2f2018,#553827);
+  border:1px solid #8d6748;
+  color:#f6d7a4;
+}
+
+.dark-student-profile-page .watch-details-heading h1{
+  color:#f8e6c5;
+}
+
+.dark-student-profile-page .watch-details-heading svg{
+  color:#efc681;
+}
+
+.dark-student-profile-page .watch-details-note{
+  background:#32231b;
+  border-color:#8b6546;
+  color:#f3e4cf;
+}
+
+.dark-student-profile-page .watch-details-note svg{
+  color:#efc681;
+}
+
+.dark-student-profile-page .watch-details-table-wrapper{
+  background:#2d2119;
+  border-color:#6e5038;
+}
+
+.dark-student-profile-page .watch-details-table thead{
+  background:#4a2f1f;
+}
+
+.dark-student-profile-page .watch-details-table th{
+  color:#f8e6c5;
+}
+
+.dark-student-profile-page .watch-details-table td{
+  background:#34261d;
+  color:#f5e8d7;
+  border-bottom:1px solid #5d4330;
+}
+
+.dark-student-profile-page .watch-details-table tbody tr:hover{
+  background:#463226;
+}
+
+.dark-student-profile-page .watch-details-empty{
+  background:#2d2119;
+}
+
+.dark-student-profile-page .watch-details-empty-icon{
+  background:#4a2f1f;
+  color:#efc681;
+}
+
+.dark-student-profile-page .watch-details-empty h2{
+  color:#fff3df;
+}
+
+.dark-student-profile-page .watch-details-empty p{
+  color:#d9c3aa;
+}
+
+.dark-student-profile-page .watch-details-footer{
+  color:#f3e4cf;
+}
+
+.dark-student-profile-page .watch-details-page-size{
+  color:#f3e4cf;
+}
+
+.dark-student-profile-page .watch-details-page-size select{
+  background:#3b2b20;
+  color:#fff3df;
+  border-color:#8b6546;
+}
+
+.dark-student-profile-page .watch-details-count{
+  color:#d8c0a7;
+}
+
+.dark-student-profile-page .watch-details-pagination button{
+  background:#4a2f1f;
+  color:#f6d7a4;
+  border-color:#8b6546;
+}
+
+.dark-student-profile-page .watch-details-pagination button:hover:not(:disabled){
+  background:#6b4730;
+}
+
+.dark-student-profile-page .watch-details-pagination button:disabled{
+  opacity:.5;
+}

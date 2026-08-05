@@ -1,0 +1,437 @@
+.points-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.points-title {
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 30px;
+  padding: 25px 35px;
+  border: 1px solid #8f6644;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #f7d9aa;
+  background: linear-gradient(
+    135deg,
+    #3d281c,
+    #67472f
+  );
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.22);
+}
+
+.points-title svg {
+  color: #efc681;
+  font-size: 35px;
+}
+
+.points-title h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.points-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.points-total-card,
+.points-rank-card {
+  min-height: 190px;
+  padding: 30px;
+  border: 1px solid #dfc4a1;
+  border-radius: 22px;
+  background: #fffaf3;
+  box-shadow: 0 12px 30px rgba(74, 47, 31, 0.1);
+}
+
+.points-total-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.points-total-card span {
+  display: block;
+  margin-bottom: 12px;
+  color: #9c714d;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.points-total-card strong {
+  display: block;
+  margin: 0;
+  color: #4a2f1f;
+  font-size: 58px;
+  line-height: 1;
+}
+
+.points-total-card p {
+  display: block;
+  margin: 16px 0 0;
+  color: #b27e42;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.points-rank-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.points-rank-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f5cf91;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #765238
+  );
+  font-size: 40px;
+}
+
+.points-rank-card span {
+  color: #9b7657;
+  font-weight: 800;
+}
+
+.points-rank-card h2 {
+  margin: 8px 0 0;
+  color: #4a2f1f;
+  font-size: 30px;
+}
+
+.points-progress-card {
+  margin-top: 24px;
+  padding: 26px;
+  border: 1px solid #dfc4a1;
+  border-radius: 22px;
+  background: #fffaf3;
+  box-shadow: 0 12px 30px rgba(74, 47, 31, 0.1);
+}
+
+.points-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.points-progress-heading h2 {
+  margin: 0 0 7px;
+  color: #4a2f1f;
+}
+
+.points-progress-heading p {
+  margin: 0;
+  color: #8d6c52;
+}
+
+.points-progress-heading strong {
+  color: #b27938;
+  font-size: 26px;
+}
+
+.points-progress {
+  height: 14px;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ead9c4;
+}
+
+.points-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #70492d,
+    #c99652,
+    #edcb93
+  );
+}
+
+.points-progress-numbers {
+  margin-top: 9px;
+  display: flex;
+  justify-content: space-between;
+  color: #85664e;
+}
+
+.points-activities {
+  margin-top: 28px;
+}
+
+.points-activities > h2 {
+  color: #4a2f1f;
+  font-size: 26px;
+}
+
+.points-activities-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.points-activity-card {
+  padding: 20px;
+  border: 1px solid #e0c5a2;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  background: #fffaf3;
+  box-shadow: 0 8px 22px rgba(74, 47, 31, 0.08);
+}
+
+.points-activity-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  color: #f4d097;
+  background: linear-gradient(
+    135deg,
+    #4b301f,
+    #795439
+  );
+  font-size: 24px;
+}
+
+.points-activity-content h3 {
+  margin: 0 0 6px;
+  color: #4a2f1f;
+}
+
+.points-activity-content p {
+  margin: 0;
+  color: #96765b;
+}
+
+.points-activity-card > strong {
+  color: #b17635;
+  font-size: 22px;
+}
+
+.points-empty-message {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid #d9b98f;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #f8ebd9;
+}
+
+.points-empty-message > svg {
+  color: #a86f33;
+  font-size: 40px;
+}
+
+.points-empty-message h2 {
+  margin: 0 0 6px;
+}
+
+.points-empty-message p {
+  margin: 0;
+  color: #85664e;
+}
+
+@media (max-width: 750px) {
+  .points-page {
+    padding: 18px;
+  }
+
+  .points-title {
+    min-height: 90px;
+    padding: 20px;
+  }
+
+  .points-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .points-activity-card {
+    grid-template-columns: 55px 1fr;
+  }
+
+  .points-activity-card > strong {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}
+/* =========================================
+   MY POINTS PAGE - DARK MODE
+========================================= */
+
+.dark-student-profile-page .points-page {
+  color: #f8ead9;
+}
+
+/* عنوان الصفحة */
+.dark-student-profile-page .points-title {
+  color: #ffe1aa !important;
+  background: linear-gradient(
+    135deg,
+    #2b1b13,
+    #4f3424
+  ) !important;
+  border-color: #805a3d !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.dark-student-profile-page .points-title h1 {
+  color: #ffe1aa !important;
+}
+
+.dark-student-profile-page .points-title svg {
+  color: #f0c781 !important;
+}
+
+/* كارت إجمالي النقاط وكارت الرتبة */
+.dark-student-profile-page .points-total-card,
+.dark-student-profile-page .points-rank-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.dark-student-profile-page .points-total-card span {
+  color: #d8c2aa !important;
+}
+
+.dark-student-profile-page .points-total-card strong {
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .points-total-card p {
+  color: #e7b86f !important;
+}
+
+.dark-student-profile-page .points-rank-card span {
+  color: #d8c2aa !important;
+}
+
+.dark-student-profile-page .points-rank-card h2 {
+  color: #fff5e8 !important;
+}
+
+/* أيقونة الرتبة */
+.dark-student-profile-page .points-rank-icon {
+  color: #f5cf91 !important;
+  background: linear-gradient(
+    135deg,
+    #523723,
+    #795238
+  ) !important;
+  border: 1px solid #9a704c;
+}
+
+/* كارت التقدم */
+.dark-student-profile-page .points-progress-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.dark-student-profile-page .points-progress-heading h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .points-progress-heading p {
+  color: #d3bda6 !important;
+}
+
+.dark-student-profile-page .points-progress-heading strong {
+  color: #ffd58d !important;
+}
+
+.dark-student-profile-page .points-progress {
+  background: #513b2d !important;
+}
+
+.dark-student-profile-page .points-progress-fill {
+  background: linear-gradient(
+    90deg,
+    #8f6438,
+    #c99652,
+    #efcb91
+  ) !important;
+}
+
+.dark-student-profile-page .points-progress-numbers {
+  color: #d6c0aa !important;
+}
+
+.dark-student-profile-page .points-progress-numbers span {
+  color: #d6c0aa !important;
+}
+
+/* عنوان الأنشطة */
+.dark-student-profile-page .points-activities > h2 {
+  color: #fff5e8 !important;
+}
+
+/* كروت الأنشطة */
+.dark-student-profile-page .points-activity-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+.dark-student-profile-page .points-activity-content h3 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .points-activity-content p {
+  color: #cfb9a2 !important;
+}
+
+.dark-student-profile-page .points-activity-card > strong {
+  color: #ffd58d !important;
+}
+
+/* أيقونة النشاط */
+.dark-student-profile-page .points-activity-icon {
+  color: #f4d097 !important;
+  background: linear-gradient(
+    135deg,
+    #523723,
+    #795439
+  ) !important;
+}
+
+/* رسالة عدم وجود نقاط */
+.dark-student-profile-page .points-empty-message {
+  background: #3b2a20 !important;
+  border-color: #805a3d !important;
+}
+
+.dark-student-profile-page .points-empty-message h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .points-empty-message p {
+  color: #d3bda6 !important;
+}
+
+.dark-student-profile-page .points-empty-message > svg {
+  color: #efc681 !important;
+}

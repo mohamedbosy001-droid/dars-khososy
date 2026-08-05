@@ -1,0 +1,428 @@
+.results-page {
+  width: 100%;
+  min-height: 70vh;
+  padding: 30px;
+  direction: rtl;
+  color: #4a2f1f;
+}
+
+.results-title {
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 25px;
+  padding: 25px 35px;
+  border: 1px solid #8f6644;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #f5d39c;
+  background: linear-gradient(
+    135deg,
+    #3f291d,
+    #66452f
+  );
+  box-shadow: 0 12px 28px rgba(74, 47, 31, 0.22);
+}
+
+.results-title svg {
+  font-size: 34px;
+  color: #f0c781;
+}
+
+.results-title h1 {
+  margin: 0;
+  font-size: 34px;
+  color: #f8dfb5;
+}
+
+.results-tabs {
+  width: min(720px, 100%);
+  margin: 0 auto 35px;
+  padding: 8px;
+  border: 1px solid #d6b68d;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  background: #f5eadc;
+  box-shadow: 0 8px 22px rgba(89, 57, 35, 0.12);
+}
+
+.results-tab-btn {
+  min-height: 58px;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #755033;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.results-tab-btn:hover {
+  color: #4a2f1f;
+  background: rgba(255, 250, 243, 0.85);
+  transform: translateY(-1px);
+}
+
+.results-tab-btn.active {
+  color: #3f291d;
+  background: linear-gradient(
+    135deg,
+    #c99451,
+    #ebc88d
+  );
+  box-shadow: 0 8px 18px rgba(100, 65, 38, 0.24);
+}
+
+.results-tab-btn svg {
+  font-size: 21px;
+}
+
+.empty-results {
+  width: min(700px, 95%);
+  min-height: 320px;
+  margin: 45px auto;
+  padding: 45px 30px;
+  border: 1px solid #dcc19e;
+  border-radius: 24px;
+  text-align: center;
+  background: rgba(255, 250, 243, 0.96);
+  box-shadow: 0 15px 40px rgba(74, 47, 31, 0.14);
+}
+
+.empty-results-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 22px;
+  border: 1px solid #8d6140;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f5cf91;
+  background: linear-gradient(
+    135deg,
+    #4a2f1f,
+    #765238
+  );
+  box-shadow: 0 10px 24px rgba(74, 47, 31, 0.22);
+  font-size: 40px;
+}
+
+.empty-results h2 {
+  margin: 0 0 15px;
+  color: #4a2f1f;
+  font-size: 27px;
+}
+
+.empty-results p {
+  max-width: 520px;
+  margin: 0 auto;
+  color: #88694f;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.results-list {
+  display: grid;
+  gap: 22px;
+}
+
+.result-card {
+  padding: 25px;
+  border: 1px solid #dfc5a3;
+  border-radius: 20px;
+  background: #fffaf3;
+  box-shadow: 0 12px 30px rgba(74, 47, 31, 0.1);
+}
+
+.result-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.result-course {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #a46f32;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.result-card-heading h2 {
+  margin: 0 0 8px;
+  color: #4a2f1f;
+  font-size: 23px;
+}
+
+.result-card-heading p {
+  margin: 0;
+  color: #9a7c62;
+}
+
+.result-status {
+  padding: 9px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.result-status.passed {
+  color: #376c42;
+  background: #eaf4e8;
+  border: 1px solid #b8d5b8;
+}
+
+.result-status.failed {
+  color: #9b3e34;
+  background: #fbe9e5;
+  border: 1px solid #e1b5ad;
+}
+
+.result-details {
+  margin: 25px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.result-number {
+  padding: 18px;
+  border: 1px solid #ead5ba;
+  border-radius: 14px;
+  text-align: center;
+  background: #f8efe3;
+}
+
+.result-number span {
+  display: block;
+  margin-bottom: 8px;
+  color: #8b6b51;
+}
+
+.result-number strong {
+  color: #4a2f1f;
+  font-size: 25px;
+}
+
+.result-progress {
+  height: 12px;
+  overflow: hidden;
+  border: 1px solid #dfc6a6;
+  border-radius: 999px;
+  background: #ead9c4;
+}
+
+.result-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.result-progress-fill.passed {
+  background: linear-gradient(
+    90deg,
+    #7e5a35,
+    #d1a263
+  );
+}
+
+.result-progress-fill.failed {
+  background: linear-gradient(
+    90deg,
+    #a34c3f,
+    #d98976
+  );
+}
+
+@media (max-width: 700px) {
+  .results-page {
+    padding: 18px;
+  }
+
+  .results-title {
+    min-height: 90px;
+    padding: 20px;
+  }
+
+  .results-title h1 {
+    font-size: 28px;
+  }
+
+  .results-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .result-card-heading {
+    flex-direction: column;
+  }
+
+  .result-details {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================
+   RESULTS PAGE - DARK MODE
+========================================= */
+
+.dark-student-profile-page .results-page {
+  color: #f8ead9;
+}
+
+/* عنوان الصفحة */
+.dark-student-profile-page .results-title {
+  color: #ffe1aa !important;
+  background: linear-gradient(
+    135deg,
+    #2b1b13,
+    #4f3424
+  ) !important;
+  border-color: #805a3d !important;
+}
+
+.dark-student-profile-page .results-title h1 {
+  color: #ffe1aa !important;
+}
+
+.dark-student-profile-page .results-title svg {
+  color: #f0c781 !important;
+}
+
+/* شريط الاختيارات */
+.dark-student-profile-page .results-tabs {
+  background: #33231a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+.dark-student-profile-page .results-tab-btn {
+  color: #ead7c1 !important;
+  background: transparent !important;
+}
+
+.dark-student-profile-page .results-tab-btn:hover {
+  color: #fff6e8 !important;
+  background: #4b3527 !important;
+}
+
+.dark-student-profile-page .results-tab-btn.active {
+  color: #2e1c12 !important;
+  background: linear-gradient(
+    135deg,
+    #c99451,
+    #efcd95
+  ) !important;
+}
+
+.dark-student-profile-page .results-tab-btn.active svg {
+  color: #4a2f1f !important;
+}
+
+/* حالة عدم وجود نتائج */
+.dark-student-profile-page .empty-results {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.28);
+}
+
+.dark-student-profile-page .empty-results h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .empty-results p {
+  color: #dcc8b2 !important;
+}
+
+.dark-student-profile-page .empty-results-icon {
+  color: #f5cf91 !important;
+  background: linear-gradient(
+    135deg,
+    #523723,
+    #795238
+  ) !important;
+  border-color: #a07149 !important;
+}
+
+/* كروت النتائج */
+.dark-student-profile-page .result-card {
+  background: #30221a !important;
+  border-color: #735039 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+}
+
+.dark-student-profile-page .result-course {
+  color: #e3ae69 !important;
+}
+
+.dark-student-profile-page .result-card-heading h2 {
+  color: #fff5e8 !important;
+}
+
+.dark-student-profile-page .result-card-heading p {
+  color: #cdb9a4 !important;
+}
+
+/* مربعات الدرجات */
+.dark-student-profile-page .result-number {
+  background: #412e22 !important;
+  border-color: #755239 !important;
+}
+
+.dark-student-profile-page .result-number span {
+  color: #d6c0aa !important;
+}
+
+.dark-student-profile-page .result-number strong {
+  color: #ffd58d !important;
+}
+
+/* ناجح */
+.dark-student-profile-page .result-status.passed {
+  color: #bce7c4 !important;
+  background: #28412e !important;
+  border-color: #42734d !important;
+}
+
+/* راسب */
+.dark-student-profile-page .result-status.failed {
+  color: #ffc0b8 !important;
+  background: #4d2925 !important;
+  border-color: #865047 !important;
+}
+
+/* شريط التقدم */
+.dark-student-profile-page .result-progress {
+  background: #513b2d !important;
+  border-color: #755239 !important;
+}
+
+.dark-student-profile-page .result-progress-fill.passed {
+  background: linear-gradient(
+    90deg,
+    #8f6438,
+    #e0af6b
+  ) !important;
+}
+
+.dark-student-profile-page .result-progress-fill.failed {
+  background: linear-gradient(
+    90deg,
+    #a34c3f,
+    #e08b78
+  ) !important;
+}
