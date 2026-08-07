@@ -24,31 +24,29 @@ import {
 import "./Exam.css";
 
 function renderQuestionText(text = "") {
-  const match = text.match(/\[\[(.*?)\]\]/);
+  const parts = text.split(/(\[\[.*?\]\])/g);
 
-  if (!match) {
-    return text;
-  }
+  return parts.map((part, index) => {
+    if (
+      part.startsWith("[[") &&
+      part.endsWith("]]")
+    ) {
+      return (
+        <span
+          key={index}
+          className="exam-underlined-word"
+        >
+          {part.slice(2, -2)}
+        </span>
+      );
+    }
 
-  const before = text.substring(0, match.index);
-  const underlined = match[1];
-  const after = text.substring(match.index + match[0].length);
-
-  return (
-    <>
-      {before}
-      <span
-        style={{
-          borderBottom: "2px solid #fff",
-          paddingBottom: "2px",
-          display: "inline-block",
-        }}
-      >
-        {underlined}
+    return (
+      <span key={index}>
+        {part}
       </span>
-      {after}
-    </>
-  );
+    );
+  });
 }
 
 function Exam({
