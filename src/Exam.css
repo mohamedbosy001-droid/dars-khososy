@@ -659,18 +659,3 @@
     grid-template-columns: 1fr;
   }
 }
-.exam-question-card h2 .exam-underlined-word {
-  display: inline-block;
-  position: relative;
-  padding-bottom: 2px;
-  margin: 0 2px;
-  color: inherit !important;
-  border-bottom: 3px solid #4a2f1f !important;
-  line-height: 1.3;
-}
-
-.dark-student-profile-page
-  .exam-question-card h2
-  .exam-underlined-word {
-  border-bottom-color: #fff4e4 !important;
-}

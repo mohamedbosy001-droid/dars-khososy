@@ -6,6 +6,7 @@ import {
 
 import {
   doc,
+  getDoc,
   runTransaction,
   Timestamp,
   updateDoc,
@@ -22,32 +23,6 @@ import {
 } from "react-icons/fa";
 
 import "./Exam.css";
-
-function renderQuestionText(text = "") {
-  const parts = text.split(/(\[\[.*?\]\])/g);
-
-  return parts.map((part, index) => {
-    if (
-      part.startsWith("[[") &&
-      part.endsWith("]]")
-    ) {
-      return (
-        <span
-          key={index}
-          className="exam-underlined-word"
-        >
-          {part.slice(2, -2)}
-        </span>
-      );
-    }
-
-    return (
-      <span key={index}>
-        {part}
-      </span>
-    );
-  });
-}
 
 function Exam({
   exam,
@@ -101,6 +76,10 @@ function Exam({
         )
       : 0;
 
+  /*
+    تحميل محاولة الطالب السابقة أو
+    إنشاء محاولة جديدة للمرة الأولى.
+  */
   useEffect(() => {
     async function loadExamAttempt() {
       if (
@@ -161,6 +140,10 @@ function Exam({
                   exam.id
               );
 
+            /*
+              لو الامتحان اتسلم قبل كده،
+              نظهر النتيجة فقط.
+            */
             if (
               savedAttempt?.completed ===
                 true ||
@@ -183,6 +166,9 @@ function Exam({
               return;
             }
 
+            /*
+              استكمال محاولة بدأت قبل كده.
+            */
             if (savedAttempt) {
               setAnswers(
                 savedAttempt.answers || {}
@@ -207,6 +193,9 @@ function Exam({
               return;
             }
 
+            /*
+              إنشاء محاولة الطالب الأولى.
+            */
             examAttempts[exam.id] = {
               examId: exam.id,
               examTitle: exam.title,
@@ -256,6 +245,10 @@ function Exam({
     questions.length,
   ]);
 
+  /*
+    حفظ إجابة الطالب فور اختيارها،
+    علشان لو خرج ورجع يكمل من مكانه.
+  */
   async function saveAttemptProgress(
     nextAnswers,
     nextQuestionIndex
@@ -485,6 +478,10 @@ function Exam({
           const existingAttempt =
             examAttempts[exam.id];
 
+          /*
+            يمنع تسليم أو فتح محاولة ثانية
+            بعد اكتمال الامتحان.
+          */
           if (
             existingAttempt?.completed ===
             true
@@ -794,9 +791,7 @@ function Exam({
           </div>
 
           <h2>
-            {renderQuestionText(
-              currentQuestion.question
-            )}
+            {currentQuestion.question}
           </h2>
 
           <div className="exam-options-list">
