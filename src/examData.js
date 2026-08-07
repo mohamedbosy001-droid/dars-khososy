@@ -99,7 +99,7 @@ export const examsData = {
           "لا طالبين مقصران في واجبهما",
           "لا يضيع حق وراءه مطالب",
         ],
-        correctAnswer: 0,
+        correctAnswer: 2,
       },
       {
         id: "exam1-q9",
@@ -312,7 +312,7 @@ export const examsData = {
           "طاب القلب نفسًا",
           "دخل الطالب الفصل مسرعًا",
         ],
-        correctAnswer: 1,
+        correctAnswer: 3,
       },
       {
         id: "exam2-q11",
@@ -348,7 +348,7 @@ export const examsData = {
           "خبر",
           "نائب فاعل",
         ],
-        correctAnswer: 3,
+        correctAnswer: 1,
       },
       {
         id: "exam2-q14",
