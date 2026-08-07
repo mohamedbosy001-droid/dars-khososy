@@ -24,34 +24,31 @@ import {
 import "./Exam.css";
 
 function renderQuestionText(text = "") {
-  const parts = text.split(/(\[\[.*?\]\])/g);
+  const match = text.match(/\[\[(.*?)\]\]/);
 
-  return parts.map((part, index) => {
-    if (
-      part.startsWith("[[") &&
-      part.endsWith("]]")
-    ) {
-      return (
-        <span
-          key={index}
-          style={{
-            display: "inline-block",
-            borderBottom: "3px solid currentColor",
-            paddingBottom: "2px",
-            lineHeight: "1.2",
-          }}
-        >
-          {part.slice(2, -2)}
-        </span>
-      );
-    }
+  if (!match) {
+    return text;
+  }
 
-    return (
-      <span key={index}>
-        {part}
+  const before = text.substring(0, match.index);
+  const underlined = match[1];
+  const after = text.substring(match.index + match[0].length);
+
+  return (
+    <>
+      {before}
+      <span
+        style={{
+          borderBottom: "2px solid #fff",
+          paddingBottom: "2px",
+          display: "inline-block",
+        }}
+      >
+        {underlined}
       </span>
-    );
-  });
+      {after}
+    </>
+  );
 }
 
 function Exam({
