@@ -790,9 +790,11 @@ function Exam({
             {currentQuestionIndex + 1}
           </div>
 
-          <h2>
-            {currentQuestion.question}
-          </h2>
+         <h2
+  dangerouslySetInnerHTML={{
+    __html: currentQuestion.question,
+  }}
+/>
 
           <div className="exam-options-list">
             {currentQuestion.options.map(
