@@ -35,9 +35,10 @@ function renderQuestionText(text = "") {
         <span
           key={index}
           style={{
-            textDecoration: "underline",
-            textUnderlineOffset: "5px",
-            textDecorationThickness: "2px",
+            display: "inline-block",
+            borderBottom: "3px solid currentColor",
+            paddingBottom: "2px",
+            lineHeight: "1.2",
           }}
         >
           {part.slice(2, -2)}
