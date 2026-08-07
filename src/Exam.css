@@ -659,3 +659,9 @@
     grid-template-columns: 1fr;
   }
 }
+.exam-underlined-word {
+  display: inline-block;
+  border-bottom: 3px solid currentColor;
+  padding-bottom: 2px;
+  line-height: 1.2;
+}
