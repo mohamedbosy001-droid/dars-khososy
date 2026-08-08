@@ -31,6 +31,7 @@ import examsData from "./examData";
 import secondFreeCourse from "./assets/second-free-course.jpeg";
 import secondCourse2 from "./assets/second-course-2.jpeg";
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
+import thirdCourse2 from "./assets/third-course-2.jpeg";
 
 import "./AllCourses.css";
 
@@ -300,6 +301,9 @@ function AllCourses({ currentStudent }) {
     ) {
       return secondCourse2;
     }
+    if (course.id === "third-course-2") {
+  return thirdCourse2;
+}
 
     if (
       course.id ===
@@ -1048,10 +1052,10 @@ function AllCourses({ currentStudent }) {
             let finalExamKey =
               examKey;
 
-            if (
-              selectedCourse.id ===
-              "second-course-2"
-            ) {
+           if (
+  selectedCourse.id === "second-course-2" ||
+  selectedCourse.id === "third-course-2"
+) {
               if (
                 examKey === "exam1"
               ) {
