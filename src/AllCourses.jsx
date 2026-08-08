@@ -29,6 +29,7 @@ import Exam from "./Exam";
 import examsData from "./examData";
 
 import secondFreeCourse from "./assets/second-free-course.jpeg";
+import secondCourse2 from "./assets/second-course-2.jpeg";
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
 
 import "./AllCourses.css";
@@ -279,6 +280,9 @@ function AllCourses({ currentStudent }) {
     تحديد صورة كل كورس
   */
   function getCourseImage(course) {
+    if (course.id === "second-course-2") {
+  return secondCourse2;
+}
     if (
       course.id ===
       "free-second-course"
@@ -1030,15 +1034,25 @@ function AllCourses({ currentStudent }) {
           onOpenPdf={() =>
             openPdf(firstLesson)
           }
-          onOpenExam={(
-            examKey
-          ) =>
-            openExam(
-              selectedCourse,
-              firstLesson,
-              examKey
-            )
-          }
+         onOpenExam={(examKey) => {
+  let finalExamKey = examKey;
+
+  if (selectedCourse.id === "second-course-2") {
+    if (examKey === "exam1") {
+      finalExamKey = "secondCourse2Exam1";
+    }
+
+    if (examKey === "exam2") {
+      finalExamKey = "secondCourse2Exam2";
+    }
+  }
+
+  openExam(
+    selectedCourse,
+    firstLesson,
+    finalExamKey
+  );
+}}
         />
 
         {renderVideoModal()}

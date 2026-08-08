@@ -6,7 +6,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-import { db } from "./firebase";
+import { auth, db } from "./firebase";
 import examsData from "./examData";
 
 function UploadExams() {
@@ -21,9 +21,26 @@ function UploadExams() {
       return;
     }
 
+    console.log(
+      "Firebase user:",
+      auth.currentUser
+    );
+
+    if (!auth.currentUser) {
+      setMessage(
+        "❌ Firebase مش شايف تسجيل الدخول."
+      );
+
+      window.alert(
+        "Firebase مش شايف تسجيل الدخول. سجلي دخول للمنصة الأول ثم حاولي مرة أخرى."
+      );
+
+      return;
+    }
+
     const shouldUpload =
       window.confirm(
-        "سيتم رفع الامتحان الأول والثاني إلى Firebase. هل تريدين المتابعة؟"
+        "سيتم رفع امتحاني الكورس الجديد إلى Firebase. هل تريدين المتابعة؟"
       );
 
     if (!shouldUpload) {
@@ -34,21 +51,30 @@ function UploadExams() {
     setMessage("");
 
     try {
-      const examsEntries =
-        Object.entries(examsData);
+      const newExams = [
+        [
+          "secondCourse2Exam1",
+          examsData.secondCourse2Exam1,
+        ],
+        [
+          "secondCourse2Exam2",
+          examsData.secondCourse2Exam2,
+        ],
+      ];
 
       for (const [
         examKey,
         examData,
-      ] of examsEntries) {
+      ] of newExams) {
         if (
-          !examData?.id ||
+          !examData ||
+          !examData.id ||
           !Array.isArray(
             examData.questions
           )
         ) {
           throw new Error(
-            `بيانات ${examKey} غير مكتملة.`
+            `بيانات ${examKey} غير موجودة أو غير مكتملة.`
           );
         }
 
@@ -81,11 +107,11 @@ function UploadExams() {
       }
 
       setMessage(
-        "✅ تم رفع الامتحان الأول والثاني بنجاح."
+        "✅ تم رفع امتحاني الكورس الجديد بنجاح."
       );
 
       window.alert(
-        "✅ تم رفع الامتحانين إلى Firebase."
+        "✅ تم رفع امتحاني الكورس الجديد إلى Firebase."
       );
     } catch (error) {
       console.error(
@@ -93,12 +119,16 @@ function UploadExams() {
         error
       );
 
+      const errorMessage =
+        error?.message ||
+        "حدث خطأ غير معروف.";
+
       setMessage(
-        "❌ حدث خطأ أثناء رفع الامتحانين."
+        `❌ ${errorMessage}`
       );
 
       window.alert(
-        "حدث خطأ أثناء رفع الامتحانين إلى Firebase."
+        `حدث خطأ أثناء الرفع:\n${errorMessage}`
       );
     } finally {
       setIsUploading(false);
@@ -133,7 +163,7 @@ function UploadExams() {
             color: "#4a2f1f",
           }}
         >
-          رفع الامتحانين إلى Firebase
+          رفع امتحاني الكورس الجديد
         </h1>
 
         <p
@@ -142,10 +172,9 @@ function UploadExams() {
             lineHeight: 1.8,
           }}
         >
-          استخدمي الزر مرة واحدة فقط.
-          سيتم إنشاء Collection باسم
-          exams ورفع الامتحان الأول
-          والثاني بداخله.
+          سيتم رفع الامتحان الأول
+          والثاني الخاصين بكورس
+          second-course-2 فقط.
         </p>
 
         <button
@@ -173,7 +202,7 @@ function UploadExams() {
         >
           {isUploading
             ? "جاري رفع الامتحانين..."
-            : "رفع الامتحانين الآن"}
+            : "رفع امتحاني الكورس الجديد"}
         </button>
 
         {message && (
