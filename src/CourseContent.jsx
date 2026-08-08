@@ -37,6 +37,28 @@ function CourseContent({
     );
   }
 
+  const isBalaghaCourse =
+    course.id === "second-course-2" ||
+    course.id === "third-course-2";
+
+  const displayedDuration =
+    isBalaghaCourse
+      ? "1:38:59"
+      : lesson.duration || "1:59:48";
+
+  let pdfText =
+    "اضغط لفتح ملف تعليم الإعراب PDF";
+
+  if (course.id === "second-course-2") {
+    pdfText =
+      "اضغط لفتح ملف البلاغة PDF";
+  }
+
+  if (course.id === "third-course-2") {
+    pdfText =
+      "اضغط لفتح ملف البلاغة تالتة ثانوي PDF";
+  }
+
   return (
     <section className="course-content-page">
       <button
@@ -53,11 +75,13 @@ function CourseContent({
 
         <div>
           <span>
-            {course.grade || "الثاني الثانوي"}
+            {course.grade ||
+              "الثاني الثانوي"}
           </span>
 
           <h1>
-            {course.title || "كورس اللغة العربية"}
+            {course.title ||
+              "كورس اللغة العربية"}
           </h1>
 
           <p>
@@ -71,7 +95,8 @@ function CourseContent({
         <h2>المحاضرة الأولى</h2>
 
         <p>
-          شاهد الفيديو، ثم افتح الملف والامتحان.
+          شاهد الفيديو، ثم افتح الملف
+          والامتحان.
         </p>
       </div>
 
@@ -95,7 +120,7 @@ function CourseContent({
             <span>
               <FaClock />
               مدة الفيديو:{" "}
-              {lesson.duration || "1:59:48"}
+              {displayedDuration}
             </span>
           </div>
 
@@ -115,13 +140,11 @@ function CourseContent({
           </div>
 
           <div className="course-content-card-info">
-            <h3>ملف المحاضرة الأولى</h3>
+            <h3>
+              ملف المحاضرة الأولى
+            </h3>
 
-            <p>
-              {course.id === "second-course-2"
-                ? "اضغط لفتح ملف البلاغة PDF"
-                : "اضغط لفتح ملف تعليم الإعراب PDF"}
-            </p>
+            <p>{pdfText}</p>
           </div>
         </button>
 
@@ -129,10 +152,14 @@ function CourseContent({
         <button
           type="button"
           className={`course-content-card exam-card ${
-            watched ? "available" : "locked"
+            watched
+              ? "available"
+              : "locked"
           }`}
           disabled={!watched}
-          onClick={() => onOpenExam("exam1")}
+          onClick={() =>
+            onOpenExam("exam1")
+          }
         >
           <div className="course-content-card-icon">
             {watched ? (
@@ -157,10 +184,14 @@ function CourseContent({
         <button
           type="button"
           className={`course-content-card exam-card ${
-            watched ? "available" : "locked"
+            watched
+              ? "available"
+              : "locked"
           }`}
           disabled={!watched}
-          onClick={() => onOpenExam("exam2")}
+          onClick={() =>
+            onOpenExam("exam2")
+          }
         >
           <div className="course-content-card-icon">
             {watched ? (
