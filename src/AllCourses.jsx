@@ -134,9 +134,16 @@ function AllCourses({ currentStudent }) {
                           lesson.pdfUrl ||
                           "/files/تعليم الإعراب.pdf",
 
+                        /*
+                          مدة البلاغة مختلفة
+                          عن مدة الكورس القديم
+                        */
                         duration:
-                          lesson.duration ||
-                          "1:59:48",
+                          courseDocument.id ===
+                          "second-course-2"
+                            ? "1:38:59"
+                            : lesson.duration ||
+                              "1:59:48",
                       })
                     )
                   : [
@@ -159,7 +166,15 @@ function AllCourses({ currentStudent }) {
                           courseData.pdfUrl ||
                           "/files/تعليم الإعراب.pdf",
 
-                        duration: "1:59:48",
+                        /*
+                          البلاغة = 1:38:59
+                          باقي الكورسات = 1:59:48
+                        */
+                        duration:
+                          courseDocument.id ===
+                          "second-course-2"
+                            ? "1:38:59"
+                            : "1:59:48",
                       },
                     ];
 
@@ -280,9 +295,12 @@ function AllCourses({ currentStudent }) {
     تحديد صورة كل كورس
   */
   function getCourseImage(course) {
-    if (course.id === "second-course-2") {
-  return secondCourse2;
-}
+    if (
+      course.id === "second-course-2"
+    ) {
+      return secondCourse2;
+    }
+
     if (
       course.id ===
       "free-second-course"
@@ -727,8 +745,7 @@ function AllCourses({ currentStudent }) {
             );
 
             if (
-              calculatedPercent >=
-              30
+              calculatedPercent >= 30
             ) {
               await saveWatchCompletion(
                 activeLesson.course,
@@ -913,20 +930,13 @@ function AllCourses({ currentStudent }) {
             ) : (
               <div
                 style={{
-                  minHeight:
-                    "350px",
-
+                  minHeight: "350px",
                   display: "flex",
-
-                  alignItems:
-                    "center",
-
-                  justifyContent:
-                    "center",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                لم تتم إضافة رابط
-                فيديو صحيح.
+                لم تتم إضافة رابط فيديو صحيح.
               </div>
             )}
           </div>
@@ -1034,25 +1044,35 @@ function AllCourses({ currentStudent }) {
           onOpenPdf={() =>
             openPdf(firstLesson)
           }
-         onOpenExam={(examKey) => {
-  let finalExamKey = examKey;
+          onOpenExam={(examKey) => {
+            let finalExamKey =
+              examKey;
 
-  if (selectedCourse.id === "second-course-2") {
-    if (examKey === "exam1") {
-      finalExamKey = "secondCourse2Exam1";
-    }
+            if (
+              selectedCourse.id ===
+              "second-course-2"
+            ) {
+              if (
+                examKey === "exam1"
+              ) {
+                finalExamKey =
+                  "secondCourse2Exam1";
+              }
 
-    if (examKey === "exam2") {
-      finalExamKey = "secondCourse2Exam2";
-    }
-  }
+              if (
+                examKey === "exam2"
+              ) {
+                finalExamKey =
+                  "secondCourse2Exam2";
+              }
+            }
 
-  openExam(
-    selectedCourse,
-    firstLesson,
-    finalExamKey
-  );
-}}
+            openExam(
+              selectedCourse,
+              firstLesson,
+              finalExamKey
+            );
+          }}
         />
 
         {renderVideoModal()}
@@ -1090,8 +1110,7 @@ function AllCourses({ currentStudent }) {
             </div>
 
             <h2>
-              جاري تحميل
-              الكورسات...
+              جاري تحميل الكورسات...
             </h2>
           </div>
         ) : coursesError ? (
@@ -1108,8 +1127,7 @@ function AllCourses({ currentStudent }) {
             </div>
 
             <h2>
-              مفيش كورسات متاحة
-              حاليًا
+              مفيش كورسات متاحة حاليًا
             </h2>
           </div>
         ) : (
