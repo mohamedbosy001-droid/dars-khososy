@@ -30,11 +30,21 @@ import CourseContent from "./CourseContent";
 import Exam from "./Exam";
 import examsData from "./examData";
 
+/* الصور القديمة */
 import secondFreeCourse from "./assets/second-free-course.jpeg";
 import secondCourse2 from "./assets/second-course-2.jpeg";
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
 import thirdCourse2 from "./assets/third-course-2.jpeg";
+
+/* صور الكورسات المدفوعة الجديدة */
+import firstMonthCourse from "./assets/first-month.jpeg";
+import firstTermCourse from "./assets/first-term.jpeg";
+
+import secondMonthCourse from "./assets/second-month.jpeg";
+import secondTermCourse from "./assets/second-term.jpeg";
+
 import thirdMonthCourse from "./assets/third-month.jpeg";
+import thirdTermCourse from "./assets/third-term.jpeg";
 
 import "./AllCourses.css";
 
@@ -88,6 +98,28 @@ function AllCourses({ currentStudent }) {
     currentStudent?.grade ||
     "";
 
+  /*
+    توحيد اسم السنة الدراسية
+    عشان "الأول الثانوي"
+    و "الصف الأول الثانوي"
+    يعتبروا نفس السنة
+  */
+  function normalizeGrade(grade) {
+    if (!grade) {
+      return "";
+    }
+
+    const cleanedGrade =
+      String(grade)
+        .trim()
+        .replace(/^الصف\s+/, "");
+
+    return cleanedGrade;
+  }
+
+  /*
+    تحميل الكورسات من Firebase
+  */
   useEffect(() => {
     setIsLoading(true);
     setCoursesError("");
@@ -123,7 +155,9 @@ function AllCourses({ currentStudent }) {
 
                         title:
                           lesson.title ||
-                          `المحاضرة ${index + 1}`,
+                          `المحاضرة ${
+                            index + 1
+                          }`,
 
                         description:
                           lesson.description ||
@@ -202,6 +236,9 @@ function AllCourses({ currentStudent }) {
     return () => unsubscribe();
   }, []);
 
+  /*
+    متابعة بيانات الطالب
+  */
   useEffect(() => {
     if (!studentUid) {
       setStudentData(
@@ -238,10 +275,14 @@ function AllCourses({ currentStudent }) {
     return () => unsubscribe();
   }, [studentUid, currentStudent]);
 
+  /*
+    كل طالب يشوف كورسات سنته فقط
+  */
   const visibleCourses = useMemo(() => {
     return courses.filter((course) => {
       const belongsToStudentGrade =
-        course.grade === studentGrade;
+        normalizeGrade(course.grade) ===
+        normalizeGrade(studentGrade);
 
       const isLocalPreview =
         window.location.hostname ===
@@ -262,8 +303,12 @@ function AllCourses({ currentStudent }) {
     });
   }, [courses, studentGrade]);
 
+  /*
+    عرض السعر
+  */
   function getDisplayedPrice(price) {
-    const numericPrice = Number(price);
+    const numericPrice =
+      Number(price);
 
     if (
       price === "" ||
@@ -281,6 +326,9 @@ function AllCourses({ currentStudent }) {
     return `${numericPrice} جنيه`;
   }
 
+  /*
+    زر واتساب للاشتراك
+  */
   function openCourseSubscription(course) {
     const studentName =
       studentData?.fullName ||
@@ -296,11 +344,17 @@ function AllCourses({ currentStudent }) {
       course?.title ||
       "الكورس";
 
-    const message = encodeURIComponent(
-      `السلام عليكم، أنا الطالب ${studentName}
+    const message =
+      encodeURIComponent(
+        `السلام عليكم، أنا الطالب ${studentName}
 رقم الهاتف: ${studentPhone}
+السنة الدراسية: ${
+          studentData?.grade ||
+          currentStudent?.grade ||
+          ""
+        }
 وأرغب في الاشتراك في كورس: ${courseName}`
-    );
+      );
 
     window.open(
       `https://wa.me/${platformWhatsAppNumber}?text=${message}`,
@@ -309,6 +363,9 @@ function AllCourses({ currentStudent }) {
     );
   }
 
+  /*
+    كتابة كود التفعيل
+  */
   function handleActivationCodeChange(
     courseId,
     value
@@ -316,12 +373,16 @@ function AllCourses({ currentStudent }) {
     setActivationCodes(
       (previousCodes) => ({
         ...previousCodes,
+
         [courseId]:
           value.toUpperCase(),
       })
     );
   }
 
+  /*
+    مؤقتًا لحد ربط الأكواد بـ Firebase
+  */
   function activateCourseCode(course) {
     const enteredCode =
       (
@@ -343,21 +404,74 @@ function AllCourses({ currentStudent }) {
     );
   }
 
+  /*
+    صور الكورسات
+  */
   function getCourseImage(course) {
+    /*
+      أولى ثانوي
+    */
     if (
-      course.id === "second-course-2"
+      course.id ===
+      "first-month-course"
     ) {
-      return secondCourse2;
+      return firstMonthCourse;
     }
 
     if (
-      course.id === "third-month-course"
+      course.id ===
+      "first-term-course"
+    ) {
+      return firstTermCourse;
+    }
+
+    /*
+      تانية ثانوي
+    */
+    if (
+      course.id ===
+      "second-month-course"
+    ) {
+      return secondMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "second-term-course"
+    ) {
+      return secondTermCourse;
+    }
+
+    /*
+      تالتة ثانوي
+    */
+    if (
+      course.id ===
+      "third-month-course"
     ) {
       return thirdMonthCourse;
     }
 
     if (
-      course.id === "third-course-2"
+      course.id ===
+      "third-term-course"
+    ) {
+      return thirdTermCourse;
+    }
+
+    /*
+      الكورسات القديمة
+    */
+    if (
+      course.id ===
+      "second-course-2"
+    ) {
+      return secondCourse2;
+    }
+
+    if (
+      course.id ===
+      "third-course-2"
     ) {
       return thirdCourse2;
     }
@@ -376,6 +490,9 @@ function AllCourses({ currentStudent }) {
       return thirdFreeCourse;
     }
 
+    /*
+      لو الصورة رابط خارجي
+    */
     if (
       course.image &&
       course.image !== "default" &&
@@ -394,7 +511,9 @@ function AllCourses({ currentStudent }) {
     return (
       studentData?.courseProgress?.[
         courseId
-      ]?.lessons?.[lessonId] || {}
+      ]?.lessons?.[
+        lessonId
+      ] || {}
     );
   }
 
@@ -434,7 +553,8 @@ function AllCourses({ currentStudent }) {
     }
 
     try {
-      const parsedUrl = new URL(url);
+      const parsedUrl =
+        new URL(url);
 
       if (
         parsedUrl.hostname.includes(
@@ -484,7 +604,10 @@ function AllCourses({ currentStudent }) {
     return "";
   }
 
-  function openLesson(course, lesson) {
+  function openLesson(
+    course,
+    lesson
+  ) {
     if (!course || !lesson) {
       window.alert(
         "تعذر فتح المحاضرة."
@@ -518,6 +641,9 @@ function AllCourses({ currentStudent }) {
     setWatchPercent(0);
   }
 
+  /*
+    تسجيل مشاهدة 30%
+  */
   async function saveWatchCompletion(
     course,
     lesson,
@@ -547,11 +673,12 @@ function AllCourses({ currentStudent }) {
     setIsSavingWatch(true);
 
     try {
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
@@ -572,7 +699,8 @@ function AllCourses({ currentStudent }) {
           const savedStudent =
             studentSnapshot.data();
 
-          const now = Timestamp.now();
+          const now =
+            Timestamp.now();
 
           const courseProgress = {
             ...(savedStudent.courseProgress ||
@@ -591,22 +719,28 @@ function AllCourses({ currentStudent }) {
           };
 
           const oldLessonProgress = {
-            ...(savedLessons[lesson.id] ||
-              {}),
+            ...(savedLessons[
+              lesson.id
+            ] || {}),
           };
 
           const wasAlreadyWatched =
             oldLessonProgress.videoWatched ===
             true;
 
-          savedLessons[lesson.id] = {
+          savedLessons[
+            lesson.id
+          ] = {
             ...oldLessonProgress,
 
-            lessonId: lesson.id,
+            lessonId:
+              lesson.id,
+
             lessonTitle:
               lesson.title,
 
             videoWatched: true,
+
             watchedPercent: 30,
 
             watchedSeconds:
@@ -623,20 +757,28 @@ function AllCourses({ currentStudent }) {
 
             firstWatchedAt:
               oldLessonProgress
-                .firstWatchedAt || now,
+                .firstWatchedAt ||
+              now,
 
             lastWatchedAt: now,
           };
 
-          courseProgress[course.id] = {
+          courseProgress[
+            course.id
+          ] = {
             ...savedCourseProgress,
 
-            courseId: course.id,
+            courseId:
+              course.id,
+
             courseTitle:
               course.title,
 
-            lessons: savedLessons,
-            updatedAt: now,
+            lessons:
+              savedLessons,
+
+            updatedAt:
+              now,
           };
 
           const watchHistory =
@@ -662,15 +804,20 @@ function AllCourses({ currentStudent }) {
             id:
               `${course.id}-${lesson.id}`,
 
-            courseId: course.id,
+            courseId:
+              course.id,
+
             courseName:
               course.title,
 
-            lessonId: lesson.id,
+            lessonId:
+              lesson.id,
+
             lessonName:
               lesson.title,
 
-            watchedPercent: 30,
+            watchedPercent:
+              30,
 
             watchedSeconds:
               Math.floor(
@@ -682,8 +829,11 @@ function AllCourses({ currentStudent }) {
                 durationSeconds
               ),
 
-            videoWatched: true,
-            lastWatch: now,
+            videoWatched:
+              true,
+
+            lastWatch:
+              now,
           };
 
           if (
@@ -701,8 +851,12 @@ function AllCourses({ currentStudent }) {
           } else {
             watchHistory.push({
               ...historyItem,
-              firstWatch: now,
-              watchCount: 1,
+
+              firstWatch:
+                now,
+
+              watchCount:
+                1,
             });
           }
 
@@ -710,6 +864,7 @@ function AllCourses({ currentStudent }) {
             studentReference,
             {
               courseProgress,
+
               watchHistory,
 
               watchedVideos:
@@ -723,7 +878,8 @@ function AllCourses({ currentStudent }) {
                         0
                     ) + 1,
 
-              updatedAt: now,
+              updatedAt:
+                now,
             }
           );
         }
@@ -748,6 +904,9 @@ function AllCourses({ currentStudent }) {
     }
   }
 
+  /*
+    متابعة فيديو يوتيوب
+  */
   useEffect(() => {
     if (
       !youtubePlayer ||
@@ -861,7 +1020,9 @@ function AllCourses({ currentStudent }) {
     }
 
     const selectedExamData =
-      examsData[examKey];
+      examsData[
+        examKey
+      ];
 
     if (!selectedExamData) {
       window.alert(
@@ -910,7 +1071,9 @@ function AllCourses({ currentStudent }) {
           <button
             type="button"
             className="course-lesson-close"
-            onClick={closeLesson}
+            onClick={
+              closeLesson
+            }
             aria-label="إغلاق الفيديو"
           >
             ×
@@ -918,14 +1081,16 @@ function AllCourses({ currentStudent }) {
 
           <h2>
             {
-              activeLesson.lesson
+              activeLesson
+                .lesson
                 .title
             }
           </h2>
 
           <p className="course-lesson-duration">
             مدة الفيديو:{" "}
-            {activeLesson.lesson
+            {activeLesson
+              .lesson
               .duration ||
               "1:59:48"}
           </p>
@@ -933,10 +1098,14 @@ function AllCourses({ currentStudent }) {
           <div className="course-youtube-wrapper">
             {videoId ? (
               <YouTube
-                videoId={videoId}
+                videoId={
+                  videoId
+                }
                 opts={{
-                  width: "100%",
-                  height: "100%",
+                  width:
+                    "100%",
+                  height:
+                    "100%",
 
                   playerVars: {
                     autoplay: 1,
@@ -947,31 +1116,46 @@ function AllCourses({ currentStudent }) {
                   },
                 }}
                 style={{
-                  width: "100%",
-                  height: "100%",
+                  width:
+                    "100%",
+                  height:
+                    "100%",
                 }}
                 iframeClassName="youtube-course-player"
-                onReady={(event) => {
+                onReady={(
+                  event
+                ) => {
                   setYoutubePlayer(
                     event.target
                   );
                 }}
-                onStateChange={(event) => {
+                onStateChange={(
+                  event
+                ) => {
                   setVideoIsPlaying(
-                    event.data === 1
+                    event.data ===
+                      1
                   );
                 }}
               />
             ) : (
               <div
                 style={{
-                  minHeight: "350px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  minHeight:
+                    "350px",
+
+                  display:
+                    "flex",
+
+                  alignItems:
+                    "center",
+
+                  justifyContent:
+                    "center",
                 }}
               >
-                لم تتم إضافة رابط فيديو صحيح.
+                لم تتم إضافة رابط
+                فيديو صحيح.
               </div>
             )}
           </div>
@@ -1018,7 +1202,8 @@ function AllCourses({ currentStudent }) {
               className="course-pdf-btn"
               onClick={() =>
                 openPdf(
-                  activeLesson.lesson
+                  activeLesson
+                    .lesson
                 )
               }
             >
@@ -1031,28 +1216,43 @@ function AllCourses({ currentStudent }) {
     );
   }
 
+  /*
+    صفحة الامتحان
+  */
   if (selectedExam) {
     return (
       <Exam
-        exam={selectedExam}
+        exam={
+          selectedExam
+        }
         currentStudent={
           studentData ||
           currentStudent
         }
-        onBack={closeExam}
+        onBack={
+          closeExam
+        }
       />
     );
   }
 
+  /*
+    صفحة محتوى الكورس
+  */
   if (selectedCourse) {
     const firstLesson =
-      selectedCourse.lessons?.[0];
+      selectedCourse
+        .lessons?.[0];
 
     return (
       <>
         <CourseContent
-          course={selectedCourse}
-          lesson={firstLesson}
+          course={
+            selectedCourse
+          }
+          lesson={
+            firstLesson
+          }
           watched={
             firstLesson
               ? isLessonWatched(
@@ -1071,9 +1271,13 @@ function AllCourses({ currentStudent }) {
             )
           }
           onOpenPdf={() =>
-            openPdf(firstLesson)
+            openPdf(
+              firstLesson
+            )
           }
-          onOpenExam={(examKey) => {
+          onOpenExam={(
+            examKey
+          ) => {
             let finalExamKey =
               examKey;
 
@@ -1084,14 +1288,16 @@ function AllCourses({ currentStudent }) {
                 "third-course-2"
             ) {
               if (
-                examKey === "exam1"
+                examKey ===
+                "exam1"
               ) {
                 finalExamKey =
                   "secondCourse2Exam1";
               }
 
               if (
-                examKey === "exam2"
+                examKey ===
+                "exam2"
               ) {
                 finalExamKey =
                   "secondCourse2Exam2";
@@ -1111,6 +1317,9 @@ function AllCourses({ currentStudent }) {
     );
   }
 
+  /*
+    صفحة جميع الكورسات
+  */
   return (
     <>
       <section className="all-courses-page">
@@ -1137,23 +1346,30 @@ function AllCourses({ currentStudent }) {
             </div>
 
             <h2>
-              جاري تحميل الكورسات...
+              جاري تحميل
+              الكورسات...
             </h2>
           </div>
         ) : coursesError ? (
           <div className="all-courses-empty">
-            <h2>حدث خطأ</h2>
+            <h2>
+              حدث خطأ
+            </h2>
 
-            <p>{coursesError}</p>
+            <p>
+              {coursesError}
+            </p>
           </div>
-        ) : visibleCourses.length === 0 ? (
+        ) : visibleCourses.length ===
+          0 ? (
           <div className="all-courses-empty">
             <div className="all-courses-empty-icon">
               <FaGraduationCap />
             </div>
 
             <h2>
-              مفيش كورسات متاحة حاليًا
+              مفيش كورسات متاحة
+              حاليًا
             </h2>
           </div>
         ) : (
@@ -1161,15 +1377,20 @@ function AllCourses({ currentStudent }) {
             {visibleCourses.map(
               (course) => {
                 const firstLesson =
-                  course.lessons?.[0];
+                  course
+                    .lessons?.[0];
 
                 const isPaidCourse =
-                  Number(course.price) > 0;
+                  Number(
+                    course.price
+                  ) > 0;
 
                 return (
                   <article
                     className="course-shop-card"
-                    key={course.id}
+                    key={
+                      course.id
+                    }
                   >
                     <div className="course-shop-main">
                       <div className="course-shop-image-wrapper">
@@ -1188,17 +1409,27 @@ function AllCourses({ currentStudent }) {
                           style={{
                             position:
                               "absolute",
-                            top: "14px",
-                            right: "14px",
+
+                            top:
+                              "14px",
+
+                            right:
+                              "14px",
+
                             padding:
                               "8px 14px",
+
                             borderRadius:
                               "30px",
+
                             background:
                               isPaidCourse
                                 ? "#31271f"
                                 : "#168d55",
-                            color: "#fff",
+
+                            color:
+                              "#fff",
+
                             fontWeight:
                               "bold",
                           }}
@@ -1244,7 +1475,8 @@ function AllCourses({ currentStudent }) {
                             disabled
                           >
                             <FaLock />
-                            محتوى الكورس مقفول
+                            محتوى الكورس
+                            مقفول
                           </button>
 
                           <button
@@ -1264,6 +1496,7 @@ function AllCourses({ currentStudent }) {
                             style={{
                               width:
                                 "100%",
+
                               marginTop:
                                 "12px",
                             }}
@@ -1272,15 +1505,19 @@ function AllCourses({ currentStudent }) {
                               type="text"
                               value={
                                 activationCodes[
-                                  course.id
-                                ] || ""
+                                  course
+                                    .id
+                                ] ||
+                                ""
                               }
                               onChange={(
                                 event
                               ) =>
                                 handleActivationCodeChange(
                                   course.id,
-                                  event.target.value
+                                  event
+                                    .target
+                                    .value
                                 )
                               }
                               placeholder="اكتب كود التفعيل"
@@ -1288,24 +1525,34 @@ function AllCourses({ currentStudent }) {
                               style={{
                                 width:
                                   "100%",
+
                                 minHeight:
                                   "48px",
+
                                 padding:
                                   "10px 14px",
+
                                 borderRadius:
                                   "12px",
+
                                 border:
                                   "1px solid #d7c2ae",
+
                                 fontSize:
                                   "16px",
+
                                 fontWeight:
                                   "700",
+
                                 textAlign:
                                   "center",
+
                                 boxSizing:
                                   "border-box",
+
                                 marginBottom:
                                   "10px",
+
                                 direction:
                                   "ltr",
                               }}
