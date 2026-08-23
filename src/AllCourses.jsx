@@ -22,6 +22,8 @@ import {
   FaGraduationCap,
   FaPlay,
   FaFilePdf,
+  FaWhatsapp,
+  FaLock,
 } from "react-icons/fa";
 
 import CourseContent from "./CourseContent";
@@ -36,6 +38,8 @@ import thirdCourse2 from "./assets/third-course-2.jpeg";
 import "./AllCourses.css";
 
 function AllCourses({ currentStudent }) {
+  const platformWhatsAppNumber = "201114497910";
+
   const [courses, setCourses] = useState([]);
 
   const [studentData, setStudentData] =
@@ -135,10 +139,6 @@ function AllCourses({ currentStudent }) {
                           lesson.pdfUrl ||
                           "/files/تعليم الإعراب.pdf",
 
-                        /*
-                          مدة البلاغة مختلفة
-                          عن مدة الكورس القديم
-                        */
                         duration:
                           courseDocument.id ===
                           "second-course-2"
@@ -167,10 +167,6 @@ function AllCourses({ currentStudent }) {
                           courseData.pdfUrl ||
                           "/files/تعليم الإعراب.pdf",
 
-                        /*
-                          البلاغة = 1:38:59
-                          باقي الكورسات = 1:59:48
-                        */
                         duration:
                           courseDocument.id ===
                           "second-course-2"
@@ -293,6 +289,37 @@ function AllCourses({ currentStudent }) {
   }
 
   /*
+    فتح واتساب للاشتراك
+  */
+  function openCourseSubscription(course) {
+    const studentName =
+      studentData?.fullName ||
+      currentStudent?.fullName ||
+      "طالب";
+
+    const studentPhone =
+      studentData?.studentPhone ||
+      currentStudent?.studentPhone ||
+      "";
+
+    const courseName =
+      course?.title ||
+      "الكورس";
+
+    const message = encodeURIComponent(
+      `السلام عليكم، أنا الطالب ${studentName}
+رقم الهاتف: ${studentPhone}
+وأرغب في الاشتراك في كورس: ${courseName}`
+    );
+
+    window.open(
+      `https://wa.me/${platformWhatsAppNumber}?text=${message}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  /*
     تحديد صورة كل كورس
   */
   function getCourseImage(course) {
@@ -301,9 +328,12 @@ function AllCourses({ currentStudent }) {
     ) {
       return secondCourse2;
     }
-    if (course.id === "third-course-2") {
-  return thirdCourse2;
-}
+
+    if (
+      course.id === "third-course-2"
+    ) {
+      return thirdCourse2;
+    }
 
     if (
       course.id ===
@@ -1052,10 +1082,10 @@ function AllCourses({ currentStudent }) {
             let finalExamKey =
               examKey;
 
-           if (
-  selectedCourse.id === "second-course-2" ||
-  selectedCourse.id === "third-course-2"
-) {
+            if (
+              selectedCourse.id === "second-course-2" ||
+              selectedCourse.id === "third-course-2"
+            ) {
               if (
                 examKey === "exam1"
               ) {
@@ -1099,8 +1129,7 @@ function AllCourses({ currentStudent }) {
             </h1>
 
             <p>
-              الكورسات المتاحة
-              لطلاب{" "}
+              الكورسات المتاحة لطلاب{" "}
               {studentGrade ||
                 "المرحلة الثانوية"}
             </p>
@@ -1120,11 +1149,9 @@ function AllCourses({ currentStudent }) {
         ) : coursesError ? (
           <div className="all-courses-empty">
             <h2>حدث خطأ</h2>
-
             <p>{coursesError}</p>
           </div>
-        ) : visibleCourses.length ===
-          0 ? (
+        ) : visibleCourses.length === 0 ? (
           <div className="all-courses-empty">
             <div className="all-courses-empty-icon">
               <FaGraduationCap />
@@ -1140,6 +1167,9 @@ function AllCourses({ currentStudent }) {
               (course) => {
                 const firstLesson =
                   course.lessons?.[0];
+
+                const isPaidCourse =
+                  Number(course.price) > 0;
 
                 return (
                   <article
@@ -1174,11 +1204,9 @@ function AllCourses({ currentStudent }) {
                               "30px",
 
                             background:
-                              Number(
-                                course.price
-                              ) === 0
-                                ? "#168d55"
-                                : "#31271f",
+                              isPaidCourse
+                                ? "#31271f"
+                                : "#168d55",
 
                             color: "#fff",
 
@@ -1186,11 +1214,9 @@ function AllCourses({ currentStudent }) {
                               "bold",
                           }}
                         >
-                          {Number(
-                            course.price
-                          ) === 0
-                            ? "مجاني"
-                            : "مدفوع"}
+                          {isPaidCourse
+                            ? "اشتراك"
+                            : "مجاني"}
                         </span>
                       </div>
 
@@ -1221,35 +1247,63 @@ function AllCourses({ currentStudent }) {
                     </div>
 
                     <div className="course-card-actions">
-                      <button
-                        type="button"
-                        className="course-content-btn"
-                        onClick={() =>
-                          openCourseContent(
-                            course
-                          )
-                        }
-                      >
-                        <FaBookOpen />
-                        محتوى الكورس
-                      </button>
+                      {isPaidCourse ? (
+                        <>
+                          <button
+                            type="button"
+                            className="course-content-btn"
+                            disabled
+                          >
+                            <FaLock />
+                            محتوى الكورس مقفول
+                          </button>
 
-                      <button
-                        type="button"
-                        className="course-start-btn"
-                        disabled={
-                          !firstLesson
-                        }
-                        onClick={() =>
-                          openLesson(
-                            course,
-                            firstLesson
-                          )
-                        }
-                      >
-                        <FaPlay />
-                        ابدأ
-                      </button>
+                          <button
+                            type="button"
+                            className="course-start-btn"
+                            onClick={() =>
+                              openCourseSubscription(
+                                course
+                              )
+                            }
+                          >
+                            <FaWhatsapp />
+                            اشترك الآن
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="course-content-btn"
+                            onClick={() =>
+                              openCourseContent(
+                                course
+                              )
+                            }
+                          >
+                            <FaBookOpen />
+                            محتوى الكورس
+                          </button>
+
+                          <button
+                            type="button"
+                            className="course-start-btn"
+                            disabled={
+                              !firstLesson
+                            }
+                            onClick={() =>
+                              openLesson(
+                                course,
+                                firstLesson
+                              )
+                            }
+                          >
+                            <FaPlay />
+                            ابدأ
+                          </button>
+                        </>
+                      )}
                     </div>
                   </article>
                 );
