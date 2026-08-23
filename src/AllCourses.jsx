@@ -73,6 +73,9 @@ function AllCourses({ currentStudent }) {
   const [coursesError, setCoursesError] =
     useState("");
 
+  const [activationCodes, setActivationCodes] =
+    useState({});
+
   const savingWatchRef = useRef(new Set());
 
   const studentUid =
@@ -303,6 +306,40 @@ function AllCourses({ currentStudent }) {
       `https://wa.me/${platformWhatsAppNumber}?text=${message}`,
       "_blank",
       "noopener,noreferrer"
+    );
+  }
+
+  function handleActivationCodeChange(
+    courseId,
+    value
+  ) {
+    setActivationCodes(
+      (previousCodes) => ({
+        ...previousCodes,
+        [courseId]:
+          value.toUpperCase(),
+      })
+    );
+  }
+
+  function activateCourseCode(course) {
+    const enteredCode =
+      (
+        activationCodes[
+          course.id
+        ] || ""
+      ).trim();
+
+    if (!enteredCode) {
+      window.alert(
+        "من فضلك اكتب كود التفعيل أولًا."
+      );
+
+      return;
+    }
+
+    window.alert(
+      `تم إدخال الكود: ${enteredCode}`
     );
   }
 
@@ -754,7 +791,8 @@ function AllCourses({ currentStudent }) {
             );
 
             if (
-              calculatedPercent >= 30
+              calculatedPercent >=
+              30
             ) {
               await saveWatchCompletion(
                 activeLesson.course,
@@ -1040,8 +1078,10 @@ function AllCourses({ currentStudent }) {
               examKey;
 
             if (
-              selectedCourse.id === "second-course-2" ||
-              selectedCourse.id === "third-course-2"
+              selectedCourse.id ===
+                "second-course-2" ||
+              selectedCourse.id ===
+                "third-course-2"
             ) {
               if (
                 examKey === "exam1"
@@ -1103,6 +1143,7 @@ function AllCourses({ currentStudent }) {
         ) : coursesError ? (
           <div className="all-courses-empty">
             <h2>حدث خطأ</h2>
+
             <p>{coursesError}</p>
           </div>
         ) : visibleCourses.length === 0 ? (
@@ -1147,23 +1188,17 @@ function AllCourses({ currentStudent }) {
                           style={{
                             position:
                               "absolute",
-
                             top: "14px",
                             right: "14px",
-
                             padding:
                               "8px 14px",
-
                             borderRadius:
                               "30px",
-
                             background:
                               isPaidCourse
                                 ? "#31271f"
                                 : "#168d55",
-
                             color: "#fff",
-
                             fontWeight:
                               "bold",
                           }}
@@ -1224,6 +1259,74 @@ function AllCourses({ currentStudent }) {
                             <FaWhatsapp />
                             اشترك الآن
                           </button>
+
+                          <div
+                            style={{
+                              width:
+                                "100%",
+                              marginTop:
+                                "12px",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={
+                                activationCodes[
+                                  course.id
+                                ] || ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                handleActivationCodeChange(
+                                  course.id,
+                                  event.target.value
+                                )
+                              }
+                              placeholder="اكتب كود التفعيل"
+                              autoComplete="off"
+                              style={{
+                                width:
+                                  "100%",
+                                minHeight:
+                                  "48px",
+                                padding:
+                                  "10px 14px",
+                                borderRadius:
+                                  "12px",
+                                border:
+                                  "1px solid #d7c2ae",
+                                fontSize:
+                                  "16px",
+                                fontWeight:
+                                  "700",
+                                textAlign:
+                                  "center",
+                                boxSizing:
+                                  "border-box",
+                                marginBottom:
+                                  "10px",
+                                direction:
+                                  "ltr",
+                              }}
+                            />
+
+                            <button
+                              type="button"
+                              className="course-content-btn"
+                              style={{
+                                width:
+                                  "100%",
+                              }}
+                              onClick={() =>
+                                activateCourseCode(
+                                  course
+                                )
+                              }
+                            >
+                              تفعيل الكود
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <>
