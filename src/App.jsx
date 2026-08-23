@@ -551,6 +551,17 @@ function App() {
             <button
               type="button"
               className={`student-nav-btn ${
+                studentProfileSection === "homeworkSubmission" ? "active" : ""
+              }`}
+              onClick={() => openStudentSection("homeworkSubmission")}
+            >
+              <FaClipboardCheck />
+              تسليم الواجب
+            </button>
+
+            <button
+              type="button"
+              className={`student-nav-btn ${
                 studentProfileSection === "lessons" ? "active" : ""
               }`}
               onClick={() => openStudentSection("lessons")}
@@ -852,6 +863,14 @@ function App() {
 
           {studentProfileSection === "allCourses" && (
             <AllCourses currentStudent={currentStudent} />
+          )}
+
+          {studentProfileSection === "homeworkSubmission" && (
+            <section className="student-courses-page">
+              <section className="student-profile-title">
+                <h1>تسليم الواجب</h1>
+              </section>
+            </section>
           )}
 
           {studentProfileSection === "lessons" && (
