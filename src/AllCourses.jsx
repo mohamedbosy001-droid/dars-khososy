@@ -24,6 +24,7 @@ import {
   FaFilePdf,
   FaWhatsapp,
   FaLock,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 import CourseContent from "./CourseContent";
@@ -36,7 +37,7 @@ import secondCourse2 from "./assets/second-course-2.jpeg";
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
 import thirdCourse2 from "./assets/third-course-2.jpeg";
 
-/* صور الكورسات المدفوعة الجديدة */
+/* صور الكورسات المدفوعة */
 import firstMonthCourse from "./assets/first-month.jpeg";
 import firstTermCourse from "./assets/first-term.jpeg";
 
@@ -86,6 +87,9 @@ function AllCourses({ currentStudent }) {
   const [activationCodes, setActivationCodes] =
     useState({});
 
+  const [activatingCourseId, setActivatingCourseId] =
+    useState("");
+
   const savingWatchRef = useRef(new Set());
 
   const studentUid =
@@ -99,26 +103,20 @@ function AllCourses({ currentStudent }) {
     "";
 
   /*
-    توحيد اسم السنة الدراسية
-    عشان "الأول الثانوي"
-    و "الصف الأول الثانوي"
-    يعتبروا نفس السنة
+    توحيد اسم السنة
   */
   function normalizeGrade(grade) {
     if (!grade) {
       return "";
     }
 
-    const cleanedGrade =
-      String(grade)
-        .trim()
-        .replace(/^الصف\s+/, "");
-
-    return cleanedGrade;
+    return String(grade)
+      .trim()
+      .replace(/^الصف\s+/, "");
   }
 
   /*
-    تحميل الكورسات من Firebase
+    تحميل الكورسات
   */
   useEffect(() => {
     setIsLoading(true);
@@ -304,6 +302,32 @@ function AllCourses({ currentStudent }) {
   }, [courses, studentGrade]);
 
   /*
+    هل الكورس مدفوع؟
+  */
+  function isPaidCourse(course) {
+    return Number(course?.price) > 0;
+  }
+
+  /*
+    هل الطالب فتح الكورس؟
+  */
+  function hasCourseAccess(course) {
+    if (!course) {
+      return false;
+    }
+
+    if (!isPaidCourse(course)) {
+      return true;
+    }
+
+    return (
+      studentData?.courseAccess?.[
+        course.id
+      ]?.active === true
+    );
+  }
+
+  /*
     عرض السعر
   */
   function getDisplayedPrice(price) {
@@ -327,7 +351,7 @@ function AllCourses({ currentStudent }) {
   }
 
   /*
-    زر واتساب للاشتراك
+    واتساب
   */
   function openCourseSubscription(course) {
     const studentName =
@@ -364,7 +388,7 @@ function AllCourses({ currentStudent }) {
   }
 
   /*
-    كتابة كود التفعيل
+    كتابة الكود
   */
   function handleActivationCodeChange(
     courseId,
@@ -375,21 +399,33 @@ function AllCourses({ currentStudent }) {
         ...previousCodes,
 
         [courseId]:
-          value.toUpperCase(),
+          value
+            .toUpperCase()
+            .replace(/\s/g, ""),
       })
     );
   }
 
   /*
-    مؤقتًا لحد ربط الأكواد بـ Firebase
+    تفعيل الكود من Firebase
   */
-  function activateCourseCode(course) {
+  async function activateCourseCode(course) {
     const enteredCode =
       (
         activationCodes[
           course.id
         ] || ""
-      ).trim();
+      )
+        .trim()
+        .toUpperCase();
+
+    if (!studentUid) {
+      window.alert(
+        "برجاء تسجيل الدخول أولًا."
+      );
+
+      return;
+    }
 
     if (!enteredCode) {
       window.alert(
@@ -399,18 +435,268 @@ function AllCourses({ currentStudent }) {
       return;
     }
 
-    window.alert(
-      `تم إدخال الكود: ${enteredCode}`
+    setActivatingCourseId(
+      course.id
     );
+
+    try {
+      const codeReference = doc(
+        db,
+        "accessCodes",
+        enteredCode
+      );
+
+      const studentReference = doc(
+        db,
+        "students",
+        studentUid
+      );
+
+      await runTransaction(
+        db,
+        async (transaction) => {
+          const codeSnapshot =
+            await transaction.get(
+              codeReference
+            );
+
+          if (
+            !codeSnapshot.exists()
+          ) {
+            throw new Error(
+              "CODE_NOT_FOUND"
+            );
+          }
+
+          const codeData =
+            codeSnapshot.data();
+
+          if (
+            codeData.active !== true
+          ) {
+            throw new Error(
+              "CODE_INACTIVE"
+            );
+          }
+
+          if (
+            codeData.used === true
+          ) {
+            throw new Error(
+              "CODE_ALREADY_USED"
+            );
+          }
+
+          if (
+            codeData.courseId !==
+            course.id
+          ) {
+            throw new Error(
+              "WRONG_COURSE"
+            );
+          }
+
+          const studentSnapshot =
+            await transaction.get(
+              studentReference
+            );
+
+          if (
+            !studentSnapshot.exists()
+          ) {
+            throw new Error(
+              "STUDENT_NOT_FOUND"
+            );
+          }
+
+          const savedStudent =
+            studentSnapshot.data();
+
+          const now =
+            Timestamp.now();
+
+          const oldCourseAccess = {
+            ...(savedStudent.courseAccess ||
+              {}),
+          };
+
+          oldCourseAccess[
+            course.id
+          ] = {
+            active: true,
+
+            courseId:
+              course.id,
+
+            courseTitle:
+              course.title,
+
+            accessType:
+              codeData.accessType ||
+              "fullCourse",
+
+            activatedWithCode:
+              enteredCode,
+
+            activatedAt:
+              now,
+          };
+
+          const oldSubscriptions =
+            Array.isArray(
+              savedStudent.subscribedCourses
+            )
+              ? [
+                  ...savedStudent
+                    .subscribedCourses,
+                ]
+              : [];
+
+          const alreadySubscribed =
+            oldSubscriptions.some(
+              (subscription) => {
+                if (
+                  typeof subscription ===
+                  "string"
+                ) {
+                  return (
+                    subscription ===
+                    course.id
+                  );
+                }
+
+                return (
+                  subscription?.id ===
+                    course.id ||
+                  subscription?.courseId ===
+                    course.id
+                );
+              }
+            );
+
+          if (
+            !alreadySubscribed
+          ) {
+            oldSubscriptions.push({
+              id: course.id,
+
+              courseId:
+                course.id,
+
+              title:
+                course.title,
+
+              grade:
+                course.grade,
+
+              image:
+                course.image ||
+                "",
+
+              description:
+                course.description ||
+                "",
+
+              progress: 0,
+
+              activatedAt:
+                now,
+            });
+          }
+
+          /*
+            تسجيل استخدام الكود
+          */
+          transaction.update(
+            codeReference,
+            {
+              used: true,
+
+              usedBy:
+                studentUid,
+
+              usedAt:
+                now,
+            }
+          );
+
+          /*
+            فتح الكورس للطالب
+          */
+          transaction.update(
+            studentReference,
+            {
+              courseAccess:
+                oldCourseAccess,
+
+              subscribedCourses:
+                oldSubscriptions,
+
+              updatedAt:
+                now,
+            }
+          );
+        }
+      );
+
+      setActivationCodes(
+        (previousCodes) => ({
+          ...previousCodes,
+          [course.id]: "",
+        })
+      );
+
+      window.alert(
+        "✅ تم تفعيل الكورس بنجاح."
+      );
+    } catch (error) {
+      console.error(
+        "Activation error:",
+        error
+      );
+
+      if (
+        error.message ===
+        "CODE_NOT_FOUND"
+      ) {
+        window.alert(
+          "الكود غير صحيح."
+        );
+      } else if (
+        error.message ===
+        "CODE_INACTIVE"
+      ) {
+        window.alert(
+          "الكود غير مفعل."
+        );
+      } else if (
+        error.message ===
+        "CODE_ALREADY_USED"
+      ) {
+        window.alert(
+          "هذا الكود تم استخدامه من قبل."
+        );
+      } else if (
+        error.message ===
+        "WRONG_COURSE"
+      ) {
+        window.alert(
+          "هذا الكود غير مخصص لهذا الكورس."
+        );
+      } else {
+        window.alert(
+          "حدث خطأ أثناء تفعيل الكود."
+        );
+      }
+    } finally {
+      setActivatingCourseId("");
+    }
   }
 
   /*
     صور الكورسات
   */
   function getCourseImage(course) {
-    /*
-      أولى ثانوي
-    */
     if (
       course.id ===
       "first-month-course"
@@ -425,9 +711,6 @@ function AllCourses({ currentStudent }) {
       return firstTermCourse;
     }
 
-    /*
-      تانية ثانوي
-    */
     if (
       course.id ===
       "second-month-course"
@@ -442,9 +725,6 @@ function AllCourses({ currentStudent }) {
       return secondTermCourse;
     }
 
-    /*
-      تالتة ثانوي
-    */
     if (
       course.id ===
       "third-month-course"
@@ -459,9 +739,6 @@ function AllCourses({ currentStudent }) {
       return thirdTermCourse;
     }
 
-    /*
-      الكورسات القديمة
-    */
     if (
       course.id ===
       "second-course-2"
@@ -490,9 +767,6 @@ function AllCourses({ currentStudent }) {
       return thirdFreeCourse;
     }
 
-    /*
-      لو الصورة رابط خارجي
-    */
     if (
       course.image &&
       course.image !== "default" &&
@@ -529,7 +803,21 @@ function AllCourses({ currentStudent }) {
     );
   }
 
+  /*
+    فتح محتوى الكورس
+  */
   function openCourseContent(course) {
+    if (
+      isPaidCourse(course) &&
+      !hasCourseAccess(course)
+    ) {
+      window.alert(
+        "الكورس مقفول. اشترك وأدخل كود التفعيل أولًا."
+      );
+
+      return;
+    }
+
     setSelectedCourse(course);
     setSelectedExam(null);
 
@@ -604,6 +892,9 @@ function AllCourses({ currentStudent }) {
     return "";
   }
 
+  /*
+    فتح المحاضرة
+  */
   function openLesson(
     course,
     lesson
@@ -611,6 +902,17 @@ function AllCourses({ currentStudent }) {
     if (!course || !lesson) {
       window.alert(
         "تعذر فتح المحاضرة."
+      );
+
+      return;
+    }
+
+    if (
+      isPaidCourse(course) &&
+      !hasCourseAccess(course)
+    ) {
+      window.alert(
+        "المحاضرة مقفولة. قم بتفعيل الكورس أولًا."
       );
 
       return;
@@ -1071,9 +1373,7 @@ function AllCourses({ currentStudent }) {
           <button
             type="button"
             className="course-lesson-close"
-            onClick={
-              closeLesson
-            }
+            onClick={closeLesson}
             aria-label="إغلاق الفيديو"
           >
             ×
@@ -1346,8 +1646,7 @@ function AllCourses({ currentStudent }) {
             </div>
 
             <h2>
-              جاري تحميل
-              الكورسات...
+              جاري تحميل الكورسات...
             </h2>
           </div>
         ) : coursesError ? (
@@ -1368,8 +1667,7 @@ function AllCourses({ currentStudent }) {
             </div>
 
             <h2>
-              مفيش كورسات متاحة
-              حاليًا
+              مفيش كورسات متاحة حاليًا
             </h2>
           </div>
         ) : (
@@ -1380,10 +1678,15 @@ function AllCourses({ currentStudent }) {
                   course
                     .lessons?.[0];
 
-                const isPaidCourse =
-                  Number(
-                    course.price
-                  ) > 0;
+                const paid =
+                  isPaidCourse(
+                    course
+                  );
+
+                const unlocked =
+                  hasCourseAccess(
+                    course
+                  );
 
                 return (
                   <article
@@ -1423,8 +1726,10 @@ function AllCourses({ currentStudent }) {
                               "30px",
 
                             background:
-                              isPaidCourse
-                                ? "#31271f"
+                              paid
+                                ? unlocked
+                                  ? "#168d55"
+                                  : "#31271f"
                                 : "#168d55",
 
                             color:
@@ -1434,8 +1739,10 @@ function AllCourses({ currentStudent }) {
                               "bold",
                           }}
                         >
-                          {isPaidCourse
-                            ? "اشتراك"
+                          {paid
+                            ? unlocked
+                              ? "مفعل"
+                              : "اشتراك"
                             : "مجاني"}
                         </span>
                       </div>
@@ -1467,7 +1774,8 @@ function AllCourses({ currentStudent }) {
                     </div>
 
                     <div className="course-card-actions">
-                      {isPaidCourse ? (
+                      {paid &&
+                      !unlocked ? (
                         <>
                           <button
                             type="button"
@@ -1475,8 +1783,7 @@ function AllCourses({ currentStudent }) {
                             disabled
                           >
                             <FaLock />
-                            محتوى الكورس
-                            مقفول
+                            محتوى الكورس مقفول
                           </button>
 
                           <button
@@ -1522,6 +1829,7 @@ function AllCourses({ currentStudent }) {
                               }
                               placeholder="اكتب كود التفعيل"
                               autoComplete="off"
+                              maxLength={8}
                               style={{
                                 width:
                                   "100%",
@@ -1565,13 +1873,20 @@ function AllCourses({ currentStudent }) {
                                 width:
                                   "100%",
                               }}
+                              disabled={
+                                activatingCourseId ===
+                                course.id
+                              }
                               onClick={() =>
                                 activateCourseCode(
                                   course
                                 )
                               }
                             >
-                              تفعيل الكود
+                              {activatingCourseId ===
+                              course.id
+                                ? "جاري التفعيل..."
+                                : "تفعيل الكود"}
                             </button>
                           </div>
                         </>
@@ -1586,8 +1901,15 @@ function AllCourses({ currentStudent }) {
                               )
                             }
                           >
-                            <FaBookOpen />
-                            محتوى الكورس
+                            {paid ? (
+                              <FaCheckCircle />
+                            ) : (
+                              <FaBookOpen />
+                            )}
+
+                            {paid
+                              ? "محتوى الكورس"
+                              : "محتوى الكورس"}
                           </button>
 
                           <button
