@@ -34,6 +34,7 @@ import secondFreeCourse from "./assets/second-free-course.jpeg";
 import secondCourse2 from "./assets/second-course-2.jpeg";
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
 import thirdCourse2 from "./assets/third-course-2.jpeg";
+import thirdMonthCourse from "./assets/third-month.jpeg";
 
 import "./AllCourses.css";
 
@@ -84,9 +85,6 @@ function AllCourses({ currentStudent }) {
     currentStudent?.grade ||
     "";
 
-  /*
-    تحميل الكورسات من Firebase
-  */
   useEffect(() => {
     setIsLoading(true);
     setCoursesError("");
@@ -122,9 +120,7 @@ function AllCourses({ currentStudent }) {
 
                         title:
                           lesson.title ||
-                          `المحاضرة ${
-                            index + 1
-                          }`,
+                          `المحاضرة ${index + 1}`,
 
                         description:
                           lesson.description ||
@@ -203,9 +199,6 @@ function AllCourses({ currentStudent }) {
     return () => unsubscribe();
   }, []);
 
-  /*
-    متابعة بيانات الطالب مباشرة
-  */
   useEffect(() => {
     if (!studentUid) {
       setStudentData(
@@ -242,9 +235,6 @@ function AllCourses({ currentStudent }) {
     return () => unsubscribe();
   }, [studentUid, currentStudent]);
 
-  /*
-    الكورس المخفي يظهر على localhost فقط
-  */
   const visibleCourses = useMemo(() => {
     return courses.filter((course) => {
       const belongsToStudentGrade =
@@ -288,9 +278,6 @@ function AllCourses({ currentStudent }) {
     return `${numericPrice} جنيه`;
   }
 
-  /*
-    فتح واتساب للاشتراك
-  */
   function openCourseSubscription(course) {
     const studentName =
       studentData?.fullName ||
@@ -319,14 +306,17 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    تحديد صورة كل كورس
-  */
   function getCourseImage(course) {
     if (
       course.id === "second-course-2"
     ) {
       return secondCourse2;
+    }
+
+    if (
+      course.id === "third-month-course"
+    ) {
+      return thirdMonthCourse;
     }
 
     if (
@@ -383,9 +373,6 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    فتح صفحة محتوى الكورس
-  */
   function openCourseContent(course) {
     setSelectedCourse(course);
     setSelectedExam(null);
@@ -393,9 +380,6 @@ function AllCourses({ currentStudent }) {
     window.scrollTo(0, 0);
   }
 
-  /*
-    الرجوع إلى جميع الكورسات
-  */
   function closeCourseContent() {
     setSelectedCourse(null);
     setSelectedExam(null);
@@ -463,9 +447,6 @@ function AllCourses({ currentStudent }) {
     return "";
   }
 
-  /*
-    فتح الفيديو داخل المنصة
-  */
   function openLesson(course, lesson) {
     if (!course || !lesson) {
       window.alert(
@@ -500,9 +481,6 @@ function AllCourses({ currentStudent }) {
     setWatchPercent(0);
   }
 
-  /*
-    حفظ مشاهدة 30% في Firebase
-  */
   async function saveWatchCompletion(
     course,
     lesson,
@@ -733,9 +711,6 @@ function AllCourses({ currentStudent }) {
     }
   }
 
-  /*
-    متابعة نسبة مشاهدة فيديو YouTube
-  */
   useEffect(() => {
     if (
       !youtubePlayer ||
@@ -808,9 +783,6 @@ function AllCourses({ currentStudent }) {
     videoIsPlaying,
   ]);
 
-  /*
-    فتح ملف PDF
-  */
   function openPdf(lesson) {
     if (!lesson) {
       return;
@@ -824,9 +796,6 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    فتح الامتحان الأول أو الثاني
-  */
   function openExam(
     course,
     lesson,
@@ -875,17 +844,11 @@ function AllCourses({ currentStudent }) {
     window.scrollTo(0, 0);
   }
 
-  /*
-    الرجوع من الامتحان إلى محتوى الكورس
-  */
   function closeExam() {
     setSelectedExam(null);
     window.scrollTo(0, 0);
   }
 
-  /*
-    نافذة تشغيل الفيديو
-  */
   function renderVideoModal() {
     if (!activeLesson) {
       return null;
@@ -1030,9 +993,6 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    صفحة الامتحان
-  */
   if (selectedExam) {
     return (
       <Exam
@@ -1046,9 +1006,6 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    صفحة محتوى الكورس
-  */
   if (selectedCourse) {
     const firstLesson =
       selectedCourse.lessons?.[0];
@@ -1114,9 +1071,6 @@ function AllCourses({ currentStudent }) {
     );
   }
 
-  /*
-    صفحة جميع الكورسات
-  */
   return (
     <>
       <section className="all-courses-page">
