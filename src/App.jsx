@@ -10,6 +10,7 @@ import LevelIndicator from "./LevelIndicator";
 import MyPoints from "./MyPoints";
 import TopTen from "./TopTen";
 import UploadExams from "./UploadExams";
+import Homework from "./Homework";
 
 import {
   createUserWithEmailAndPassword,
@@ -453,8 +454,11 @@ function App() {
       );
     }
 
+    const isCenterStudent =
+      currentStudent.studentType === "center";
+
     const studentTypeText =
-      currentStudent.studentType === "center"
+      isCenterStudent
         ? "طالب سنتر"
         : "طالب أونلاين";
 
@@ -548,16 +552,22 @@ function App() {
               جميع الكورسات
             </button>
 
-            <button
-              type="button"
-              className={`student-nav-btn ${
-                studentProfileSection === "homeworkSubmission" ? "active" : ""
-              }`}
-              onClick={() => openStudentSection("homeworkSubmission")}
-            >
-              <FaClipboardCheck />
-              تسليم الواجب
-            </button>
+            {isCenterStudent && (
+              <button
+                type="button"
+                className={`student-nav-btn ${
+                  studentProfileSection === "homeworkSubmission"
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() =>
+                  openStudentSection("homeworkSubmission")
+                }
+              >
+                <FaClipboardCheck />
+                تسليم الواجب
+              </button>
+            )}
 
             <button
               type="button"
@@ -707,7 +717,9 @@ function App() {
 
                       <h3>عدد مرات مشاهدة الفيديوهات</h3>
                       <strong>{watchedVideos}</strong>
-                      <span>{watchedVideos === 1 ? "فيديو" : "فيديوهات"}</span>
+                      <span>
+                        {watchedVideos === 1 ? "فيديو" : "فيديوهات"}
+                      </span>
                     </article>
 
                     <article className="student-stat-card">
@@ -717,7 +729,9 @@ function App() {
 
                       <h3>عدد الاختبارات التي خلصتها</h3>
                       <strong>{completedExams}</strong>
-                      <span>{completedExams === 1 ? "اختبار" : "اختبارات"}</span>
+                      <span>
+                        {completedExams === 1 ? "اختبار" : "اختبارات"}
+                      </span>
                     </article>
 
                     <article className="student-grades-card">
@@ -847,7 +861,9 @@ function App() {
                           <button
                             type="button"
                             className="student-open-course-btn"
-                            onClick={() => openStudentSection("allCourses")}
+                            onClick={() =>
+                              openStudentSection("allCourses")
+                            }
                           >
                             <FaPlay />
                             دخول الكورس
@@ -865,13 +881,10 @@ function App() {
             <AllCourses currentStudent={currentStudent} />
           )}
 
-          {studentProfileSection === "homeworkSubmission" && (
-            <section className="student-courses-page">
-              <section className="student-profile-title">
-                <h1>تسليم الواجب</h1>
-              </section>
-            </section>
-          )}
+          {studentProfileSection === "homeworkSubmission" &&
+            isCenterStudent && (
+              <Homework currentStudent={currentStudent} />
+            )}
 
           {studentProfileSection === "lessons" && (
             <MyLessons currentStudent={currentStudent} />
@@ -997,7 +1010,9 @@ function App() {
                 <button
                   type="button"
                   className="show-password-btn"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  onClick={() =>
+                    setShowLoginPassword(!showLoginPassword)
+                  }
                   aria-label={
                     showLoginPassword
                       ? "إخفاء كلمة السر"
@@ -1084,9 +1099,14 @@ function App() {
                   event.preventDefault();
 
                   const form = event.currentTarget;
-                  const fullName = form.elements.fullName.value.trim();
-                  const studentPhone = form.elements.studentPhone.value.trim();
-                  const parentPhone = form.elements.parentPhone.value.trim();
+                  const fullName =
+                    form.elements.fullName.value.trim();
+
+                  const studentPhone =
+                    form.elements.studentPhone.value.trim();
+
+                  const parentPhone =
+                    form.elements.parentPhone.value.trim();
 
                   const messageBox = form.querySelector(
                     ".forgot-password-validation-message"
@@ -1112,7 +1132,8 @@ function App() {
                     return;
                   }
 
-                  const egyptianPhoneRegex = /^01[0125][0-9]{8}$/;
+                  const egyptianPhoneRegex =
+                    /^01[0125][0-9]{8}$/;
 
                   if (!egyptianPhoneRegex.test(studentPhone)) {
                     messageBox.textContent =
@@ -1188,7 +1209,9 @@ function App() {
               <button
                 type="button"
                 className="text-login-btn"
-                onClick={() => setShowForgotPassword(false)}
+                onClick={() =>
+                  setShowForgotPassword(false)
+                }
               >
                 رجوع
               </button>
@@ -1651,7 +1674,6 @@ function App() {
 
               <div className="stage-basic-info">
                 <h3>الأول الثانوي</h3>
-
                 <p>كل محتوى الصف الأول الثانوي</p>
               </div>
 
@@ -1681,7 +1703,6 @@ function App() {
 
               <div className="stage-basic-info">
                 <h3>الثاني الثانوي</h3>
-
                 <p>كل محتوى الصف الثاني الثانوي</p>
               </div>
 
@@ -1711,7 +1732,6 @@ function App() {
 
               <div className="stage-basic-info">
                 <h3>الثالث الثانوي</h3>
-
                 <p>كل محتوى الصف الثالث الثانوي</p>
               </div>
 
