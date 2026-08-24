@@ -35,15 +35,26 @@ function Homework({ currentStudent }) {
     auth.currentUser?.uid ||
     "";
 
-  const isCenterStudent =
-    currentStudent?.studentType === "center";
+  /*
+    المحتوى متاح فقط:
+    لطالب سنتر + الصف الثالث الثانوي
+  */
+  const isThirdSecondaryCenterStudent =
+    currentStudent?.studentType === "center" &&
+    (
+      currentStudent?.grade === "الثالث الثانوي" ||
+      currentStudent?.grade === "الصف الثالث الثانوي"
+    );
 
   /*
     متابعة بيانات الطالب من Firebase
     لمعرفة هل سلّم الواجب قبل كده أم لا
   */
   useEffect(() => {
-    if (!studentUid || !isCenterStudent) {
+    if (
+      !studentUid ||
+      !isThirdSecondaryCenterStudent
+    ) {
       setIsLoading(false);
       return undefined;
     }
@@ -77,6 +88,7 @@ function Homework({ currentStudent }) {
             setAnswers({
               question1:
                 savedHomework.answers.question1 || "",
+
               question2:
                 savedHomework.answers.question2 || "",
             });
@@ -102,12 +114,16 @@ function Homework({ currentStudent }) {
     );
 
     return () => unsubscribe();
-  }, [studentUid, isCenterStudent]);
+  }, [
+    studentUid,
+    isThirdSecondaryCenterStudent,
+  ]);
 
   /*
-    الواجب لا يظهر إلا لطالب السنتر
+    لا نظهر محتوى الصفحة إلا لطالب
+    سنتر في الصف الثالث الثانوي
   */
-  if (!isCenterStudent) {
+  if (!isThirdSecondaryCenterStudent) {
     return null;
   }
 
@@ -183,14 +199,19 @@ function Homework({ currentStudent }) {
             studentSnapshot.data();
 
           /*
-            حماية إضافية:
-            نتأكد إن الحساب طالب سنتر
+            حماية إضافية داخل Firebase:
+            لازم يكون طالب سنتر + ثالثة ثانوي
           */
-          if (
-            studentData.studentType !== "center"
-          ) {
+          const isAllowedStudent =
+            studentData.studentType === "center" &&
+            (
+              studentData.grade === "الثالث الثانوي" ||
+              studentData.grade === "الصف الثالث الثانوي"
+            );
+
+          if (!isAllowedStudent) {
             throw new Error(
-              "Homework is only available for center students."
+              "Homework is only available for third secondary center students."
             );
           }
 
@@ -303,9 +324,13 @@ function Homework({ currentStudent }) {
         onSubmit={handleSubmitHomework}
       >
         <div className="homework-question-card">
-          <h2>السؤال الأول</h2>
+          <h2>
+            السؤال الأول
+          </h2>
 
-          <p>اختر الإجابة الصحيحة:</p>
+          <p>
+            اختر الإجابة الصحيحة:
+          </p>
 
           <label>
             <input
@@ -357,9 +382,13 @@ function Homework({ currentStudent }) {
         </div>
 
         <div className="homework-question-card">
-          <h2>السؤال الثاني</h2>
+          <h2>
+            السؤال الثاني
+          </h2>
 
-          <p>اختر الإجابة الصحيحة:</p>
+          <p>
+            اختر الإجابة الصحيحة:
+          </p>
 
           <label>
             <input
@@ -447,7 +476,9 @@ function Homework({ currentStudent }) {
           <div className="homework-video-locked">
             <FaLock />
 
-            <h3>الفيديو مقفول</h3>
+            <h3>
+              الفيديو مقفول
+            </h3>
 
             <p>
               لازم تحل وتسلم الواجب الأول
