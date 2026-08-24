@@ -18,12 +18,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  getDoc,
-} from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
 
@@ -55,7 +50,6 @@ import {
 
 import coverTeacherImage from "./assets/omar-elshaier.jpeg";
 import heroBanner from "./assets/hero-banner.jpeg";
-
 import firstSecondaryImage from "./assets/first-secondary.jpeg";
 import secondSecondaryImage from "./assets/second-secondary.jpeg";
 import thirdSecondaryImage from "./assets/third-secondary.jpeg";
@@ -89,10 +83,13 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [studentProfileSection, setStudentProfileSection] = useState("profile");
+  const [studentProfileSection, setStudentProfileSection] =
+    useState("profile");
+
   const [registerData, setRegisterData] = useState(initialRegisterData);
   const [registerMessage, setRegisterMessage] = useState("");
   const [registerMessageType, setRegisterMessageType] = useState("");
+
   const [loginData, setLoginData] = useState(initialLoginData);
   const [loginMessage, setLoginMessage] = useState("");
   const [loginMessageType, setLoginMessageType] = useState("");
@@ -109,9 +106,7 @@ function App() {
   });
 
   useEffect(() => {
-    const reveals = document.querySelectorAll(
-      ".reveal-right, .reveal-up"
-    );
+    const reveals = document.querySelectorAll(".reveal-right, .reveal-up");
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -278,26 +273,26 @@ function App() {
         educationType,
         studentType,
         status: studentStatus,
+
         watchedVideos: 0,
         completedExams: 0,
         completedHomeworks: 0,
         obtainedGrades: 0,
         totalGrades: 0,
         points: 0,
+
         subscribedCourses: [],
         activatedLessons: [],
         examResults: [],
         homeworkResults: [],
         watchHistory: [],
+
         role: "student",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      await setDoc(
-        doc(db, "students", firebaseUser.uid),
-        newStudent
-      );
+      await setDoc(doc(db, "students", firebaseUser.uid), newStudent);
 
       await signOut(auth);
       setRegisterData(initialRegisterData);
@@ -339,22 +334,26 @@ function App() {
   async function handleLoginSubmit(event) {
     event.preventDefault();
 
-    const { phone, password } = loginData;
+    const cleanPhone = loginData.phone.trim();
+    const password = loginData.password;
 
-    if (!phone || !password) {
+    if (!cleanPhone || !password) {
       setLoginMessage("من فضلك اكتب رقم الهاتف وكلمة السر.");
       setLoginMessageType("error");
       return;
     }
 
-    if (!/^01[0125][0-9]{8}$/.test(phone)) {
+    if (!/^01[0125][0-9]{8}$/.test(cleanPhone)) {
       setLoginMessage("من فضلك اكتب رقم هاتف صحيح.");
       setLoginMessageType("error");
       return;
     }
 
+    setLoginMessage("جاري تسجيل الدخول...");
+    setLoginMessageType("pending");
+
     try {
-      const email = `${phone}@dars-khososy.com`;
+      const email = `${cleanPhone}@dars-khososy.com`;
 
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -366,6 +365,7 @@ function App() {
       const docSnap = await getDoc(docRef);
 
       if (!docSnap.exists()) {
+        await signOut(auth);
         setLoginMessage("بيانات الطالب غير موجودة.");
         setLoginMessageType("error");
         return;
@@ -377,10 +377,17 @@ function App() {
       };
 
       if (student.status === "pending") {
-        setLoginMessage(
-          "حسابك قيد المراجعة ولم يتم تفعيله بعد."
-        );
+        setLoginMessage("حسابك قيد المراجعة ولم يتم تفعيله بعد.");
         setLoginMessageType("pending");
+        await signOut(auth);
+        return;
+      }
+
+      if (student.status === "blocked" || student.status === "inactive") {
+        setLoginMessage(
+          "الحساب غير مفعل حاليًا. تواصل مع المدرس أو إدارة المنصة."
+        );
+        setLoginMessageType("error");
         await signOut(auth);
         return;
       }
@@ -396,6 +403,7 @@ function App() {
       setPage("studentProfile");
       setLoginMessage("");
       setLoginMessageType("");
+
       window.scrollTo(0, 0);
     } catch (error) {
       console.error(error);
@@ -406,6 +414,12 @@ function App() {
         error.code === "auth/wrong-password"
       ) {
         setLoginMessage("رقم الهاتف أو كلمة السر غير صحيحة.");
+      } else if (error.code === "auth/too-many-requests") {
+        setLoginMessage(
+          "تم إجراء محاولات تسجيل دخول كثيرة. حاول مرة أخرى بعد قليل."
+        );
+      } else if (error.code === "auth/network-request-failed") {
+        setLoginMessage("تحقق من اتصال الإنترنت وحاول مرة أخرى.");
       } else {
         setLoginMessage("حدث خطأ أثناء تسجيل الدخول.");
       }
@@ -429,6 +443,7 @@ function App() {
     setLoginMessage("");
     setLoginMessageType("");
     setPage("website");
+
     window.scrollTo(0, 0);
   }
 
@@ -443,10 +458,7 @@ function App() {
           <div className="student-session-message">
             <h2>برجاء تسجيل الدخول أولًا</h2>
 
-            <button
-              type="button"
-              onClick={openLoginPage}
-            >
+            <button type="button" onClick={openLoginPage}>
               تسجيل الدخول
             </button>
           </div>
@@ -457,16 +469,26 @@ function App() {
     const isCenterStudent =
       currentStudent.studentType === "center";
 
-    const studentTypeText =
-      isCenterStudent
-        ? "طالب سنتر"
-        : "طالب أونلاين";
+    const studentTypeText = isCenterStudent
+      ? "طالب سنتر"
+      : "طالب أونلاين";
 
-    const educationTypeText = "ثانوي عام";
-    const watchedVideos = currentStudent.watchedVideos || 0;
-    const completedExams = currentStudent.completedExams || 0;
-    const obtainedGrades = currentStudent.obtainedGrades || 0;
-    const totalGrades = currentStudent.totalGrades || 0;
+    const educationTypeText =
+      currentStudent.educationType === "عام"
+        ? "ثانوي عام"
+        : currentStudent.educationType || "ثانوي عام";
+
+    const watchedVideos =
+      Number(currentStudent.watchedVideos) || 0;
+
+    const completedExams =
+      Number(currentStudent.completedExams) || 0;
+
+    const obtainedGrades =
+      Number(currentStudent.obtainedGrades) || 0;
+
+    const totalGrades =
+      Number(currentStudent.totalGrades) || 0;
 
     const subscribedCourses = Array.isArray(
       currentStudent.subscribedCourses
@@ -501,7 +523,7 @@ function App() {
               <button
                 type="button"
                 className="student-dark-mode-btn"
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={() => setDarkMode((prev) => !prev)}
                 aria-label="تغيير وضع الألوان"
               >
                 {darkMode ? "☀️" : "🌙"}
@@ -583,7 +605,9 @@ function App() {
             <button
               type="button"
               className={`student-nav-btn ${
-                studentProfileSection === "watchDetails" ? "active" : ""
+                studentProfileSection === "watchDetails"
+                  ? "active"
+                  : ""
               }`}
               onClick={() => openStudentSection("watchDetails")}
             >
@@ -616,7 +640,9 @@ function App() {
             <button
               type="button"
               className={`student-nav-btn ${
-                studentProfileSection === "levelIndicator" ? "active" : ""
+                studentProfileSection === "levelIndicator"
+                  ? "active"
+                  : ""
               }`}
               onClick={() => openStudentSection("levelIndicator")}
             >
@@ -672,12 +698,16 @@ function App() {
                       <div className="student-data-list">
                         <p>
                           <FaPhoneAlt />
-                          <span>{currentStudent.studentPhone}</span>
+                          <span>
+                            {currentStudent.studentPhone}
+                          </span>
                         </p>
 
                         <p>
                           <FaMapMarkerAlt />
-                          <span>{currentStudent.governorate}</span>
+                          <span>
+                            {currentStudent.governorate}
+                          </span>
                         </p>
 
                         <p>
@@ -717,8 +747,11 @@ function App() {
 
                       <h3>عدد مرات مشاهدة الفيديوهات</h3>
                       <strong>{watchedVideos}</strong>
+
                       <span>
-                        {watchedVideos === 1 ? "فيديو" : "فيديوهات"}
+                        {watchedVideos === 1
+                          ? "فيديو"
+                          : "فيديوهات"}
                       </span>
                     </article>
 
@@ -729,8 +762,11 @@ function App() {
 
                       <h3>عدد الاختبارات التي خلصتها</h3>
                       <strong>{completedExams}</strong>
+
                       <span>
-                        {completedExams === 1 ? "اختبار" : "اختبارات"}
+                        {completedExams === 1
+                          ? "اختبار"
+                          : "اختبارات"}
                       </span>
                     </article>
 
@@ -758,7 +794,10 @@ function App() {
                         <div
                           className="student-grades-progress-fill"
                           style={{
-                            width: `${Math.min(gradesPercentage, 100)}%`,
+                            width: `${Math.min(
+                              Math.max(gradesPercentage, 0),
+                              100
+                            )}%`,
                           }}
                         />
                       </div>
@@ -784,8 +823,8 @@ function App() {
                   <h2>مافيش كورسات هنا لسه!</h2>
 
                   <p>
-                    أول ما يتم إضافة أي كورس إلى حسابك هتلاقيه ظاهر هنا وتقدر تبدأ
-                    المذاكرة فورًا.
+                    أول ما يتم إضافة أي كورس إلى حسابك هتلاقيه
+                    ظاهر هنا وتقدر تبدأ المذاكرة فورًا.
                   </p>
                 </div>
               ) : (
@@ -794,7 +833,7 @@ function App() {
                     const courseId =
                       course.id ||
                       course.courseId ||
-                      `${course.title}-${index}`;
+                      `${course.title || "course"}-${index}`;
 
                     const courseProgress = Math.min(
                       Math.max(Number(course.progress) || 0, 0),
@@ -823,7 +862,8 @@ function App() {
                             className="student-course-image"
                             onError={(event) => {
                               event.currentTarget.onerror = null;
-                              event.currentTarget.src = secondFreeCourse;
+                              event.currentTarget.src =
+                                secondFreeCourse;
                             }}
                           />
 
@@ -834,10 +874,14 @@ function App() {
 
                         <div className="student-course-content">
                           <span className="student-course-grade">
-                            {course.grade || currentStudent.grade}
+                            {course.grade ||
+                              currentStudent.grade}
                           </span>
 
-                          <h2>{course.title || "كورس اللغة العربية"}</h2>
+                          <h2>
+                            {course.title ||
+                              "كورس اللغة العربية"}
+                          </h2>
 
                           <p>
                             {course.description ||
@@ -941,7 +985,7 @@ function App() {
         <header className="site-header login-header">
           <button
             type="button"
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() => setDarkMode((prev) => !prev)}
             className="dark-btn"
           >
             {darkMode ? "☀️" : "🌙"}
@@ -962,6 +1006,8 @@ function App() {
             onClick={() => {
               setPage("website");
               setLoginMessage("");
+              setLoginMessageType("");
+              setShowForgotPassword(false);
               window.scrollTo(0, 0);
             }}
             className="back-btn"
@@ -983,6 +1029,7 @@ function App() {
             <form
               className="login-form"
               onSubmit={handleLoginSubmit}
+              noValidate
             >
               <div className="login-input-wrapper">
                 <input
@@ -999,7 +1046,9 @@ function App() {
 
               <div className="login-input-wrapper password-input-wrapper">
                 <input
-                  type={showLoginPassword ? "text" : "password"}
+                  type={
+                    showLoginPassword ? "text" : "password"
+                  }
                   name="password"
                   value={loginData.password}
                   onChange={handleLoginChange}
@@ -1011,7 +1060,7 @@ function App() {
                   type="button"
                   className="show-password-btn"
                   onClick={() =>
-                    setShowLoginPassword(!showLoginPassword)
+                    setShowLoginPassword((prev) => !prev)
                   }
                   aria-label={
                     showLoginPassword
@@ -1019,7 +1068,11 @@ function App() {
                       : "إظهار كلمة السر"
                   }
                 >
-                  {showLoginPassword ? <FaEye /> : <FaEyeSlash />}
+                  {showLoginPassword ? (
+                    <FaEye />
+                  ) : (
+                    <FaEyeSlash />
+                  )}
                 </button>
               </div>
 
@@ -1040,15 +1093,21 @@ function App() {
                   className={`login-result-message ${loginMessageType}`}
                 >
                   {loginMessageType === "success" && (
-                    <span className="login-result-icon">✅</span>
+                    <span className="login-result-icon">
+                      ✅
+                    </span>
                   )}
 
                   {loginMessageType === "pending" && (
-                    <span className="login-result-icon">ℹ️</span>
+                    <span className="login-result-icon">
+                      ℹ️
+                    </span>
                   )}
 
                   {loginMessageType === "error" && (
-                    <span className="login-result-icon">⚠️</span>
+                    <span className="login-result-icon">
+                      ⚠️
+                    </span>
                   )}
 
                   <p>{loginMessage}</p>
@@ -1099,6 +1158,7 @@ function App() {
                   event.preventDefault();
 
                   const form = event.currentTarget;
+
                   const fullName =
                     form.elements.fullName.value.trim();
 
@@ -1112,7 +1172,11 @@ function App() {
                     ".forgot-password-validation-message"
                   );
 
-                  if (!fullName || !studentPhone || !parentPhone) {
+                  if (
+                    !fullName ||
+                    !studentPhone ||
+                    !parentPhone
+                  ) {
                     messageBox.textContent =
                       "⚠️ من فضلك اكتب جميع البيانات المطلوبة.";
 
@@ -1135,7 +1199,9 @@ function App() {
                   const egyptianPhoneRegex =
                     /^01[0125][0-9]{8}$/;
 
-                  if (!egyptianPhoneRegex.test(studentPhone)) {
+                  if (
+                    !egyptianPhoneRegex.test(studentPhone)
+                  ) {
                     messageBox.textContent =
                       "⚠️ رقم هاتف الطالب غير صحيح، لازم يكون 11 رقم.";
 
@@ -1145,7 +1211,9 @@ function App() {
                     return;
                   }
 
-                  if (!egyptianPhoneRegex.test(parentPhone)) {
+                  if (
+                    !egyptianPhoneRegex.test(parentPhone)
+                  ) {
                     messageBox.textContent =
                       "⚠️ رقم هاتف ولي الأمر غير صحيح، لازم يكون 11 رقم.";
 
@@ -1234,7 +1302,7 @@ function App() {
         <header className="site-header register-header">
           <button
             type="button"
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() => setDarkMode((prev) => !prev)}
             className="dark-btn"
           >
             {darkMode ? "☀️" : "🌙"}
@@ -1255,6 +1323,8 @@ function App() {
             onClick={() => {
               setPage("website");
               setRegisterMessage("");
+              setRegisterMessageType("");
+              setShowInstructions(false);
               window.scrollTo(0, 0);
             }}
             className="back-btn"
@@ -1273,7 +1343,8 @@ function App() {
               <h1>إنشاء حساب جديد</h1>
 
               <p>
-                اكتب بياناتك بشكل صحيح وحدد هل أنت طالب سنتر أم طالب أونلاين.
+                اكتب بياناتك بشكل صحيح وحدد هل أنت طالب
+                سنتر أم طالب أونلاين.
               </p>
             </div>
 
@@ -1329,26 +1400,66 @@ function App() {
                     value={registerData.governorate}
                     onChange={handleRegisterChange}
                   >
-                    <option value="">اختر محافظتك</option>
-                    <option value="القاهرة">القاهرة</option>
-                    <option value="الجيزة">الجيزة</option>
-                    <option value="القليوبية">القليوبية</option>
-                    <option value="الإسكندرية">الإسكندرية</option>
-                    <option value="الشرقية">الشرقية</option>
-                    <option value="الدقهلية">الدقهلية</option>
-                    <option value="الغربية">الغربية</option>
-                    <option value="المنوفية">المنوفية</option>
-                    <option value="البحيرة">البحيرة</option>
-                    <option value="كفر الشيخ">كفر الشيخ</option>
-                    <option value="الفيوم">الفيوم</option>
-                    <option value="بني سويف">بني سويف</option>
-                    <option value="المنيا">المنيا</option>
-                    <option value="أسيوط">أسيوط</option>
-                    <option value="سوهاج">سوهاج</option>
-                    <option value="قنا">قنا</option>
-                    <option value="الأقصر">الأقصر</option>
-                    <option value="أسوان">أسوان</option>
-                    <option value="أخرى">محافظة أخرى</option>
+                    <option value="">
+                      اختر محافظتك
+                    </option>
+                    <option value="القاهرة">
+                      القاهرة
+                    </option>
+                    <option value="الجيزة">
+                      الجيزة
+                    </option>
+                    <option value="القليوبية">
+                      القليوبية
+                    </option>
+                    <option value="الإسكندرية">
+                      الإسكندرية
+                    </option>
+                    <option value="الشرقية">
+                      الشرقية
+                    </option>
+                    <option value="الدقهلية">
+                      الدقهلية
+                    </option>
+                    <option value="الغربية">
+                      الغربية
+                    </option>
+                    <option value="المنوفية">
+                      المنوفية
+                    </option>
+                    <option value="البحيرة">
+                      البحيرة
+                    </option>
+                    <option value="كفر الشيخ">
+                      كفر الشيخ
+                    </option>
+                    <option value="الفيوم">
+                      الفيوم
+                    </option>
+                    <option value="بني سويف">
+                      بني سويف
+                    </option>
+                    <option value="المنيا">
+                      المنيا
+                    </option>
+                    <option value="أسيوط">
+                      أسيوط
+                    </option>
+                    <option value="سوهاج">
+                      سوهاج
+                    </option>
+                    <option value="قنا">
+                      قنا
+                    </option>
+                    <option value="الأقصر">
+                      الأقصر
+                    </option>
+                    <option value="أسوان">
+                      أسوان
+                    </option>
+                    <option value="أخرى">
+                      محافظة أخرى
+                    </option>
                   </select>
                 </div>
 
@@ -1359,10 +1470,18 @@ function App() {
                     value={registerData.grade}
                     onChange={handleRegisterChange}
                   >
-                    <option value="">اختر السنة الدراسية</option>
-                    <option value="الأول الثانوي">الأول الثانوي</option>
-                    <option value="الثاني الثانوي">الثاني الثانوي</option>
-                    <option value="الثالث الثانوي">الثالث الثانوي</option>
+                    <option value="">
+                      اختر السنة الدراسية
+                    </option>
+                    <option value="الأول الثانوي">
+                      الأول الثانوي
+                    </option>
+                    <option value="الثاني الثانوي">
+                      الثاني الثانوي
+                    </option>
+                    <option value="الثالث الثانوي">
+                      الثالث الثانوي
+                    </option>
                   </select>
                 </div>
 
@@ -1373,8 +1492,12 @@ function App() {
                     value={registerData.educationType}
                     onChange={handleRegisterChange}
                   >
-                    <option value="">اختر نوع التعليم</option>
-                    <option value="عام">ثانوي عام</option>
+                    <option value="">
+                      اختر نوع التعليم
+                    </option>
+                    <option value="عام">
+                      ثانوي عام
+                    </option>
                   </select>
                 </div>
 
@@ -1385,9 +1508,15 @@ function App() {
                     value={registerData.studentType}
                     onChange={handleRegisterChange}
                   >
-                    <option value="">اختر نوع الطالب</option>
-                    <option value="center">طالب سنتر</option>
-                    <option value="online">طالب أونلاين</option>
+                    <option value="">
+                      اختر نوع الطالب
+                    </option>
+                    <option value="center">
+                      طالب سنتر
+                    </option>
+                    <option value="online">
+                      طالب أونلاين
+                    </option>
                   </select>
                 </div>
 
@@ -1421,15 +1550,21 @@ function App() {
                   className={`register-result-message ${registerMessageType}`}
                 >
                   {registerMessageType === "success" && (
-                    <span className="result-icon">✅</span>
+                    <span className="result-icon">
+                      ✅
+                    </span>
                   )}
 
                   {registerMessageType === "pending" && (
-                    <span className="result-icon">⏳</span>
+                    <span className="result-icon">
+                      ⏳
+                    </span>
                   )}
 
                   {registerMessageType === "error" && (
-                    <span className="result-icon">⚠️</span>
+                    <span className="result-icon">
+                      ⚠️
+                    </span>
                   )}
 
                   <p>{registerMessage}</p>
@@ -1460,14 +1595,17 @@ function App() {
         {showInstructions && (
           <div className="instructions-overlay">
             <div className="instructions-modal">
-              <div className="information-icon">i</div>
+              <div className="information-icon">
+                i
+              </div>
 
               <h2>تعليمات هامة</h2>
 
               <div className="instructions-list">
                 <p>
                   <span>1</span>
-                  يجب كتابة بيانات صحيحة خاصة رقم الطالب ورقم ولي الأمر.
+                  يجب كتابة بيانات صحيحة خاصة رقم الطالب
+                  ورقم ولي الأمر.
                 </p>
 
                 <p>
@@ -1477,12 +1615,14 @@ function App() {
 
                 <p>
                   <span>3</span>
-                  اختر نوع الطالب بشكل صحيح: طالب سنتر أو طالب أونلاين.
+                  اختر نوع الطالب بشكل صحيح: طالب سنتر أو
+                  طالب أونلاين.
                 </p>
 
                 <p>
                   <span>4</span>
-                  يجب الالتزام بمشاهدة الفيديوهات وحل الواجب والامتحانات.
+                  يجب الالتزام بمشاهدة الفيديوهات وحل الواجب
+                  والامتحانات.
                 </p>
 
                 <p>
@@ -1498,7 +1638,9 @@ function App() {
 
               <button
                 type="button"
-                onClick={() => setShowInstructions(false)}
+                onClick={() =>
+                  setShowInstructions(false)
+                }
                 className="instructions-confirm-btn"
               >
                 حسنًا
@@ -1522,13 +1664,15 @@ function App() {
         <header className="site-header">
           <button
             type="button"
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() => setDarkMode((prev) => !prev)}
             className="dark-btn"
           >
             {darkMode ? "☀️" : "🌙"}
           </button>
 
-          <div className="site-logo">درس خصوصي</div>
+          <div className="site-logo">
+            درس خصوصي
+          </div>
 
           <div className="auth-buttons">
             <button
@@ -1550,7 +1694,10 @@ function App() {
 
           <button
             type="button"
-            onClick={() => setPage("links")}
+            onClick={() => {
+              setPage("links");
+              window.scrollTo(0, 0);
+            }}
             className="back-btn"
           >
             رجوع
@@ -1580,13 +1727,16 @@ function App() {
           <h2>رحلتك نحو التفوق تبدأ من هنا</h2>
 
           <p>
-            منصة تعليمية متكاملة تقدم شرحًا مبسطًا، واختبارات دورية، ومحتوى
-            احترافي يساعدك على إتقان اللغة العربية.
+            منصة تعليمية متكاملة تقدم شرحًا مبسطًا،
+            واختبارات دورية، ومحتوى احترافي يساعدك على
+            إتقان اللغة العربية.
           </p>
         </section>
 
         <section className="features-section">
-          <h2 className="reveal-up delay-1">ليه تشترك معانا؟</h2>
+          <h2 className="reveal-up delay-1">
+            ليه تشترك معانا؟
+          </h2>
 
           <div className="features-cards">
             <div className="feature-card reveal-up delay-2">
@@ -1616,7 +1766,8 @@ function App() {
                 <h3>تنظيم الدروس والوحدات</h3>
 
                 <p>
-                  محتوى مرتب ومقسم بطريقة سهلة تساعدك تذاكر بدون تشتت.
+                  محتوى مرتب ومقسم بطريقة سهلة تساعدك تذاكر
+                  بدون تشتت.
                 </p>
               </div>
 
@@ -1624,7 +1775,8 @@ function App() {
                 <h3>شرح مبسط وواضح</h3>
 
                 <p>
-                  فيديوهات وشرح سلس يخليك تفهم القواعد والتطبيقات بسهولة.
+                  فيديوهات وشرح سلس يخليك تفهم القواعد
+                  والتطبيقات بسهولة.
                 </p>
               </div>
 
@@ -1632,7 +1784,8 @@ function App() {
                 <h3>اختبارات دورية</h3>
 
                 <p>
-                  تقييم مستمر بعد كل جزء علشان تعرف مستواك وتتطور بسرعة.
+                  تقييم مستمر بعد كل جزء علشان تعرف مستواك
+                  وتتطور بسرعة.
                 </p>
               </div>
 
@@ -1640,7 +1793,8 @@ function App() {
                 <h3>مراجعات ومحتوى احترافي</h3>
 
                 <p>
-                  مراجعات منظمة ومحتوى يساعدك تدخل الامتحان بثقة.
+                  مراجعات منظمة ومحتوى يساعدك تدخل الامتحان
+                  بثقة.
                 </p>
               </div>
             </div>
@@ -1660,7 +1814,8 @@ function App() {
             <h2>اختر مرحلتك الدراسية</h2>
 
             <p>
-              اختر الصف المناسب وابدأ رحلتك مع الشرح والاختبارات والمراجعات.
+              اختر الصف المناسب وابدأ رحلتك مع الشرح
+              والاختبارات والمراجعات.
             </p>
           </div>
 
@@ -1681,7 +1836,8 @@ function App() {
                 <h3>محتوى الأول الثانوي</h3>
 
                 <p>
-                  دروس منظمة، تدريبات، اختبارات ومراجعات تساعدك على التفوق.
+                  دروس منظمة، تدريبات، اختبارات ومراجعات
+                  تساعدك على التفوق.
                 </p>
 
                 <button
@@ -1710,7 +1866,8 @@ function App() {
                 <h3>محتوى الثاني الثانوي</h3>
 
                 <p>
-                  شرح مبسط، تدريبات متنوعة واختبارات تساعدك تتابع مستواك.
+                  شرح مبسط، تدريبات متنوعة واختبارات تساعدك
+                  تتابع مستواك.
                 </p>
 
                 <button
@@ -1739,7 +1896,8 @@ function App() {
                 <h3>محتوى الثالث الثانوي</h3>
 
                 <p>
-                  مراجعات شاملة، اختبارات ونماذج امتحانات تساعدك تحقق هدفك.
+                  مراجعات شاملة، اختبارات ونماذج امتحانات
+                  تساعدك تحقق هدفك.
                 </p>
 
                 <button
@@ -1876,9 +2034,7 @@ function App() {
           </a>
         </div>
 
-        <footer>
-          ©️ 2026 درس خصوصي
-        </footer>
+        <footer>©️ 2026 درس خصوصي</footer>
       </main>
     </div>
   );
