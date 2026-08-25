@@ -33,10 +33,9 @@ const HOMEWORK_VIDEO_ID = "qa2X7xgsay0";
 
 const CANCELLED_QUESTIONS = [
   7,
+  17,
   18,
   19,
-  20,
-  23,
   24,
   26,
   27,
@@ -56,14 +55,15 @@ const CORRECT_ANSWERS = {
   10: 2,
   11: 2,
   12: 0,
-  13: 0,
+  13: 1,
   14: 1,
   15: 3,
   16: 1,
-  17: 2,
 
+  20: 0,
   21: 1,
   22: 1,
+  23: 3,
 
   25: 2,
 
@@ -114,12 +114,6 @@ const HOMEWORK_QUESTIONS = Array.from(
 function Homework({
   currentStudent,
 }) {
-  /*
-    الشاشة الرئيسية
-    homework = فتح الواجب / النتيجة
-    video = فتح الفيديو
-    null = الكروت الرئيسية
-  */
   const [openedSection, setOpenedSection] =
     useState(null);
 
@@ -185,9 +179,6 @@ function Homework({
         )
       : 0;
 
-  /*
-    تحميل المحاولة السابقة
-  */
   useEffect(() => {
     async function loadHomeworkAttempt() {
       if (
@@ -493,9 +484,6 @@ function Homework({
     });
   }
 
-  /*
-    تسليم الواجب
-  */
   async function submitHomework() {
     if (
       questions.length === 0
@@ -785,10 +773,6 @@ function Homework({
 
       setSubmitted(true);
 
-      /*
-        بعد التسليم نخليه
-        داخل النتيجة، مش الفيديو.
-      */
       setOpenedSection("homework");
 
       window.scrollTo(0, 0);
@@ -822,9 +806,6 @@ function Homework({
     }
   }
 
-  /*
-    غير مسموح
-  */
   if (!isAllowedStudent) {
     return (
       <section className="homework-page">
@@ -845,9 +826,6 @@ function Homework({
     );
   }
 
-  /*
-    تحميل
-  */
   if (isLoadingAttempt) {
     return (
       <section className="homework-page">
@@ -860,11 +838,6 @@ function Homework({
     );
   }
 
-  /*
-    ============================
-    الصفحة الرئيسية لتسليم الواجب
-    ============================
-  */
   if (openedSection === null) {
     return (
       <section className="homework-page homework-dashboard">
@@ -879,7 +852,6 @@ function Homework({
           </p>
         </div>
 
-        {/* كارت الواجب */}
         <button
           type="button"
           className={`homework-main-card ${
@@ -936,7 +908,6 @@ function Homework({
           </div>
         </button>
 
-        {/* شريط الفيديو */}
         <button
           type="button"
           className={`homework-video-card ${
@@ -989,17 +960,9 @@ function Homework({
     );
   }
 
-  /*
-    ============================
-    فتح الفيديو
-    ============================
-  */
   if (
     openedSection === "video"
   ) {
-    /*
-      حماية إضافية
-    */
     if (!submitted) {
       return (
         <section className="homework-page">
@@ -1087,11 +1050,6 @@ function Homework({
     );
   }
 
-  /*
-    ============================
-    نتيجة الواجب
-    ============================
-  */
   if (
     openedSection === "homework" &&
     submitted &&
@@ -1181,22 +1139,10 @@ function Homework({
               )
             )}
         </div>
-
-        {/*
-          مهم:
-          الفيديو مش ظاهر هنا.
-          الطالب يرجع للصفحة
-          ويفتح كارت الفيديو بنفسه.
-        */}
       </section>
     );
   }
 
-  /*
-    ============================
-    شاشة حل الواجب
-    ============================
-  */
   return (
     <section className="homework-page">
       <button
