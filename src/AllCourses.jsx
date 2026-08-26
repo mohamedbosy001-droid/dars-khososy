@@ -1710,79 +1710,100 @@ function AllCourses({
 
     }
 
-    const codeCourseId =
+    /*
+      كود الحصة المرن لا يكون مربوطًا
+      بكورس معين وقت الإنشاء.
+      يكفي أن تكون السنة الدراسية صحيحة،
+      وبعدها يتم ربطه بالكورس والمحاضرة
+      عند الاستخدام.
+    */
+    const isFlexibleLessonCode =
 
-      normalizeText(
+      codeData.accessType ===
 
-        codeData.courseId
+        "lesson" &&
 
-      );
+      codeData.flexibleLesson ===
 
-    const currentCourseId =
+        true;
 
-      normalizeText(
+    if (!isFlexibleLessonCode) {
 
-        course.id
+      const codeCourseId =
 
-      );
+        normalizeText(
 
-    const codeCourseTitle =
+          codeData.courseId
 
-      normalizeText(
+        );
 
-        codeData.courseTitle
+      const currentCourseId =
 
-      );
+        normalizeText(
 
-    const currentCourseTitle =
+          course.id
 
-      normalizeText(
+        );
 
-        course.title
+      const codeCourseTitle =
 
-      );
+        normalizeText(
 
-    const sameCourseId =
+          codeData.courseTitle
 
-      Boolean(
+        );
 
-        codeCourseId &&
+      const currentCourseTitle =
 
-          currentCourseId &&
+        normalizeText(
 
-          codeCourseId ===
+          course.title
 
-            currentCourseId
+        );
 
-      );
+      const sameCourseId =
 
-    const sameCourseTitle =
+        Boolean(
 
-      Boolean(
+          codeCourseId &&
 
-        codeCourseTitle &&
+            currentCourseId &&
 
-          currentCourseTitle &&
+            codeCourseId ===
 
-          codeCourseTitle ===
+              currentCourseId
 
-            currentCourseTitle
+        );
 
-      );
+      const sameCourseTitle =
 
-    if (
+        Boolean(
 
-      !sameCourseId &&
+          codeCourseTitle &&
 
-      !sameCourseTitle
+            currentCourseTitle &&
 
-    ) {
+            codeCourseTitle ===
 
-      throw new Error(
+              currentCourseTitle
 
-        "WRONG_COURSE"
+        );
 
-      );
+      if (
+
+        !sameCourseId &&
+
+        !sameCourseTitle
+
+      ) {
+
+        throw new Error(
+
+          "WRONG_COURSE"
+
+        );
+
+      }
 
     }
 
@@ -2538,47 +2559,74 @@ function AllCourses({
 
           }
 
-          /*
-            كود الحصة نوعان:
-
-            1) كود قديم مربوط بمحاضرة محددة:
-               لو فيه lessonId أو lessonIds
-               نسمح له بفتح المحاضرات المحددة فقط.
-
-            2) كود حصة مرن جديد:
-               لو مفيش lessonId ولا lessonIds
-               يفتح المحاضرة التي كتب الطالب
-               الكود بجانبها، سواء الأولى أو
-               الثانية أو الثالثة... إلخ.
-          */
-          const allowedCodeLessons = [];
-
-          if (codeData.lessonId) {
-            allowedCodeLessons.push(
-              codeData.lessonId
-            );
-          }
-
-          if (
-            Array.isArray(codeData.lessonIds)
-          ) {
-            allowedCodeLessons.push(
-              ...codeData.lessonIds
-            );
-          }
-
           const isFlexibleLessonCode =
-            allowedCodeLessons.length === 0;
 
-          if (
-            !isFlexibleLessonCode &&
-            !allowedCodeLessons.includes(
-              lesson.id
-            )
-          ) {
-            throw new Error(
-              "WRONG_LESSON"
-            );
+            codeData.flexibleLesson ===
+
+            true;
+
+          /*
+            الأكواد القديمة المرتبطة بمحاضرة
+            محددة تظل تعمل كما هي.
+            أما الكود المرن فيأخذ المحاضرة
+            التي كتب الطالب الكود بجانبها.
+          */
+          if (!isFlexibleLessonCode) {
+
+            const allowedCodeLessons =
+
+              [];
+
+            if (
+
+              codeData.lessonId
+
+            ) {
+
+              allowedCodeLessons.push(
+
+                codeData.lessonId
+
+              );
+
+            }
+
+            if (
+
+              Array.isArray(
+
+                codeData.lessonIds
+
+              )
+
+            ) {
+
+              allowedCodeLessons.push(
+
+                ...codeData.lessonIds
+
+              );
+
+            }
+
+            if (
+
+              !allowedCodeLessons.includes(
+
+                lesson.id
+
+              )
+
+            ) {
+
+              throw new Error(
+
+                "WRONG_LESSON"
+
+              );
+
+            }
+
           }
 
           const now =
@@ -2754,6 +2802,30 @@ function AllCourses({
               usedAt:
 
                 now,
+
+              /*
+                نسجل أين تم استخدام كود الحصة
+                حتى لو كان مرنًا وقت الإنشاء.
+              */
+              assignedCourseId:
+
+                course.id,
+
+              assignedCourseTitle:
+
+                course.title ||
+
+                "",
+
+              assignedLessonId:
+
+                lesson.id,
+
+              assignedLessonTitle:
+
+                lesson.title ||
+
+                lesson.id,
 
             }
 
