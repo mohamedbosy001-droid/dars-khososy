@@ -1712,98 +1712,91 @@ function AllCourses({
 
     /*
       كود الحصة المرن لا يكون مربوطًا
-      بكورس معين وقت الإنشاء.
-      يكفي أن تكون السنة الدراسية صحيحة،
-      وبعدها يتم ربطه بالكورس والمحاضرة
-      عند الاستخدام.
+      بكورس محدد وقت الإنشاء.
+      يكفي أن تكون السنة صحيحة،
+      ثم يتربط بالكورس والمحاضرة
+      وقت استخدام الطالب له.
     */
-    const isFlexibleLessonCode =
+    if (
+      codeData.accessType === "lesson" &&
+      codeData.flexibleLesson === true
+    ) {
+      return;
+    }
 
-      codeData.accessType ===
+    const codeCourseId =
 
-        "lesson" &&
+      normalizeText(
 
-      codeData.flexibleLesson ===
+        codeData.courseId
 
-        true;
+      );
 
-    if (!isFlexibleLessonCode) {
+    const currentCourseId =
 
-      const codeCourseId =
+      normalizeText(
 
-        normalizeText(
+        course.id
 
-          codeData.courseId
+      );
 
-        );
+    const codeCourseTitle =
 
-      const currentCourseId =
+      normalizeText(
 
-        normalizeText(
+        codeData.courseTitle
 
-          course.id
+      );
 
-        );
+    const currentCourseTitle =
 
-      const codeCourseTitle =
+      normalizeText(
 
-        normalizeText(
+        course.title
 
-          codeData.courseTitle
+      );
 
-        );
+    const sameCourseId =
 
-      const currentCourseTitle =
+      Boolean(
 
-        normalizeText(
+        codeCourseId &&
 
-          course.title
+          currentCourseId &&
 
-        );
+          codeCourseId ===
 
-      const sameCourseId =
+            currentCourseId
 
-        Boolean(
+      );
 
-          codeCourseId &&
+    const sameCourseTitle =
 
-            currentCourseId &&
+      Boolean(
 
-            codeCourseId ===
+        codeCourseTitle &&
 
-              currentCourseId
+          currentCourseTitle &&
 
-        );
+          codeCourseTitle ===
 
-      const sameCourseTitle =
+            currentCourseTitle
 
-        Boolean(
+      );
 
-          codeCourseTitle &&
+    if (
 
-            currentCourseTitle &&
+      !sameCourseId &&
 
-            codeCourseTitle ===
+      !sameCourseTitle
 
-              currentCourseTitle
+    ) {
 
-        );
+      throw new Error(
 
-      if (
+        "WRONG_COURSE"
 
-        !sameCourseId &&
-
-        !sameCourseTitle
-
-      ) {
-
-        throw new Error(
-
-          "WRONG_COURSE"
-
-        );
-
-      }
+      );
 
     }
 
@@ -2559,74 +2552,42 @@ function AllCourses({
 
           }
 
-          const isFlexibleLessonCode =
-
-            codeData.flexibleLesson ===
-
-            true;
-
           /*
-            الأكواد القديمة المرتبطة بمحاضرة
-            محددة تظل تعمل كما هي.
-            أما الكود المرن فيأخذ المحاضرة
-            التي كتب الطالب الكود بجانبها.
+            الأكواد القديمة قد تكون مربوطة
+            بمحاضرة محددة. نحافظ عليها.
+
+            أما الكود المرن flexibleLesson
+            فيفتح المحاضرة التي وضع الطالب
+            الكود بجانبها، ثم يُستخدم مرة واحدة.
           */
-          if (!isFlexibleLessonCode) {
+          if (codeData.flexibleLesson !== true) {
+            const allowedCodeLessons = [];
 
-            const allowedCodeLessons =
-
-              [];
-
-            if (
-
-              codeData.lessonId
-
-            ) {
-
+            if (codeData.lessonId) {
               allowedCodeLessons.push(
-
                 codeData.lessonId
-
               );
-
             }
 
             if (
-
               Array.isArray(
-
                 codeData.lessonIds
-
               )
-
             ) {
-
               allowedCodeLessons.push(
-
                 ...codeData.lessonIds
-
               );
-
             }
 
             if (
-
               !allowedCodeLessons.includes(
-
                 lesson.id
-
               )
-
             ) {
-
               throw new Error(
-
                 "WRONG_LESSON"
-
               );
-
             }
-
           }
 
           const now =
@@ -2804,28 +2765,20 @@ function AllCourses({
                 now,
 
               /*
-                نسجل أين تم استخدام كود الحصة
-                حتى لو كان مرنًا وقت الإنشاء.
+                تسجيل المكان الذي استُخدم
+                فيه كود الحصة المرن.
               */
               assignedCourseId:
-
                 course.id,
 
               assignedCourseTitle:
-
-                course.title ||
-
-                "",
+                course.title || null,
 
               assignedLessonId:
-
                 lesson.id,
 
               assignedLessonTitle:
-
-                lesson.title ||
-
-                lesson.id,
+                lesson.title || null,
 
             }
 
