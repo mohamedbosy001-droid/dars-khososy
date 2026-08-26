@@ -6,6 +6,10 @@
   color: #4a2f1f;
 }
 
+/* =========================
+   زر الرجوع
+========================= */
+
 .course-content-back-btn {
   margin-bottom: 24px;
   padding: 12px 18px;
@@ -21,10 +25,14 @@
   cursor: pointer;
 }
 
+/* =========================
+   هيدر الكورس
+========================= */
+
 .course-content-header {
   width: 100%;
   min-height: 130px;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   padding: 26px 30px;
   border: 1px solid #8f6644;
   border-radius: 20px;
@@ -67,14 +75,18 @@
   line-height: 1.7;
 }
 
+/* =========================
+   عنوان المحاضرة
+========================= */
+
 .course-content-section-title {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .course-content-section-title h2 {
   margin: 0 0 7px;
   color: #4a2f1f;
-  font-size: 27px;
+  font-size: 25px;
 }
 
 .course-content-section-title p {
@@ -82,46 +94,64 @@
   color: #85664e;
 }
 
+/* =========================
+   حاوية محتويات المحاضرة
+========================= */
+
 .course-content-items {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
+
+/* =========================
+   الكروت داخل المحاضرة
+========================= */
 
 .course-content-card {
   width: 100%;
-  min-height: 105px;
-  padding: 20px;
+  min-height: 82px;
+  padding: 16px 18px;
   border: 1px solid #dfc5a3;
-  border-radius: 17px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 15px;
   text-align: right;
   color: inherit;
   background: #fffaf3;
-  box-shadow: 0 8px 20px
-    rgba(74, 47, 31, 0.08);
+  box-shadow: 0 5px 14px
+    rgba(74, 47, 31, 0.07);
   cursor: pointer;
   transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .course-content-card:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px
-    rgba(74, 47, 31, 0.13);
+  transform: translateY(-1px);
+  border-color: #bc895d;
+  box-shadow: 0 9px 20px
+    rgba(74, 47, 31, 0.12);
 }
 
 .course-content-card:disabled {
   cursor: not-allowed;
 }
 
+.course-content-card.locked {
+  opacity: 0.65;
+}
+
+/* =========================
+   أيقونة الكارت
+========================= */
+
 .course-content-card-icon {
-  width: 55px;
-  height: 55px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
-  border-radius: 15px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   color: #f7d8a6;
@@ -130,39 +160,44 @@
     #4a2f1f,
     #795439
   );
-  font-size: 22px;
+  font-size: 20px;
 }
+
+/* =========================
+   نص الكارت
+========================= */
 
 .course-content-card-info {
   flex: 1;
 }
 
 .course-content-card-info h3 {
-  margin: 0 0 7px;
+  margin: 0 0 5px;
   color: #4a2f1f;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .course-content-card-info p {
   margin: 0;
   color: #876a53;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .course-content-card-info span {
-  margin-top: 9px;
+  margin-top: 7px;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   color: #a86e30;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
 }
 
 .course-content-completed-icon {
   flex-shrink: 0;
   color: #28a963;
-  font-size: 27px;
+  font-size: 25px;
 }
 
 .exam-card.locked {
@@ -173,6 +208,10 @@
 .exam-card.available {
   border-color: #c89a5e;
 }
+
+/* =========================
+   حالة عدم وجود محتوى
+========================= */
 
 .course-content-empty {
   max-width: 650px;
@@ -194,6 +233,10 @@
   cursor: pointer;
 }
 
+/* =========================
+   الوضع الداكن
+========================= */
+
 .dark-student-profile-page
   .course-content-page {
   color: #f7ead9;
@@ -202,7 +245,7 @@
 .dark-student-profile-page
   .course-content-back-btn {
   color: #ffd9a1;
-  background: #34261d;
+  background: #2a1f19;
   border-color: #7d5b40;
 }
 
@@ -210,10 +253,10 @@
   .course-content-header {
   background: linear-gradient(
     135deg,
-    #2b1b13,
-    #4f3424
+    #241813,
+    #4a3022
   );
-  border-color: #7d5b40;
+  border-color: #6c4934;
 }
 
 .dark-student-profile-page
@@ -226,10 +269,105 @@
   color: #d5bea6;
 }
 
+/* =========================
+   المحاضرات كـ Accordion
+   قريب من الصورة
+========================= */
+
+.dark-student-profile-page
+  .course-content-page
+  > div[style*="background: rgb(255, 255, 255)"] {
+  background: #1f1713 !important;
+  border-color: #513726 !important;
+  box-shadow: 0 8px 22px
+    rgba(0, 0, 0, 0.22) !important;
+}
+
+/*
+  زر اسم المحاضرة
+*/
+.dark-student-profile-page
+  .course-content-page
+  button[style*="width: 100%"][style*="justify-content: space-between"] {
+  background: linear-gradient(
+    90deg,
+    #261914,
+    #352219
+  ) !important;
+  color: #f8eadb !important;
+  border-bottom: 1px solid
+    rgba(215, 171, 119, 0.12) !important;
+}
+
+.dark-student-profile-page
+  .course-content-page
+  button[style*="justify-content: space-between"]
+  h2 {
+  color: #fff4e4 !important;
+  font-size: 22px !important;
+}
+
+.dark-student-profile-page
+  .course-content-page
+  button[style*="justify-content: space-between"]:hover {
+  background: linear-gradient(
+    90deg,
+    #2e1d16,
+    #43291d
+  ) !important;
+}
+
+/*
+  الجزء الداخلي بعد فتح المحاضرة
+*/
+.dark-student-profile-page
+  .course-content-page
+  div[style*="border-top: 1px solid"] {
+  background: #18120f !important;
+  border-top-color: #4c3426 !important;
+}
+
+/*
+  خانة تفعيل المحاضرة
+*/
+.dark-student-profile-page
+  .course-content-page
+  div[style*="background: rgb(248, 243, 237)"] {
+  background: #241a15 !important;
+  border-color: #563b2b !important;
+}
+
+.dark-student-profile-page
+  .course-content-page
+  input {
+  background: #16100d !important;
+  color: #fff0df !important;
+  -webkit-text-fill-color: #fff0df !important;
+  caret-color: #fff0df !important;
+  border-color: #6d4a36 !important;
+}
+
+.dark-student-profile-page
+  .course-content-page
+  input::placeholder {
+  color: #a58d79 !important;
+}
+
+/* =========================
+   كروت المحتوى داخليًا
+========================= */
+
 .dark-student-profile-page
   .course-content-card {
-  background: #34261d;
-  border-color: #6b4b34;
+  background: #251a15;
+  border-color: #51392b;
+  box-shadow: none;
+}
+
+.dark-student-profile-page
+  .course-content-card:hover:not(:disabled) {
+  border-color: #95663f;
+  background: #2d1f18;
 }
 
 .dark-student-profile-page
@@ -239,48 +377,132 @@
 
 .dark-student-profile-page
   .course-content-card-info p {
-  color: #d6c0aa;
+  color: #cbb5a2;
 }
 
 .dark-student-profile-page
   .course-content-card-info span {
-  color: #ffd58d;
+  color: #e6b66e;
 }
 
 .dark-student-profile-page
-  .exam-card.locked {
-  background: #29221d;
+  .course-content-card-icon {
+  background: linear-gradient(
+    135deg,
+    #4b2f20,
+    #785137
+  );
+  color: #f5ce93;
 }
+
+.dark-student-profile-page
+  .exam-card.locked,
+.dark-student-profile-page
+  .course-content-card.locked {
+  background: #1c1612;
+  border-color: #3d2d24;
+  opacity: 0.58;
+}
+
+/* =========================
+   تحسين شكل الـ Accordion
+   في الوضع العادي
+========================= */
+
+.course-content-page
+  > div
+  > div[style*="overflow: hidden"] {
+  border-radius: 15px !important;
+}
+
+.course-content-page
+  button[style*="justify-content: space-between"] {
+  min-height: 80px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.course-content-page
+  button[style*="justify-content: space-between"]:hover {
+  background: #f8efe6 !important;
+}
+
+/* =========================
+   الموبايل
+========================= */
 
 @media (max-width: 700px) {
   .course-content-page {
-    padding: 17px;
+    padding: 14px;
   }
 
   .course-content-header {
-    padding: 22px 18px;
+    min-height: auto;
+    padding: 20px 16px;
+    gap: 13px;
   }
 
   .course-content-header > svg {
-    font-size: 34px;
+    font-size: 32px;
   }
 
   .course-content-header h1 {
-    font-size: 25px;
+    font-size: 23px;
+  }
+
+  .course-content-header p {
+    font-size: 14px;
   }
 
   .course-content-card {
-    min-height: 95px;
-    padding: 16px;
-    gap: 12px;
+    min-height: 78px;
+    padding: 14px;
+    gap: 11px;
   }
 
   .course-content-card-icon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
   }
 
   .course-content-card-info h3 {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  .course-content-card-info p {
+    font-size: 13px;
+  }
+
+  .course-content-page
+    button[style*="justify-content: space-between"] {
+    min-height: 72px;
+    padding: 16px !important;
+  }
+
+  .course-content-page
+    button[style*="justify-content: space-between"]
+    h2 {
+    font-size: 18px !important;
+  }
+}
+
+@media (max-width: 450px) {
+  .course-content-page {
+    padding: 10px;
+  }
+
+  .course-content-header {
+    border-radius: 15px;
+  }
+
+  .course-content-card {
+    border-radius: 11px;
+  }
+
+  .course-content-card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 17px;
   }
 }
