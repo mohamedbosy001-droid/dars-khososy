@@ -2538,58 +2538,47 @@ function AllCourses({
 
           }
 
-          const allowedCodeLessons =
+          /*
+            كود الحصة نوعان:
 
-            [];
+            1) كود قديم مربوط بمحاضرة محددة:
+               لو فيه lessonId أو lessonIds
+               نسمح له بفتح المحاضرات المحددة فقط.
 
-          if (
+            2) كود حصة مرن جديد:
+               لو مفيش lessonId ولا lessonIds
+               يفتح المحاضرة التي كتب الطالب
+               الكود بجانبها، سواء الأولى أو
+               الثانية أو الثالثة... إلخ.
+          */
+          const allowedCodeLessons = [];
 
-            codeData.lessonId
-
-          ) {
-
+          if (codeData.lessonId) {
             allowedCodeLessons.push(
-
               codeData.lessonId
-
             );
-
           }
 
           if (
-
-            Array.isArray(
-
-              codeData.lessonIds
-
-            )
-
+            Array.isArray(codeData.lessonIds)
           ) {
-
             allowedCodeLessons.push(
-
               ...codeData.lessonIds
-
             );
-
           }
 
+          const isFlexibleLessonCode =
+            allowedCodeLessons.length === 0;
+
           if (
-
+            !isFlexibleLessonCode &&
             !allowedCodeLessons.includes(
-
               lesson.id
-
             )
-
           ) {
-
             throw new Error(
-
               "WRONG_LESSON"
-
             );
-
           }
 
           const now =
