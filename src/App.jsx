@@ -11,6 +11,7 @@ import MyPoints from "./MyPoints";
 import TopTen from "./TopTen";
 import UploadExams from "./UploadExams";
 import Homework from "./Homework";
+import GenerateAccessCodes from "./GenerateAccessCodes";
 
 import {
   createUserWithEmailAndPassword,
@@ -448,8 +449,13 @@ function App() {
   }
 
   if (window.location.hash === "#upload-exams") {
-    return <UploadExams />;
-  }
+  return <UploadExams />;
+}
+
+if (window.location.hash === "#generate-access-codes") {
+  return <GenerateAccessCodes />;
+}
+
 
   if (page === "studentProfile") {
     if (!currentStudent) {

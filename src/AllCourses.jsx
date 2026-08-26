@@ -309,7 +309,23 @@ function AllCourses({ currentStudent }) {
   }
 
   /*
-    هل الطالب فتح الكورس؟
+    بيانات صلاحية الطالب للكورس
+  */
+  function getCourseAccess(course) {
+    if (!course) {
+      return null;
+    }
+
+    return (
+      studentData?.courseAccess?.[
+        course.id
+      ] || null
+    );
+  }
+
+  /*
+    هل الطالب عنده أي صلاحية
+    داخل الكورس؟
   */
   function hasCourseAccess(course) {
     if (!course) {
@@ -320,11 +336,94 @@ function AllCourses({ currentStudent }) {
       return true;
     }
 
-    return (
-      studentData?.courseAccess?.[
-        course.id
-      ]?.active === true
-    );
+    const access =
+      getCourseAccess(course);
+
+    return access?.active === true;
+  }
+
+  /*
+    هل الطالب مسموح له
+    بفتح المحاضرة المحددة؟
+  */
+  function hasLessonAccess(
+    course,
+    lesson
+  ) {
+    if (!course || !lesson) {
+      return false;
+    }
+
+    if (!isPaidCourse(course)) {
+      return true;
+    }
+
+    const access =
+      getCourseAccess(course);
+
+    if (!access?.active) {
+      return false;
+    }
+
+    /*
+      كود الترم:
+      يفتح كل المحاضرات الحالية
+      وأي محاضرات تضاف بعد كده.
+    */
+    if (
+      access.accessType === "term"
+    ) {
+      return true;
+    }
+
+    /*
+      كود الشهر:
+      يفتح كل محاضرات كورس الشهر.
+    */
+    if (
+      access.accessType === "month"
+    ) {
+      return true;
+    }
+
+    /*
+      النظام القديم
+    */
+    if (
+      access.accessType ===
+        "fullCourse" ||
+      !access.accessType
+    ) {
+      return true;
+    }
+
+    /*
+      كود محاضرة واحدة
+    */
+    if (
+      access.accessType ===
+      "lesson"
+    ) {
+      if (
+        access.lessonId ===
+        lesson.id
+      ) {
+        return true;
+      }
+
+      if (
+        Array.isArray(
+          access.lessonIds
+        ) &&
+        access.lessonIds.includes(
+          lesson.id
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /*
@@ -407,7 +506,7 @@ function AllCourses({ currentStudent }) {
   }
 
   /*
-    تفعيل الكود من Firebase
+    تفعيل الكود
   */
   async function activateCourseCode(course) {
     const enteredCode =
@@ -442,7 +541,7 @@ function AllCourses({ currentStudent }) {
     try {
       const codeReference = doc(
         db,
-        "accessCodes",
+        "accessCode",
         enteredCode
       );
 
@@ -487,6 +586,10 @@ function AllCourses({ currentStudent }) {
             );
           }
 
+          /*
+            الكود لازم يكون
+            لنفس الكورس
+          */
           if (
             codeData.courseId !==
             course.id
@@ -512,6 +615,57 @@ function AllCourses({ currentStudent }) {
           const savedStudent =
             studentSnapshot.data();
 
+          /*
+            حماية السنة الدراسية
+          */
+          if (
+            codeData.grade &&
+            normalizeGrade(
+              codeData.grade
+            ) !==
+              normalizeGrade(
+                savedStudent.grade
+              )
+          ) {
+            throw new Error(
+              "WRONG_GRADE"
+            );
+          }
+
+          const accessType =
+            codeData.accessType ||
+            "fullCourse";
+
+          if (
+            ![
+              "lesson",
+              "month",
+              "term",
+              "fullCourse",
+            ].includes(accessType)
+          ) {
+            throw new Error(
+              "INVALID_ACCESS_TYPE"
+            );
+          }
+
+          /*
+            كود محاضرة لازم
+            يكون مرتبط بمحاضرة
+          */
+          if (
+            accessType ===
+              "lesson" &&
+            !codeData.lessonId &&
+            !Array.isArray(
+              codeData.lessonIds
+            )
+          ) {
+            throw new Error(
+              "LESSON_NOT_SET"
+            );
+          }
+
           const now =
             Timestamp.now();
 
@@ -520,9 +674,128 @@ function AllCourses({ currentStudent }) {
               {}),
           };
 
+          const oldAccess =
+            oldCourseAccess[
+              course.id
+            ] || {};
+
+          /*
+            لو الطالب عنده ترم كامل
+            خلاص عنده أعلى صلاحية
+          */
+          if (
+            oldAccess.active ===
+              true &&
+            oldAccess.accessType ===
+              "term"
+          ) {
+            throw new Error(
+              "ALREADY_HAS_TERM"
+            );
+          }
+
+          /*
+            لو عنده شهر كامل
+            واستخدم كود محاضرة،
+            ما نقللش الصلاحية.
+          */
+          if (
+            oldAccess.active ===
+              true &&
+            (oldAccess.accessType ===
+              "month" ||
+              oldAccess.accessType ===
+                "fullCourse") &&
+            accessType ===
+              "lesson"
+          ) {
+            throw new Error(
+              "ALREADY_HAS_COURSE"
+            );
+          }
+
+          let finalAccessType =
+            accessType;
+
+          /*
+            لو عنده محاضرات منفردة
+            وبعدين دخل كود شهر
+            أو ترم، نعمل Upgrade.
+          */
+          if (
+            accessType === "term"
+          ) {
+            finalAccessType =
+              "term";
+          } else if (
+            accessType === "month"
+          ) {
+            finalAccessType =
+              "month";
+          }
+
+          /*
+            دمج المحاضرات
+            في حالة أكواد lesson
+          */
+          let allowedLessonIds =
+            Array.isArray(
+              oldAccess.lessonIds
+            )
+              ? [
+                  ...oldAccess.lessonIds,
+                ]
+              : [];
+
+          if (
+            oldAccess.lessonId &&
+            !allowedLessonIds.includes(
+              oldAccess.lessonId
+            )
+          ) {
+            allowedLessonIds.push(
+              oldAccess.lessonId
+            );
+          }
+
+          if (
+            accessType ===
+            "lesson"
+          ) {
+            const newLessonIds =
+              [];
+
+            if (
+              codeData.lessonId
+            ) {
+              newLessonIds.push(
+                codeData.lessonId
+              );
+            }
+
+            if (
+              Array.isArray(
+                codeData.lessonIds
+              )
+            ) {
+              newLessonIds.push(
+                ...codeData.lessonIds
+              );
+            }
+
+            allowedLessonIds = [
+              ...new Set([
+                ...allowedLessonIds,
+                ...newLessonIds,
+              ]),
+            ];
+          }
+
           oldCourseAccess[
             course.id
           ] = {
+            ...oldAccess,
+
             active: true,
 
             courseId:
@@ -532,13 +805,30 @@ function AllCourses({ currentStudent }) {
               course.title,
 
             accessType:
-              codeData.accessType ||
-              "fullCourse",
+              finalAccessType,
+
+            lessonId:
+              finalAccessType ===
+              "lesson"
+                ? codeData.lessonId ||
+                  oldAccess.lessonId ||
+                  null
+                : null,
+
+            lessonIds:
+              finalAccessType ===
+              "lesson"
+                ? allowedLessonIds
+                : [],
 
             activatedWithCode:
               enteredCode,
 
             activatedAt:
+              oldAccess.activatedAt ||
+              now,
+
+            lastActivatedAt:
               now,
           };
 
@@ -605,7 +895,7 @@ function AllCourses({ currentStudent }) {
           }
 
           /*
-            تسجيل استخدام الكود
+            الكود يستخدم مرة واحدة
           */
           transaction.update(
             codeReference,
@@ -620,9 +910,6 @@ function AllCourses({ currentStudent }) {
             }
           );
 
-          /*
-            فتح الكورس للطالب
-          */
           transaction.update(
             studentReference,
             {
@@ -642,12 +929,13 @@ function AllCourses({ currentStudent }) {
       setActivationCodes(
         (previousCodes) => ({
           ...previousCodes,
+
           [course.id]: "",
         })
       );
 
       window.alert(
-        "✅ تم تفعيل الكورس بنجاح."
+        "✅ تم تفعيل الكود بنجاح."
       );
     } catch (error) {
       console.error(
@@ -682,6 +970,34 @@ function AllCourses({ currentStudent }) {
       ) {
         window.alert(
           "هذا الكود غير مخصص لهذا الكورس."
+        );
+      } else if (
+        error.message ===
+        "WRONG_GRADE"
+      ) {
+        window.alert(
+          "هذا الكود غير مخصص لسنتك الدراسية."
+        );
+      } else if (
+        error.message ===
+        "LESSON_NOT_SET"
+      ) {
+        window.alert(
+          "كود المحاضرة غير مرتبط بمحاضرة صحيحة."
+        );
+      } else if (
+        error.message ===
+        "ALREADY_HAS_TERM"
+      ) {
+        window.alert(
+          "أنت مشترك بالفعل في الترم كامل."
+        );
+      } else if (
+        error.message ===
+        "ALREADY_HAS_COURSE"
+      ) {
+        window.alert(
+          "أنت بالفعل عندك صلاحية أكبر من كود المحاضرة."
         );
       } else {
         window.alert(
@@ -907,12 +1223,21 @@ function AllCourses({ currentStudent }) {
       return;
     }
 
+    /*
+      هنا الفرق المهم:
+      مش مجرد إن الكورس مفتوح،
+      لازم المحاضرة نفسها تكون
+      ضمن صلاحية الكود.
+    */
     if (
       isPaidCourse(course) &&
-      !hasCourseAccess(course)
+      !hasLessonAccess(
+        course,
+        lesson
+      )
     ) {
       window.alert(
-        "المحاضرة مقفولة. قم بتفعيل الكورس أولًا."
+        "هذه المحاضرة غير مشمولة في كود التفعيل الخاص بك."
       );
 
       return;
@@ -1056,6 +1381,12 @@ function AllCourses({ currentStudent }) {
               ),
 
             examUnlocked: true,
+
+            /*
+              هنستخدمها بعد كده
+              لفتح الواجب
+            */
+            homeworkUnlocked: true,
 
             firstWatchedAt:
               oldLessonProgress
@@ -1491,8 +1822,8 @@ function AllCourses({ currentStudent }) {
               {isSavingWatch
                 ? "جاري تسجيل المشاهدة..."
                 : lessonWatched
-                  ? "✅ تم فتح الامتحانين."
-                  : "يتم فتح الامتحانين بعد مشاهدة 30% من الفيديو."}
+                  ? "✅ تم مشاهدة 30% وفتح المحتوى التالي."
+                  : "يتم فتح الواجب بعد مشاهدة 30% من الفيديو."}
             </p>
           </div>
 
@@ -1829,7 +2160,7 @@ function AllCourses({ currentStudent }) {
                               }
                               placeholder="اكتب كود التفعيل"
                               autoComplete="off"
-                              maxLength={8}
+                              maxLength={12}
                               style={{
                                 width:
                                   "100%",
@@ -1901,15 +2232,9 @@ function AllCourses({ currentStudent }) {
                               )
                             }
                           >
-                            {paid ? (
-                              <FaCheckCircle />
-                            ) : (
-                              <FaBookOpen />
-                            )}
+                            <FaCheckCircle />
 
-                            {paid
-                              ? "محتوى الكورس"
-                              : "محتوى الكورس"}
+                            محتوى الكورس
                           </button>
 
                           <button
