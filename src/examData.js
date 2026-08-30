@@ -31,8 +31,8 @@ export const examsData = {
       },
       {
         id: "exam1-q3",
-       question:
-  "أعرب ما تحته خط: «الوطن له [[مكانة]]».",
+        question:
+          "أعرب ما تحته خط: «الوطن له [[مكانة]]».",
         options: [
           "خبر مرفوع",
           "مبتدأ مؤخر",
@@ -128,7 +128,7 @@ export const examsData = {
       {
         id: "exam1-q11",
         question:
-         "أعرب ما تحته خط: «واشتعل الرأس [[شيبًا]]».",
+          "أعرب ما تحته خط: «واشتعل الرأس [[شيبًا]]».",
         options: [
           "فاعل",
           "تمييز منصوب",
@@ -197,7 +197,7 @@ export const examsData = {
       {
         id: "exam2-q1",
         question:
-    "أعرب ما تحته خط: «من الصدق [[النجاة]]».",
+          "أعرب ما تحته خط: «من الصدق [[النجاة]]».",
         options: [
           "فاعل",
           "مبتدأ مؤخر",
@@ -376,6 +376,7 @@ export const examsData = {
       },
     ],
   },
+
   secondCourse2Exam1: {
     id: "second-course-2-exam-1",
     title: "الامتحان الأول",
@@ -395,7 +396,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam1-q2",
         question:
@@ -408,7 +408,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam1-q3",
         question:
@@ -421,7 +420,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q4",
         question:
@@ -434,7 +432,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam1-q5",
         question:
@@ -447,7 +444,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam1-q6",
         question:
@@ -460,7 +456,6 @@ export const examsData = {
         ],
         correctAnswer: 2,
       },
-
       {
         id: "second-course-2-exam1-q7",
         question:
@@ -473,7 +468,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q8",
         question:
@@ -486,7 +480,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam1-q9",
         question:
@@ -499,7 +492,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q10",
         question:
@@ -512,7 +504,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q11",
         question:
@@ -525,7 +516,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam1-q12",
         question:
@@ -538,7 +528,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q13",
         question:
@@ -550,7 +539,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam1-q14",
         question:
@@ -562,7 +550,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam1-q15",
         question:
@@ -576,6 +563,7 @@ export const examsData = {
       },
     ],
   },
+
   secondCourse2Exam2: {
     id: "second-course-2-exam-2",
     title: "الامتحان الثاني",
@@ -595,7 +583,6 @@ export const examsData = {
         ],
         correctAnswer: 2,
       },
-
       {
         id: "second-course-2-exam2-q2",
         question:
@@ -608,7 +595,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam2-q3",
         question:
@@ -621,7 +607,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam2-q4",
         question:
@@ -634,7 +619,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam2-q5",
         question:
@@ -647,7 +631,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam2-q6",
         question:
@@ -660,7 +643,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam2-q7",
         question:
@@ -673,7 +655,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam2-q8",
         question:
@@ -686,7 +667,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam2-q9",
         question:
@@ -699,7 +679,6 @@ export const examsData = {
         ],
         correctAnswer: 2,
       },
-
       {
         id: "second-course-2-exam2-q10",
         question:
@@ -712,7 +691,6 @@ export const examsData = {
         ],
         correctAnswer: 2,
       },
-
       {
         id: "second-course-2-exam2-q11",
         question:
@@ -725,7 +703,6 @@ export const examsData = {
         ],
         correctAnswer: 3,
       },
-
       {
         id: "second-course-2-exam2-q12",
         question:
@@ -738,7 +715,6 @@ export const examsData = {
         ],
         correctAnswer: 1,
       },
-
       {
         id: "second-course-2-exam2-q13",
         question:
@@ -750,7 +726,6 @@ export const examsData = {
         ],
         correctAnswer: 0,
       },
-
       {
         id: "second-course-2-exam2-q14",
         question:
@@ -762,7 +737,6 @@ export const examsData = {
         ],
         correctAnswer: 2,
       },
-
       {
         id: "second-course-2-exam2-q15",
         question:
@@ -771,6 +745,175 @@ export const examsData = {
           "صفة",
           "نسبة",
           "موصوف",
+        ],
+        correctAnswer: 2,
+      },
+    ],
+  },
+
+  // ==========================================
+  // المحاضرة التمهيدية المجانية - تانية ثانوي
+  // ==========================================
+  secondFreeIntroExam: {
+    id: "second-free-intro-exam",
+    title: "امتحان المحاضرة التمهيدية",
+    courseId: "second-free-intro-course",
+    lessonId: "lesson-1",
+
+    questions: [
+      {
+        id: "second-free-intro-q1",
+        question:
+          "«يوسف وأخوه» — أعرب كلمة «أخوه».",
+        options: [
+          "فاعل مرفوع بالواو",
+          "معطوف مرفوع وعلامة رفعه الواو",
+          "مبتدأ ثانٍ مرفوع بالضمة",
+          "خبر مرفوع بالألف",
+        ],
+        correctAnswer: 1,
+      },
+      {
+        id: "second-free-intro-q2",
+        question:
+          "«هذا فم طاهر» — أعرب كلمة «فم».",
+        options: [
+          "بدل مرفوع بالضمة",
+          "مبتدأ مرفوع بالألف",
+          "خبر مرفوع وعلامة رفعه الضمة الظاهرة",
+          "خبر مرفوع وعلامة رفعه الواو",
+        ],
+        correctAnswer: 2,
+      },
+      {
+        id: "second-free-intro-q3",
+        question:
+          "«ما كان محمد أبا أحد...» — أعرب كلمة «أبا».",
+        options: [
+          "مفعول به منصوب بالفتحة",
+          "خبر كان منصوب وعلامة نصبه الألف",
+          "اسم كان مرفوع بالضمة",
+          "بدل منصوب بالألف",
+        ],
+        correctAnswer: 1,
+      },
+      {
+        id: "second-free-intro-q4",
+        question:
+          "«تبت يدا أبي لهب...» — أعرب كلمة «أبي».",
+        options: [
+          "مضاف إليه مجرور وعلامة جره الياء",
+          "بدل مجرور بالكسرة",
+          "فاعل مرفوع بالواو",
+          "اسم مجرور بالكسرة المقدرة",
+        ],
+        correctAnswer: 0,
+      },
+      {
+        id: "second-free-intro-q5",
+        question:
+          "الجملة التي اشتملت على اسم من الأسماء الخمسة يُعرب بالحروف:",
+        options: [
+          "إن أباك رجل فاضل",
+          "هذا أبي العزيز",
+          "إن أبا كريما يُحب",
+          "نطق فم الشاعر",
+        ],
+        correctAnswer: 0,
+      },
+      {
+        id: "second-free-intro-q6",
+        question:
+          "الجملة التي لا يوجد بها اسم من الأسماء الخمسة:",
+        options: [
+          "طهر فاك بالذكر",
+          "ينطق فمك بالحق",
+          "لا تخرج السوء من فيك",
+          "لا ينطق فوك إلا الحق",
+        ],
+        correctAnswer: 1,
+      },
+      {
+        id: "second-free-intro-q7",
+        question:
+          "اختر التصويب الصحيح للجملة: «كان أباك ذو علم غفير».",
+        options: [
+          "كان أبوك ذا علمٍ",
+          "كان أبوك ذو علم",
+          "كان أباك ذا علم",
+          "كان أباك ذو علم",
+        ],
+        correctAnswer: 0,
+      },
+      {
+        id: "second-free-intro-q8",
+        question:
+          "اختر التصويب الصحيح للجملة: «إن ذو المروءة محبوب».",
+        options: [
+          "إن ذو المروءة محبوبًا",
+          "إن ذي المروءة محبوب",
+          "إن ذا المروءة محبوبٌ",
+          "إن ذا المروءة محبوبًا",
+        ],
+        correctAnswer: 2,
+      },
+      {
+        id: "second-free-intro-q9",
+        question:
+          "أي مما يلي ليس من الأسماء الخمسة بسبب عدم تحقق شرط المعنى في «ذو»؟",
+        options: [
+          "ذو العقل",
+          "ذو المال (بمعنى صاحب)",
+          "ذو الطائية (بمعنى الذي)",
+          "ذو الفضل",
+        ],
+        correctAnswer: 2,
+      },
+      {
+        id: "second-free-intro-q10",
+        question:
+          "«رأيت حماك في المسجد» — أعرب كلمة «حماك».",
+        options: [
+          "فاعل مرفوع بالألف",
+          "مفعول به منصوب وعلامة نصبه الألف",
+          "حال منصوب بالألف",
+          "مضاف إليه",
+        ],
+        correctAnswer: 1,
+      },
+      {
+        id: "second-free-intro-q11",
+        question:
+          "يتناول النص التجارة الإلكترونية وآثارها في البيع والشراء والأسواق. ما الزاوية التي يتناول منها الكاتب الموضوع؟",
+        options: [
+          "علمية بحتة",
+          "اقتصادية",
+          "أخلاقية قانونية",
+          "تاريخية فقط",
+        ],
+        correctAnswer: 1,
+      },
+      {
+        id: "second-free-intro-q12",
+        question:
+          "يتناول النص قرارًا حكوميًا متعلقًا بحوكمة الشركات وتنظيم عملها. ما الزاوية التي يتناول منها الكاتب الموضوع؟",
+        options: [
+          "اقتصادية",
+          "سياسية",
+          "قانونية تنظيمية",
+          "تاريخية",
+        ],
+        correctAnswer: 2,
+      },
+      {
+        id: "second-free-intro-q13",
+        question:
+          "يتناول النص استخدام أحد المصانع للفلاتر للحد من التلوث والمحافظة على البيئة. ما الزاوية التي يتناول منها الكاتب الموضوع؟",
+        options: [
+          "علمية بحتة",
+          "قانونية تنظيمية",
+          "بيئية",
+          "فكرية تحليلية",
         ],
         correctAnswer: 2,
       },

@@ -57,8 +57,10 @@ function Exam({
   const [answers, setAnswers] =
     useState({});
 
-  const [currentQuestionIndex, setCurrentQuestionIndex] =
-    useState(0);
+  const [
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+  ] = useState(0);
 
   const [submitted, setSubmitted] =
     useState(false);
@@ -66,8 +68,10 @@ function Exam({
   const [result, setResult] =
     useState(null);
 
-  const [isLoadingAttempt, setIsLoadingAttempt] =
-    useState(true);
+  const [
+    isLoadingAttempt,
+    setIsLoadingAttempt,
+  ] = useState(true);
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
@@ -126,7 +130,9 @@ function Exam({
                 studentReference
               );
 
-            if (!studentSnapshot.exists()) {
+            if (
+              !studentSnapshot.exists()
+            ) {
               throw new Error(
                 "Student not found."
               );
@@ -185,7 +191,8 @@ function Exam({
 
             if (savedAttempt) {
               setAnswers(
-                savedAttempt.answers || {}
+                savedAttempt.answers ||
+                  {}
               );
 
               setCurrentQuestionIndex(
@@ -228,6 +235,7 @@ function Exam({
               studentReference,
               {
                 examAttempts,
+
                 updatedAt:
                   Timestamp.now(),
               }
@@ -320,7 +328,9 @@ function Exam({
     );
   }
 
-  function goToQuestion(questionIndex) {
+  function goToQuestion(
+    questionIndex
+  ) {
     if (
       questionIndex < 0 ||
       questionIndex >= questions.length
@@ -410,6 +420,19 @@ function Exam({
                 selectedOption ??
                 null,
 
+              correctOption:
+                question.correctAnswer,
+
+              question:
+                question.question,
+
+              options:
+                Array.isArray(
+                  question.options
+                )
+                  ? question.options
+                  : [],
+
               isCorrect,
             };
           }
@@ -464,7 +487,9 @@ function Exam({
               studentReference
             );
 
-          if (!studentSnapshot.exists()) {
+          if (
+            !studentSnapshot.exists()
+          ) {
             throw new Error(
               "Student not found."
             );
@@ -657,41 +682,150 @@ function Exam({
           </h2>
 
           {result.answers.map(
-            (answer) => (
-              <article
-                className={`exam-review-item ${
-                  answer.isCorrect
-                    ? "correct"
-                    : "wrong"
-                }`}
-                key={
-                  answer.questionId
-                }
-              >
-                <div>
-                  {answer.isCorrect ? (
-                    <FaCheckCircle />
-                  ) : (
-                    <FaTimesCircle />
-                  )}
-                </div>
+            (answer) => {
+              const questionData =
+                questions.find(
+                  (question) =>
+                    question.id ===
+                    answer.questionId
+                );
 
-                <div>
-                  <h3>
-                    السؤال{" "}
-                    {
-                      answer.questionNumber
-                    }
-                  </h3>
+              const questionText =
+                answer.question ||
+                questionData?.question ||
+                "";
 
-                  <p>
-                    {answer.isCorrect
-                      ? "إجابتك صحيحة"
-                      : "إجابتك غير صحيحة"}
-                  </p>
-                </div>
-              </article>
-            )
+              const questionOptions =
+                Array.isArray(
+                  answer.options
+                )
+                  ? answer.options
+                  : Array.isArray(
+                        questionData?.options
+                      )
+                    ? questionData.options
+                    : [];
+
+              const correctOption =
+                answer.correctOption ??
+                questionData?.correctAnswer;
+
+              const selectedAnswerText =
+                answer.selectedOption !==
+                  null &&
+                answer.selectedOption !==
+                  undefined
+                  ? questionOptions[
+                      answer.selectedOption
+                    ] ||
+                    "إجابة غير متاحة"
+                  : "لم يتم اختيار إجابة";
+
+              const correctAnswerText =
+                correctOption !==
+                  null &&
+                correctOption !==
+                  undefined
+                  ? questionOptions[
+                      correctOption
+                    ] ||
+                    "الإجابة غير متاحة"
+                  : "الإجابة غير متاحة";
+
+              return (
+                <article
+                  className={`exam-review-item ${
+                    answer.isCorrect
+                      ? "correct"
+                      : "wrong"
+                  }`}
+                  key={
+                    answer.questionId
+                  }
+                >
+                  <div>
+                    {answer.isCorrect ? (
+                      <FaCheckCircle />
+                    ) : (
+                      <FaTimesCircle />
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    <h3>
+                      السؤال{" "}
+                      {
+                        answer.questionNumber
+                      }
+                    </h3>
+
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        marginBottom:
+                          "10px",
+                      }}
+                    >
+                      {renderQuestionText(
+                        questionText
+                      )}
+                    </p>
+
+                    <p>
+                      {answer.isCorrect
+                        ? "إجابتك صحيحة"
+                        : "إجابتك غير صحيحة"}
+                    </p>
+
+                    {!answer.isCorrect && (
+                      <div
+                        style={{
+                          marginTop:
+                            "12px",
+                          padding:
+                            "12px",
+                          borderRadius:
+                            "12px",
+                          background:
+                            "#fff7f7",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin:
+                              "0 0 8px",
+                          }}
+                        >
+                          <strong>
+                            إجابتك:
+                          </strong>{" "}
+                          {
+                            selectedAnswerText
+                          }
+                        </p>
+
+                        <p
+                          style={{
+                            margin: 0,
+                          }}
+                        >
+                          <strong>
+                            الإجابة الصحيحة:
+                          </strong>{" "}
+                          {
+                            correctAnswerText
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            }
           )}
         </div>
       </section>
