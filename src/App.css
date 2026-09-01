@@ -2845,3 +2845,386 @@ footer {
   textarea::placeholder {
   color: #baa48e;
 }
+/* =========================================================
+   PUBLIC COURSES - NEW APP.JSX
+   الكورسات الظاهرة قبل التسجيل
+========================================================= */
+
+.website-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* القسم اللي يحتوي على الكورسات العامة */
+.website-page section:has([id^="public-course-"]) {
+  width: 100%;
+  padding: 95px 30px !important;
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(216, 185, 146, 0.12),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(200, 148, 95, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      #1f140e,
+      #2b1d14
+    ) !important;
+
+  direction: rtl;
+  text-align: center;
+}
+
+/* عنوان الكورسات المتاحة */
+.website-page section:has([id^="public-course-"]) > h2,
+.website-page section:has([id^="public-course-"]) h2:first-of-type {
+  color: #fff3df !important;
+  font-size: 46px !important;
+  line-height: 1.4;
+  font-weight: 900 !important;
+  margin: 0 0 12px !important;
+}
+
+/* الوصف أسفل العنوان */
+.website-page section:has([id^="public-course-"]) > p {
+  max-width: 760px;
+  margin: 0 auto 48px !important;
+  color: #d8b992 !important;
+  font-size: 19px !important;
+  line-height: 1.9;
+  font-weight: 700;
+}
+
+/* الحاوية التي تحمل الكروت */
+.website-page section:has([id^="public-course-"])
+  > div {
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* كل كارت كورس */
+[id^="public-course-"] {
+  position: relative !important;
+  overflow: hidden !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fffaf3,
+      #ead9c1
+    ) !important;
+
+  border: 2px solid #d8b992 !important;
+  border-radius: 26px !important;
+
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.32) !important;
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease !important;
+
+  text-align: right !important;
+}
+
+[id^="public-course-"]:hover {
+  transform: translateY(-9px) !important;
+
+  border-color: #f1cf96 !important;
+
+  box-shadow:
+    0 34px 75px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* صورة الكورس */
+[id^="public-course-"] img {
+  width: 100% !important;
+  height: 230px !important;
+
+  display: block !important;
+
+  object-fit: cover !important;
+  object-position: center !important;
+
+  border-radius: 0 !important;
+
+  transition: transform 0.5s ease !important;
+}
+
+[id^="public-course-"]:hover img {
+  transform: scale(1.055) !important;
+}
+
+/* النصوص داخل الكارت */
+[id^="public-course-"] h3,
+[id^="public-course-"] h2 {
+  color: #3a2416 !important;
+  font-weight: 900 !important;
+  line-height: 1.55 !important;
+}
+
+/* المرحلة */
+[id^="public-course-"] p {
+  color: #6b4228 !important;
+  line-height: 1.7 !important;
+  font-weight: 700 !important;
+}
+
+/* أي span مثل الصف أو السعر */
+[id^="public-course-"] span {
+  font-family: "Cairo", sans-serif !important;
+}
+
+/* كل الأزرار في كارت الكورس */
+[id^="public-course-"] button {
+  min-height: 48px !important;
+
+  border-radius: 14px !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease !important;
+}
+
+[id^="public-course-"] button:hover {
+  transform: translateY(-3px) !important;
+}
+
+/* زر الاشتراك / ابدأ مجانًا */
+[id^="public-course-"] button:first-of-type {
+  color: #2b1d14 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f3d29b,
+      #c8945f
+    ) !important;
+
+  border: 2px solid #2b1d14 !important;
+
+  box-shadow:
+    0 5px 0 #2b1d14 !important;
+}
+
+[id^="public-course-"] button:first-of-type:hover {
+  box-shadow:
+    0 8px 0 #2b1d14,
+    0 14px 25px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* زر مشاركة الكورس */
+[id^="public-course-"] button:last-of-type {
+  color: #fff4e4 !important;
+
+  background: #3a2416 !important;
+
+  border: 2px solid #d8b992 !important;
+}
+
+[id^="public-course-"] button:last-of-type:hover {
+  background: #573822 !important;
+}
+
+/* =========================================================
+   تحسين الهيدر
+========================================================= */
+
+.site-header {
+  min-height: 86px;
+  height: auto;
+
+  padding: 15px 35px;
+
+  background: rgba(255, 250, 243, 0.97);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.site-logo {
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.auth-buttons {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero-section {
+  padding: 0 !important;
+  background: #1f140e;
+}
+
+.image-hero {
+  border-top: 0;
+  border-bottom: 7px solid #c8945f;
+  box-shadow:
+    0 22px 65px rgba(0, 0, 0, 0.38);
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: auto;
+  max-height: 780px;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* =========================================================
+   INTRO - تحسين الجزء بعد الصورة
+========================================================= */
+
+.intro-section {
+  padding: 90px 25px 80px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(216, 185, 146, 0.12),
+      transparent 35%
+    ),
+    #1f140e;
+}
+
+.intro-section h2 {
+  max-width: 900px;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  color: #fff3df;
+
+  font-size: clamp(31px, 4vw, 46px);
+  line-height: 1.5;
+}
+
+.intro-section p {
+  max-width: 850px;
+
+  color: #dfc7aa;
+
+  font-size: clamp(17px, 2vw, 22px);
+
+  line-height: 2;
+}
+
+/* =========================================================
+   FEATURES
+========================================================= */
+
+.features-section {
+  padding-top: 70px;
+}
+
+.features-cards {
+  align-items: stretch;
+}
+
+.feature-card {
+  min-height: 150px;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 1000px) {
+  .website-page section:has([id^="public-course-"])
+    > div {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .website-page section:has([id^="public-course-"]) {
+    padding: 65px 15px !important;
+  }
+
+  .website-page section:has([id^="public-course-"])
+    > h2,
+  .website-page section:has([id^="public-course-"])
+    h2:first-of-type {
+    font-size: 32px !important;
+  }
+
+  .website-page section:has([id^="public-course-"])
+    > p {
+    margin-bottom: 32px !important;
+    font-size: 16px !important;
+  }
+
+  .website-page section:has([id^="public-course-"])
+    > div {
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+  }
+
+  [id^="public-course-"] {
+    width: 100% !important;
+    max-width: 480px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  [id^="public-course-"] img {
+    height: 250px !important;
+  }
+
+  .site-header {
+    padding: 13px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .website-page section:has([id^="public-course-"]) {
+    padding:
+      55px 12px !important;
+  }
+
+  [id^="public-course-"] {
+    border-radius: 21px !important;
+  }
+
+  [id^="public-course-"] img {
+    height: 205px !important;
+  }
+
+  [id^="public-course-"] button {
+    min-height: 45px !important;
+    font-size: 13px !important;
+  }
+
+  .hero-banner-img {
+    min-height: 280px;
+    object-fit: cover;
+  }
+
+  .intro-section {
+    padding:
+      60px 16px;
+  }
+}
