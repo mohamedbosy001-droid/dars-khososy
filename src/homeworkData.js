@@ -500,6 +500,143 @@ const homeworkData = {
       },
     ],
   },
+
+  "third-month-lesson-2-homework": {
+    id: "third-month-lesson-2-homework",
+
+    title: "واجب المحاضرة الثانية",
+
+    courseId: "third-month-course",
+
+    lessonId: "lesson-2",
+
+    grade: "الثالث الثانوي",
+
+    videoId: "6pv2Rb6UPr4",
+
+    questions: [
+      {
+        id: "q1",
+        question: "السؤال 1",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 3,
+      },
+      {
+        id: "q2",
+        question: "السؤال 2",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q3",
+        question: "السؤال 3",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 0,
+      },
+      {
+        id: "q4",
+        question: "السؤال 4",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 3,
+      },
+      {
+        id: "q5",
+        question: "السؤال 5",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q6",
+        question: "السؤال 6",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 2,
+      },
+      {
+        id: "q7",
+        question: "السؤال 7",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q8",
+        question: "السؤال 8",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q9",
+        question: "السؤال 9",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q10",
+        question: "السؤال 10",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q11",
+        question: "السؤال 11",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 2,
+      },
+      {
+        id: "q12",
+        question: "السؤال 12",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 0,
+      },
+      {
+        id: "q13",
+        question: "السؤال 13",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q14",
+        question: "السؤال 14",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 0,
+      },
+      {
+        id: "q15",
+        question: "السؤال 15",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 3,
+      },
+      {
+        id: "q16",
+        question: "السؤال 16",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 0,
+      },
+      {
+        id: "q17",
+        question: "السؤال 17",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q18",
+        question: "السؤال 18",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 2,
+      },
+      {
+        id: "q19",
+        question: "السؤال 19",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 0,
+      },
+      {
+        id: "q20",
+        question: "السؤال 20",
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: 1,
+      },
+    ],
+  },
 };
 
 export default homeworkData;

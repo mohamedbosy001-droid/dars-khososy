@@ -8,6 +8,7 @@ import YouTube from "react-youtube";
 
 import {
   doc,
+  getDoc,
   runTransaction,
   Timestamp,
   updateDoc,
@@ -28,10 +29,11 @@ import {
 
 import "./Homework.css";
 
-const HOMEWORK_ID = "homework-1";
-const HOMEWORK_VIDEO_ID = "qa2X7xgsay0";
+/* =========================
+   الواجب الأول - كما هو
+========================= */
 
-const CANCELLED_QUESTIONS = [
+const FIRST_HOMEWORK_CANCELLED_QUESTIONS = [
   7,
   17,
   18,
@@ -42,7 +44,7 @@ const CANCELLED_QUESTIONS = [
   33,
 ];
 
-const CORRECT_ANSWERS = {
+const FIRST_HOMEWORK_CORRECT_ANSWERS = {
   1: 1,
   2: 1,
   3: 0,
@@ -79,7 +81,7 @@ const CORRECT_ANSWERS = {
   37: 2,
 };
 
-const HOMEWORK_QUESTIONS = Array.from(
+const FIRST_HOMEWORK_QUESTIONS = Array.from(
   {
     length: 37,
   },
@@ -87,7 +89,7 @@ const HOMEWORK_QUESTIONS = Array.from(
     const questionNumber = index + 1;
 
     const isCancelled =
-      CANCELLED_QUESTIONS.includes(
+      FIRST_HOMEWORK_CANCELLED_QUESTIONS.includes(
         questionNumber
       );
 
@@ -104,18 +106,104 @@ const HOMEWORK_QUESTIONS = Array.from(
 
       correctAnswer: isCancelled
         ? null
-        : CORRECT_ANSWERS[
+        : FIRST_HOMEWORK_CORRECT_ANSWERS[
             questionNumber
           ],
     };
   }
 );
 
+/* =========================
+   الواجب الثاني
+========================= */
+
+const SECOND_HOMEWORK_CORRECT_ANSWERS = {
+  1: 3,
+  2: 1,
+  3: 0,
+  4: 3,
+  5: 1,
+  6: 2,
+  7: 1,
+  8: 1,
+  9: 1,
+  10: 1,
+  11: 2,
+  12: 0,
+  13: 1,
+  14: 0,
+  15: 3,
+  16: 0,
+  17: 1,
+  18: 2,
+  19: 0,
+  20: 1,
+};
+
+const SECOND_HOMEWORK_QUESTIONS = Array.from(
+  {
+    length: 20,
+  },
+  (_, index) => {
+    const questionNumber = index + 1;
+
+    return {
+      id: `third-homework-2-q${questionNumber}`,
+
+      questionNumber,
+
+      question: `السؤال ${questionNumber}`,
+
+      options: ["أ", "ب", "ج", "د"],
+
+      cancelled: false,
+
+      correctAnswer:
+        SECOND_HOMEWORK_CORRECT_ANSWERS[
+          questionNumber
+        ],
+    };
+  }
+);
+
+/* =========================
+   بيانات الواجبات
+========================= */
+
+const HOMEWORKS = [
+  {
+    id: "homework-1",
+
+    title: "الواجب الأول",
+
+    videoId: "qa2X7xgsay0",
+
+    questions:
+      FIRST_HOMEWORK_QUESTIONS,
+  },
+
+  {
+    id: "third-homework-2",
+
+    title: "الواجب الثاني",
+
+    videoId: "6pv2Rb6UPr4",
+
+    questions:
+      SECOND_HOMEWORK_QUESTIONS,
+  },
+];
+
 function Homework({
   currentStudent,
 }) {
   const [openedSection, setOpenedSection] =
     useState(null);
+
+  const [
+    activeHomeworkId,
+    setActiveHomeworkId,
+  ] = useState(null);
 
   const [answers, setAnswers] =
     useState({});
@@ -134,12 +222,22 @@ function Homework({
   const [
     isLoadingAttempt,
     setIsLoadingAttempt,
+  ] = useState(false);
+
+  const [
+    isLoadingDashboard,
+    setIsLoadingDashboard,
   ] = useState(true);
 
   const [
     isSubmitting,
     setIsSubmitting,
   ] = useState(false);
+
+  const [
+    homeworkStatuses,
+    setHomeworkStatuses,
+  ] = useState({});
 
   const studentUid =
     currentStudent?.uid ||
@@ -154,13 +252,24 @@ function Homework({
       currentStudent?.grade ===
         "الصف الثالث الثانوي");
 
-  const questions = useMemo(
-    () => HOMEWORK_QUESTIONS,
-    []
-  );
+  const activeHomework =
+    useMemo(
+      () =>
+        HOMEWORKS.find(
+          (homework) =>
+            homework.id ===
+            activeHomeworkId
+        ) || null,
+      [activeHomeworkId]
+    );
+
+  const questions =
+    activeHomework?.questions || [];
 
   const currentQuestion =
-    questions[currentQuestionIndex];
+    questions[
+      currentQuestionIndex
+    ];
 
   const answeredQuestionsCount =
     questions.filter(
@@ -179,15 +288,148 @@ function Homework({
         )
       : 0;
 
+  /* =========================
+     تحميل حالة كل الواجبات
+  ========================= */
+
   useEffect(() => {
-    async function loadHomeworkAttempt() {
+    async function loadDashboard() {
       if (
         !studentUid ||
         !isAllowedStudent
       ) {
-        setIsLoadingAttempt(false);
+        setIsLoadingDashboard(false);
         return;
       }
+
+      try {
+        const studentReference = doc(
+          db,
+          "students",
+          studentUid
+        );
+
+        const studentSnapshot =
+          await getDoc(
+            studentReference
+          );
+
+        if (
+          !studentSnapshot.exists()
+        ) {
+          return;
+        }
+
+        const studentData =
+          studentSnapshot.data();
+
+        const attempts =
+          studentData.homeworkAttempts &&
+          typeof studentData.homeworkAttempts ===
+            "object"
+            ? studentData.homeworkAttempts
+            : {};
+
+        const results =
+          Array.isArray(
+            studentData.homeworkResults
+          )
+            ? studentData.homeworkResults
+            : [];
+
+        const nextStatuses = {};
+
+        HOMEWORKS.forEach(
+          (homework) => {
+            const attempt =
+              attempts[
+                homework.id
+              ];
+
+            const savedResult =
+              results.find(
+                (item) =>
+                  item?.homeworkId ===
+                  homework.id
+              );
+
+            const savedAnswers =
+              attempt?.answers || {};
+
+            const answeredCount =
+              homework.questions.filter(
+                (question) =>
+                  question.cancelled ||
+                  savedAnswers[
+                    question.id
+                  ] !== undefined
+              ).length;
+
+            nextStatuses[
+              homework.id
+            ] = {
+              completed:
+                attempt?.completed ===
+                  true ||
+                savedResult?.completed ===
+                  true,
+
+              score:
+                savedResult?.score ??
+                attempt?.result?.score ??
+                0,
+
+              totalQuestions:
+                savedResult?.totalQuestions ??
+                homework.questions.length,
+
+              answeredCount,
+            };
+          }
+        );
+
+        setHomeworkStatuses(
+          nextStatuses
+        );
+      } catch (error) {
+        console.error(
+          "Error loading homework dashboard:",
+          error
+        );
+      } finally {
+        setIsLoadingDashboard(false);
+      }
+    }
+
+    loadDashboard();
+  }, [
+    studentUid,
+    isAllowedStudent,
+  ]);
+
+  /* =========================
+     تحميل الواجب المختار
+  ========================= */
+
+  useEffect(() => {
+    async function loadHomeworkAttempt() {
+      if (
+        !activeHomework ||
+        !studentUid ||
+        !isAllowedStudent
+      ) {
+        return;
+      }
+
+      setIsLoadingAttempt(true);
+
+      setAnswers({});
+
+      setCurrentQuestionIndex(0);
+
+      setSubmitted(false);
+
+      setResult(null);
 
       try {
         const studentReference = doc(
@@ -240,7 +482,7 @@ function Homework({
 
             const savedAttempt =
               homeworkAttempts[
-                HOMEWORK_ID
+                activeHomework.id
               ];
 
             const homeworkResults =
@@ -254,7 +496,7 @@ function Homework({
               homeworkResults.find(
                 (savedHomeworkResult) =>
                   savedHomeworkResult?.homeworkId ===
-                  HOMEWORK_ID
+                  activeHomework.id
               );
 
             if (
@@ -265,7 +507,7 @@ function Homework({
             ) {
               setResult(
                 savedResult ||
-                  savedAttempt.result ||
+                  savedAttempt?.result ||
                   null
               );
 
@@ -295,7 +537,9 @@ function Homework({
                     0
                   ),
                   Math.max(
-                    questions.length - 1,
+                    activeHomework
+                      .questions.length -
+                      1,
                     0
                   )
                 )
@@ -305,11 +549,13 @@ function Homework({
             }
 
             homeworkAttempts[
-              HOMEWORK_ID
+              activeHomework.id
             ] = {
-              homeworkId: HOMEWORK_ID,
+              homeworkId:
+                activeHomework.id,
 
-              title: "الواجب الأول",
+              title:
+                activeHomework.title,
 
               started: true,
 
@@ -358,9 +604,10 @@ function Homework({
 
     loadHomeworkAttempt();
   }, [
+    activeHomeworkId,
     studentUid,
     isAllowedStudent,
-    questions.length,
+    activeHomework,
   ]);
 
   async function saveAttemptProgress(
@@ -369,6 +616,7 @@ function Homework({
   ) {
     if (
       !studentUid ||
+      !activeHomework ||
       submitted ||
       !isAllowedStudent
     ) {
@@ -385,13 +633,13 @@ function Homework({
       await updateDoc(
         studentReference,
         {
-          [`homeworkAttempts.${HOMEWORK_ID}.answers`]:
+          [`homeworkAttempts.${activeHomework.id}.answers`]:
             nextAnswers,
 
-          [`homeworkAttempts.${HOMEWORK_ID}.currentQuestionIndex`]:
+          [`homeworkAttempts.${activeHomework.id}.currentQuestionIndex`]:
             nextQuestionIndex,
 
-          [`homeworkAttempts.${HOMEWORK_ID}.updatedAt`]:
+          [`homeworkAttempts.${activeHomework.id}.updatedAt`]:
             Timestamp.now(),
 
           updatedAt:
@@ -414,10 +662,11 @@ function Homework({
       return;
     }
 
-    const question = questions.find(
-      (item) =>
-        item.id === questionId
-    );
+    const question =
+      questions.find(
+        (item) =>
+          item.id === questionId
+      );
 
     if (question?.cancelled) {
       return;
@@ -475,8 +724,59 @@ function Homework({
     );
   }
 
+  function openHomework(
+    homeworkId
+  ) {
+    setActiveHomeworkId(
+      homeworkId
+    );
+
+    setOpenedSection(
+      "homework"
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  function openVideo(
+    homeworkId
+  ) {
+    const status =
+      homeworkStatuses[
+        homeworkId
+      ];
+
+    if (!status?.completed) {
+      return;
+    }
+
+    setActiveHomeworkId(
+      homeworkId
+    );
+
+    setOpenedSection("video");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
   function goBackToHomeworkHome() {
     setOpenedSection(null);
+
+    setActiveHomeworkId(null);
+
+    setAnswers({});
+
+    setCurrentQuestionIndex(0);
+
+    setSubmitted(false);
+
+    setResult(null);
 
     window.scrollTo({
       top: 0,
@@ -485,6 +785,10 @@ function Homework({
   }
 
   async function submitHomework() {
+    if (!activeHomework) {
+      return;
+    }
+
     if (
       questions.length === 0
     ) {
@@ -555,7 +859,9 @@ function Homework({
             }
 
             const selectedOption =
-              answers[question.id];
+              answers[
+                question.id
+              ];
 
             const isCorrect =
               selectedOption ===
@@ -599,10 +905,11 @@ function Homework({
           : 0;
 
       const homeworkResult = {
-        homeworkId: HOMEWORK_ID,
+        homeworkId:
+          activeHomework.id,
 
         homeworkTitle:
-          "الواجب الأول",
+          activeHomework.title,
 
         score,
 
@@ -677,7 +984,7 @@ function Homework({
 
           const existingAttempt =
             homeworkAttempts[
-              HOMEWORK_ID
+              activeHomework.id
             ];
 
           if (
@@ -702,7 +1009,7 @@ function Homework({
             homeworkResults.findIndex(
               (savedResult) =>
                 savedResult?.homeworkId ===
-                HOMEWORK_ID
+                activeHomework.id
             );
 
           if (
@@ -718,16 +1025,16 @@ function Homework({
           );
 
           homeworkAttempts[
-            HOMEWORK_ID
+            activeHomework.id
           ] = {
             ...(existingAttempt ||
               {}),
 
             homeworkId:
-              HOMEWORK_ID,
+              activeHomework.id,
 
             title:
-              "الواجب الأول",
+              activeHomework.title,
 
             started: true,
 
@@ -769,11 +1076,32 @@ function Homework({
         }
       );
 
-      setResult(homeworkResult);
+      setResult(
+        homeworkResult
+      );
 
       setSubmitted(true);
 
-      setOpenedSection("homework");
+      setHomeworkStatuses(
+        (previous) => ({
+          ...previous,
+
+          [activeHomework.id]: {
+            completed: true,
+
+            score,
+
+            totalQuestions,
+
+            answeredCount:
+              totalQuestions,
+          },
+        })
+      );
+
+      setOpenedSection(
+        "homework"
+      );
 
       window.scrollTo(0, 0);
     } catch (error) {
@@ -806,6 +1134,10 @@ function Homework({
     }
   }
 
+  /* =========================
+     غير مسموح
+  ========================= */
+
   if (!isAllowedStudent) {
     return (
       <section className="homework-page">
@@ -826,19 +1158,23 @@ function Homework({
     );
   }
 
-  if (isLoadingAttempt) {
-    return (
-      <section className="homework-page">
-        <div className="homework-empty">
-          <h2>
-            جاري تحميل الواجب...
-          </h2>
-        </div>
-      </section>
-    );
-  }
+  /* =========================
+     الصفحة الرئيسية للواجبات
+  ========================= */
 
   if (openedSection === null) {
+    if (isLoadingDashboard) {
+      return (
+        <section className="homework-page">
+          <div className="homework-empty">
+            <h2>
+              جاري تحميل الواجبات...
+            </h2>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="homework-page homework-dashboard">
         <div className="homework-dashboard-heading">
@@ -852,118 +1188,181 @@ function Homework({
           </p>
         </div>
 
-        <button
-          type="button"
-          className={`homework-main-card ${
-            submitted
-              ? "completed"
-              : ""
-          }`}
-          onClick={() =>
-            setOpenedSection(
-              "homework"
-            )
-          }
-        >
-          <div className="homework-main-card-icon">
-            <FaClipboardCheck />
-          </div>
-
-          <div className="homework-main-card-content">
-            <span className="homework-main-card-label">
-              واجب
-            </span>
-
-            <h2>
-              الواجب الأول
-            </h2>
-
-            <p>
-              {submitted
-                ? `تم تسليم الواجب — نتيجتك ${result?.score ?? 0} من ${result?.totalQuestions ?? 37}`
-                : answeredQuestionsCount >
-                    CANCELLED_QUESTIONS.length
-                  ? `تم حل ${answeredQuestionsCount} من ${questions.length} — اضغط للاستكمال`
-                  : "37 سؤالًا — اضغط لبدء حل الواجب"}
-            </p>
-
-            {!submitted && (
-              <div className="homework-card-progress">
-                <div
-                  className="homework-card-progress-fill"
-                  style={{
-                    width: `${progressPercentage}%`,
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="homework-main-card-arrow">
-            {submitted ? (
-              <FaCheckCircle />
-            ) : (
-              <FaChevronLeft />
-            )}
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`homework-video-card ${
-            submitted
-              ? "unlocked"
-              : "locked"
-          }`}
-          onClick={() => {
-            if (!submitted) {
-              return;
-            }
-
-            setOpenedSection(
-              "video"
-            );
-
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
+        <div
+          style={{
+            display: "grid",
+            gap: "20px",
           }}
         >
-          <div className="homework-video-card-icon">
-            {submitted ? (
-              <FaPlay />
-            ) : (
-              <FaLock />
-            )}
-          </div>
+          {HOMEWORKS.map(
+            (homework) => {
+              const status =
+                homeworkStatuses[
+                  homework.id
+                ] || {};
 
-          <div className="homework-video-card-content">
-            <h3>
-              فيديو شرح الواجب
-            </h3>
+              const homeworkCompleted =
+                status.completed ===
+                true;
 
-            <p>
-              {submitted
-                ? "الفيديو متاح الآن — اضغط للمشاهدة"
-                : "يتم فتح الفيديو بعد تسليم الواجب"}
-            </p>
-          </div>
+              const answeredCount =
+                status.answeredCount ||
+                0;
 
-          <div className="homework-video-card-status">
-            {submitted
-              ? "مشاهدة"
-              : "مغلق"}
-          </div>
-        </button>
+              const homeworkProgress =
+                homework.questions
+                  .length > 0
+                  ? Math.round(
+                      (answeredCount /
+                        homework
+                          .questions
+                          .length) *
+                        100
+                    )
+                  : 0;
+
+              return (
+                <div
+                  key={
+                    homework.id
+                  }
+                >
+                  <button
+                    type="button"
+                    className={`homework-main-card ${
+                      homeworkCompleted
+                        ? "completed"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      openHomework(
+                        homework.id
+                      )
+                    }
+                  >
+                    <div className="homework-main-card-icon">
+                      <FaClipboardCheck />
+                    </div>
+
+                    <div className="homework-main-card-content">
+                      <span className="homework-main-card-label">
+                        واجب
+                      </span>
+
+                      <h2>
+                        {
+                          homework.title
+                        }
+                      </h2>
+
+                      <p>
+                        {homeworkCompleted
+                          ? `تم تسليم الواجب — نتيجتك ${status.score ?? 0} من ${status.totalQuestions ?? homework.questions.length}`
+                          : answeredCount >
+                              0
+                            ? `تم حل ${answeredCount} من ${homework.questions.length} — اضغط للاستكمال`
+                            : `${homework.questions.length} سؤالًا — اضغط لبدء حل الواجب`}
+                      </p>
+
+                      {!homeworkCompleted && (
+                        <div className="homework-card-progress">
+                          <div
+                            className="homework-card-progress-fill"
+                            style={{
+                              width: `${homeworkProgress}%`,
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="homework-main-card-arrow">
+                      {homeworkCompleted ? (
+                        <FaCheckCircle />
+                      ) : (
+                        <FaChevronLeft />
+                      )}
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`homework-video-card ${
+                      homeworkCompleted
+                        ? "unlocked"
+                        : "locked"
+                    }`}
+                    onClick={() =>
+                      openVideo(
+                        homework.id
+                      )
+                    }
+                  >
+                    <div className="homework-video-card-icon">
+                      {homeworkCompleted ? (
+                        <FaPlay />
+                      ) : (
+                        <FaLock />
+                      )}
+                    </div>
+
+                    <div className="homework-video-card-content">
+                      <h3>
+                        فيديو شرح{" "}
+                        {
+                          homework.title
+                        }
+                      </h3>
+
+                      <p>
+                        {homeworkCompleted
+                          ? "الفيديو متاح الآن — اضغط للمشاهدة"
+                          : `يتم فتح الفيديو بعد تسليم ${homework.title}`}
+                      </p>
+                    </div>
+
+                    <div className="homework-video-card-status">
+                      {homeworkCompleted
+                        ? "مشاهدة"
+                        : "مغلق"}
+                    </div>
+                  </button>
+                </div>
+              );
+            }
+          )}
+        </div>
       </section>
     );
   }
 
+  /* =========================
+     تحميل الواجب
+  ========================= */
+
+  if (isLoadingAttempt) {
+    return (
+      <section className="homework-page">
+        <div className="homework-empty">
+          <h2>
+            جاري تحميل الواجب...
+          </h2>
+        </div>
+      </section>
+    );
+  }
+
+  /* =========================
+     الفيديو
+  ========================= */
+
   if (
     openedSection === "video"
   ) {
-    if (!submitted) {
+    if (
+      !activeHomework ||
+      !submitted
+    ) {
       return (
         <section className="homework-page">
           <button
@@ -985,8 +1384,8 @@ function Homework({
             </h3>
 
             <p>
-              لازم تسلم الواجب الأول
-              قبل مشاهدة الفيديو.
+              لازم تسلم الواجب قبل
+              مشاهدة الفيديو.
             </p>
           </div>
         </section>
@@ -1012,7 +1411,10 @@ function Homework({
 
             <div>
               <h2>
-                فيديو شرح الواجب
+                فيديو شرح{" "}
+                {
+                  activeHomework.title
+                }
               </h2>
 
               <p>
@@ -1025,7 +1427,7 @@ function Homework({
           <div className="homework-video-wrapper">
             <YouTube
               videoId={
-                HOMEWORK_VIDEO_ID
+                activeHomework.videoId
               }
               opts={{
                 width: "100%",
@@ -1050,10 +1452,16 @@ function Homework({
     );
   }
 
+  /* =========================
+     النتيجة
+  ========================= */
+
   if (
-    openedSection === "homework" &&
+    openedSection ===
+      "homework" &&
     submitted &&
-    result
+    result &&
+    activeHomework
   ) {
     return (
       <section className="homework-page">
@@ -1076,7 +1484,9 @@ function Homework({
           </h1>
 
           <h2>
-            الواجب الأول
+            {
+              activeHomework.title
+            }
           </h2>
 
           <strong>
@@ -1143,6 +1553,14 @@ function Homework({
     );
   }
 
+  /* =========================
+     حل الواجب
+  ========================= */
+
+  if (!activeHomework) {
+    return null;
+  }
+
   return (
     <section className="homework-page">
       <button
@@ -1161,7 +1579,9 @@ function Homework({
 
         <div>
           <h1>
-            الواجب الأول
+            {
+              activeHomework.title
+            }
           </h1>
 
           <p>
