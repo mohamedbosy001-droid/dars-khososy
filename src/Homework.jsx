@@ -174,7 +174,7 @@ const HOMEWORKS = [
   {
     id: "homework-1",
 
-    title: "الواجب الأول",
+    title: "واجب المحاضرة الأولي",
 
     videoId: "qa2X7xgsay0",
 
@@ -185,7 +185,7 @@ const HOMEWORKS = [
   {
     id: "third-homework-2",
 
-    title: "الواجب الثاني",
+    title: "واجب المحاضرة الثانية",
 
     videoId: "6pv2Rb6UPr4",
 
