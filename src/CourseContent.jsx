@@ -24,6 +24,13 @@ function CourseContent({
   getLessonWatched,
   getHomeworkSubmitted,
 
+  /*
+    جديد:
+    هل امتحان المحاضرة الأولى
+    في تالتة ثانوي تم تسليمه؟
+  */
+  isThirdLecture1ExamCompleted = false,
+
   lessonActivationCodes,
   onLessonCodeChange,
   onActivateLessonCode,
@@ -64,8 +71,9 @@ function CourseContent({
     : [];
 
   /*
-    كورسات تالتة ثانوي
-    التي بها المحاضرة الثانية الجديدة
+    =====================================
+    كورسات تالتة ثانوي الجديدة
+    =====================================
   */
   const isThirdSecondaryCourse =
     course.id ===
@@ -75,8 +83,7 @@ function CourseContent({
 
   /*
     المحاضرة الأولى
-    هنستخدم بيانات امتحانها
-    داخل المحاضرة الثانية
+    نستخدم امتحانها داخل المحاضرة الثانية
   */
   const firstLesson =
     lessons[0] || null;
@@ -101,7 +108,10 @@ function CourseContent({
 
   return (
     <section className="course-content-page">
-      {/* الرجوع */}
+      {/* =========================
+          زر الرجوع
+      ========================= */}
+
       <button
         type="button"
         className="course-content-back-btn"
@@ -112,7 +122,10 @@ function CourseContent({
         الرجوع إلى جميع الكورسات
       </button>
 
-      {/* بيانات الكورس */}
+      {/* =========================
+          بيانات الكورس
+      ========================= */}
+
       <div className="course-content-header">
         <FaBookOpen />
 
@@ -134,7 +147,10 @@ function CourseContent({
         </div>
       </div>
 
-      {/* لا توجد محاضرات */}
+      {/* =========================
+          لا توجد محاضرات
+      ========================= */}
+
       {lessons.length === 0 ? (
         <div className="course-content-empty">
           <h2>
@@ -167,6 +183,13 @@ function CourseContent({
               const lessonNumber =
                 lessonIndex + 1;
 
+              /*
+                هل المحاضرة متفعلة؟
+
+                بالنسبة للمحاضرة الثانية:
+                ممكن تبقى متفعلة بالكود
+                حتى لو الامتحان لسه متسلمش.
+              */
               const unlocked =
                 typeof isLessonUnlocked ===
                 "function"
@@ -175,6 +198,9 @@ function CourseContent({
                     )
                   : true;
 
+              /*
+                هل الطالب شاهد 30%؟
+              */
               const watched =
                 typeof getLessonWatched ===
                 "function"
@@ -183,6 +209,9 @@ function CourseContent({
                     )
                   : false;
 
+              /*
+                هل الواجب اتسلم؟
+              */
               const homeworkSubmitted =
                 typeof getHomeworkSubmitted ===
                 "function"
@@ -195,6 +224,38 @@ function CourseContent({
                 openedLessons[
                   lessonId
                 ] === true;
+
+              /*
+                =====================================
+                هل دي المحاضرة الثانية لتالتة؟
+                =====================================
+              */
+              const isThirdSecondLesson =
+                isThirdSecondaryCourse &&
+                lessonIndex === 1;
+
+              /*
+                =====================================
+                فتح الفيديو
+
+                المحاضرات العادية:
+                نفس النظام القديم.
+
+                المحاضرة الثانية لتالتة:
+                لازم:
+                1- المحاضرة تكون متفعلة
+                2- الامتحان الأول يكون متسلم
+
+                يعني الكود لوحده
+                لا يفتح الفيديو.
+                =====================================
+              */
+              const canOpenVideo =
+                unlocked &&
+                (
+                  !isThirdSecondLesson ||
+                  isThirdLecture1ExamCompleted
+                );
 
               /*
                 فيديو المحاضرة
@@ -239,8 +300,9 @@ function CourseContent({
                 );
 
               /*
-                الكورسات القديمة
-                الخاصة بالبلاغة
+                =====================================
+                الكورسات القديمة الخاصة بالبلاغة
+                =====================================
               */
               const isOldBalaghaCourse =
                 course.id ===
@@ -265,18 +327,22 @@ function CourseContent({
                 isOldBalaghaCourse;
 
               /*
+                =====================================
                 نخفي امتحان المحاضرة الأولى
-                من المحاضرة الأولى فقط
-                في كورسات تالتة الجديدة
+                من المحاضرة الأولى
+                في تالتة ثانوي
+                =====================================
               */
               const hideExam1InFirstLesson =
                 isThirdSecondaryCourse &&
                 lessonIndex === 0;
 
               /*
+                =====================================
                 نعرض امتحان المحاضرة الأولى
                 داخل المحاضرة الثانية
                 قبل الفيديو
+                =====================================
               */
               const showFirstExamBeforeSecondLesson =
                 isThirdSecondaryCourse &&
@@ -289,10 +355,6 @@ function CourseContent({
                     firstLesson.exam1Key
                   )
                 );
-
-              const isThirdSecondLesson =
-                isThirdSecondaryCourse &&
-                lessonIndex === 1;
 
               return (
                 <div
@@ -314,11 +376,10 @@ function CourseContent({
                       "0 7px 20px rgba(0,0,0,0.06)",
                   }}
                 >
-                  {/*
-                    ==============================
-                    رأس المحاضرة
-                    ==============================
-                  */}
+                  {/* =====================================
+                      رأس المحاضرة
+                  ===================================== */}
+
                   <button
                     type="button"
                     onClick={() =>
@@ -451,11 +512,14 @@ function CourseContent({
                                 : "#8a6a52",
                           }}
                         >
-                          {unlocked
-                            ? "المحاضرة متاحة"
-                            : isThirdSecondLesson
-                              ? "فعّل المحاضرة بالكود أو أكمل الامتحان"
-                              : "اضغط لعرض تفاصيل المحاضرة"}
+                          {!unlocked
+                            ? isThirdSecondLesson
+                              ? "فعّل المحاضرة بالكود لفتح الامتحان"
+                              : "اضغط لعرض تفاصيل المحاضرة"
+                            : isThirdSecondLesson &&
+                                !isThirdLecture1ExamCompleted
+                              ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
+                              : "المحاضرة متاحة"}
                         </span>
                       </div>
                     </div>
@@ -467,11 +531,10 @@ function CourseContent({
                     )}
                   </button>
 
-                  {/*
-                    ==============================
-                    محتويات المحاضرة
-                    ==============================
-                  */}
+                  {/* =====================================
+                      محتويات المحاضرة
+                  ===================================== */}
+
                   {opened && (
                     <div
                       style={{
@@ -501,16 +564,20 @@ function CourseContent({
                         </p>
                       )}
 
-                      {/*
-                        =====================================
-                        امتحان المحاضرة الأولى
+                      {/* =====================================
+                          امتحان المحاضرة الأولى
 
-                        يظهر داخل المحاضرة الثانية.
-                        يفتح بمجرد المحاضرة الثانية
-                        تكون متاحة.
-                        بدون شرط 30%.
-                        =====================================
-                      */}
+                          داخل المحاضرة الثانية.
+
+                          بمجرد تفعيل المحاضرة بالكود:
+                          الامتحان يفتح.
+
+                          لا يحتاج مشاهدة 30%.
+
+                          بعد تسليمه:
+                          الفيديو يفتح.
+                      ===================================== */}
+
                       {showFirstExamBeforeSecondLesson && (
                         <button
                           type="button"
@@ -539,7 +606,11 @@ function CourseContent({
                         >
                           <div className="course-content-card-icon">
                             {unlocked ? (
-                              <FaClipboardCheck />
+                              isThirdLecture1ExamCompleted ? (
+                                <FaCheckCircle />
+                              ) : (
+                                <FaClipboardCheck />
+                              )
                             ) : (
                               <FaLock />
                             )}
@@ -552,20 +623,23 @@ function CourseContent({
                             </h3>
 
                             <p>
-                              {unlocked
-                                ? "اضغط لفتح امتحان المحاضرة الأولى"
-                                : "فعّل المحاضرة الثانية أولًا"}
+                              {!unlocked
+                                ? "فعّل المحاضرة الثانية بالكود أولًا"
+                                : isThirdLecture1ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك فتحه لمراجعة النتيجة"
+                                  : "ابدأ الامتحان - بعد تسليمه يفتح فيديو المحاضرة الثانية"}
                             </p>
                           </div>
+
+                          {isThirdLecture1ExamCompleted && (
+                            <FaCheckCircle className="course-content-completed-icon" />
+                          )}
                         </button>
                       )}
 
-                      {/*
-                        =================================
-                        فيديو المحاضرة + كود التفعيل
-                        جنب بعض
-                        =================================
-                      */}
+                      {/* =====================================
+                          فيديو المحاضرة + كود التفعيل
+                      ===================================== */}
 
                       {(hasVideo ||
                         !unlocked) && (
@@ -587,17 +661,20 @@ function CourseContent({
                               "14px",
                           }}
                         >
-                          {/* فيديو الشرح */}
+                          {/* =========================
+                              فيديو الشرح
+                          ========================= */}
+
                           {hasVideo && (
                             <button
                               type="button"
                               className={`course-content-card video-card ${
-                                unlocked
+                                canOpenVideo
                                   ? ""
                                   : "locked"
                               }`}
                               disabled={
-                                !unlocked
+                                !canOpenVideo
                               }
                               onClick={() =>
                                 onOpenVideo?.(
@@ -618,7 +695,7 @@ function CourseContent({
                               }}
                             >
                               <div className="course-content-card-icon">
-                                {unlocked ? (
+                                {canOpenVideo ? (
                                   <FaPlay />
                                 ) : (
                                   <FaLock />
@@ -632,9 +709,12 @@ function CourseContent({
                                 </h3>
 
                                 <p>
-                                  {unlocked
-                                    ? "اضغط لمشاهدة شرح المحاضرة"
-                                    : "فعّل المحاضرة بالكود لمشاهدة الفيديو"}
+                                  {!unlocked
+                                    ? "فعّل المحاضرة بالكود أولًا"
+                                    : isThirdSecondLesson &&
+                                        !isThirdLecture1ExamCompleted
+                                      ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
+                                      : "اضغط لمشاهدة شرح المحاضرة"}
                                 </p>
 
                                 {lesson.duration && (
@@ -655,14 +735,12 @@ function CourseContent({
                             </button>
                           )}
 
-                          {/*
-                            ===========================
-                            كود تفعيل المحاضرة
+                          {/* =====================================
+                              كود تفعيل المحاضرة
 
-                            يظهر لأي محاضرة مقفولة
-                            ومنها المحاضرة الثانية
-                            ===========================
-                          */}
+                              يظهر طالما المحاضرة مقفولة
+                          ===================================== */}
+
                           {!unlocked && (
                             <div
                               style={{
@@ -833,11 +911,10 @@ function CourseContent({
                       )}
 
                       <div className="course-content-items">
-                        {/*
-                          =========================
-                          PDF
-                          =========================
-                        */}
+                        {/* =========================
+                            PDF
+                        ========================= */}
+
                         {hasPdf && (
                           <button
                             type="button"
@@ -877,23 +954,24 @@ function CourseContent({
                           </button>
                         )}
 
-                        {/*
-                          =========================
-                          الواجب
-                          يفتح بعد 30%
-                          =========================
-                        */}
+                        {/* =====================================
+                            الواجب
+
+                            يظل كما هو:
+                            بعد مشاهدة 30% من الفيديو
+                        ===================================== */}
+
                         {hasHomework && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${
-                              unlocked &&
+                              canOpenVideo &&
                               watched
                                 ? "available"
                                 : "locked"
                             }`}
                             disabled={
-                              !unlocked ||
+                              !canOpenVideo ||
                               !watched
                             }
                             onClick={() =>
@@ -903,7 +981,7 @@ function CourseContent({
                             }
                           >
                             <div className="course-content-card-icon">
-                              {unlocked &&
+                              {canOpenVideo &&
                               watched ? (
                                 <FaClipboardCheck />
                               ) : (
@@ -920,11 +998,14 @@ function CourseContent({
                               <p>
                                 {!unlocked
                                   ? "المحاضرة مقفولة"
-                                  : !watched
-                                    ? "يفتح بعد مشاهدة 30% من فيديو الشرح"
-                                    : homeworkSubmitted
-                                      ? "تم تسليم الواجب"
-                                      : "اضغط لبدء الواجب"}
+                                  : isThirdSecondLesson &&
+                                      !isThirdLecture1ExamCompleted
+                                    ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
+                                    : !watched
+                                      ? "يفتح بعد مشاهدة 30% من فيديو الشرح"
+                                      : homeworkSubmitted
+                                        ? "تم تسليم الواجب"
+                                        : "اضغط لبدء الواجب"}
                               </p>
                             </div>
 
@@ -934,23 +1015,24 @@ function CourseContent({
                           </button>
                         )}
 
-                        {/*
-                          =========================
-                          فيديو حل الواجب
-                          يفتح بعد التسليم فقط
-                          =========================
-                        */}
+                        {/* =====================================
+                            فيديو حل الواجب
+
+                            يظل كما هو:
+                            بعد تسليم الواجب فقط
+                        ===================================== */}
+
                         {hasHomeworkSolution && (
                           <button
                             type="button"
                             className={`course-content-card video-card ${
-                              unlocked &&
+                              canOpenVideo &&
                               homeworkSubmitted
                                 ? ""
                                 : "locked"
                             }`}
                             disabled={
-                              !unlocked ||
+                              !canOpenVideo ||
                               !homeworkSubmitted
                             }
                             onClick={() =>
@@ -961,7 +1043,7 @@ function CourseContent({
                             }
                           >
                             <div className="course-content-card-icon">
-                              {unlocked &&
+                              {canOpenVideo &&
                               homeworkSubmitted ? (
                                 <FaPlay />
                               ) : (
@@ -978,22 +1060,24 @@ function CourseContent({
                               <p>
                                 {!unlocked
                                   ? "المحاضرة مقفولة"
-                                  : !homeworkSubmitted
-                                    ? "سلّم الواجب أولًا لفتح فيديو الحل"
-                                    : "اضغط لمشاهدة فيديو حل الواجب"}
+                                  : isThirdSecondLesson &&
+                                      !isThirdLecture1ExamCompleted
+                                    ? "سلّم الامتحان أولًا"
+                                    : !homeworkSubmitted
+                                      ? "سلّم الواجب أولًا لفتح فيديو الحل"
+                                      : "اضغط لمشاهدة فيديو حل الواجب"}
                               </p>
                             </div>
                           </button>
                         )}
 
-                        {/*
-                          =========================
-                          الامتحان الأول العادي
+                        {/* =====================================
+                            الامتحان الأول العادي
 
-                          في تالتة الجديدة:
-                          لا يظهر تحت المحاضرة الأولى.
-                          =========================
-                        */}
+                            تالتة الجديدة:
+                            مش بيظهر تحت المحاضرة الأولى
+                        ===================================== */}
+
                         {hasExam1 &&
                           !hideExam1InFirstLesson && (
                             <button
@@ -1042,11 +1126,10 @@ function CourseContent({
                             </button>
                           )}
 
-                        {/*
-                          =========================
-                          الامتحان الثاني القديم
-                          =========================
-                        */}
+                        {/* =========================
+                            الامتحان الثاني القديم
+                        ========================= */}
+
                         {hasExam2 && (
                           <button
                             type="button"
@@ -1095,9 +1178,10 @@ function CourseContent({
                         )}
                       </div>
 
-                      {/*
-                        مفيش أي محتوى
-                      */}
+                      {/* =========================
+                          لا يوجد محتوى
+                      ========================= */}
+
                       {!hasVideo &&
                         !hasPdf &&
                         !hasHomework &&

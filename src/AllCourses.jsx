@@ -4365,6 +4365,9 @@ function AllCourses({
           course={
             selectedCourse
           }
+          isThirdLecture1ExamCompleted={isExamCompleted(
+  THIRD_LECTURE_1_EXAM_ID
+)}
           onBack={
             closeCourseContent
           }
