@@ -75,20 +75,11 @@ function CourseContent({
 
   /*
     المحاضرة الأولى
-    هنستخدمها لعرض امتحانها
-    قبل فيديو المحاضرة الثانية
+    هنستخدم بيانات امتحانها
+    داخل المحاضرة الثانية
   */
   const firstLesson =
     lessons[0] || null;
-
-  const firstLessonWatched =
-    firstLesson &&
-    typeof getLessonWatched ===
-      "function"
-      ? getLessonWatched(
-          firstLesson
-        )
-      : false;
 
   function hasValue(value) {
     return (
@@ -284,8 +275,8 @@ function CourseContent({
 
               /*
                 نعرض امتحان المحاضرة الأولى
-                بشكل دائم داخل المحاضرة الثانية
-                وقبل فيديو المحاضرة الثانية
+                داخل المحاضرة الثانية
+                قبل الفيديو
               */
               const showFirstExamBeforeSecondLesson =
                 isThirdSecondaryCourse &&
@@ -299,12 +290,6 @@ function CourseContent({
                   )
                 );
 
-              /*
-                المحاضرة الثانية في تالتة
-                مقفولة بسبب شرط الامتحان،
-                لذلك لا نظهر خانة كود تفعيل
-                طالما القفل بسبب الامتحان.
-              */
               const isThirdSecondLesson =
                 isThirdSecondaryCourse &&
                 lessonIndex === 1;
@@ -469,7 +454,7 @@ function CourseContent({
                           {unlocked
                             ? "المحاضرة متاحة"
                             : isThirdSecondLesson
-                              ? "افتح التفاصيل وأكمل امتحان المحاضرة الأولى"
+                              ? "فعّل المحاضرة بالكود أو أكمل الامتحان"
                               : "اضغط لعرض تفاصيل المحاضرة"}
                         </span>
                       </div>
@@ -520,22 +505,22 @@ function CourseContent({
                         =====================================
                         امتحان المحاضرة الأولى
 
-                        يظهر دائمًا داخل المحاضرة الثانية
-                        قبل فيديو المحاضرة الثانية.
-
-                        لا يختفي بعد التسليم.
+                        يظهر داخل المحاضرة الثانية.
+                        يفتح بمجرد المحاضرة الثانية
+                        تكون متاحة.
+                        بدون شرط 30%.
                         =====================================
                       */}
                       {showFirstExamBeforeSecondLesson && (
                         <button
                           type="button"
                           className={`course-content-card exam-card ${
-                            firstLessonWatched
+                            unlocked
                               ? "available"
                               : "locked"
                           }`}
                           disabled={
-                            !firstLessonWatched
+                            !unlocked
                           }
                           onClick={() =>
                             onOpenExam?.(
@@ -553,7 +538,7 @@ function CourseContent({
                           }}
                         >
                           <div className="course-content-card-icon">
-                            {firstLessonWatched ? (
+                            {unlocked ? (
                               <FaClipboardCheck />
                             ) : (
                               <FaLock />
@@ -567,9 +552,9 @@ function CourseContent({
                             </h3>
 
                             <p>
-                              {firstLessonWatched
+                              {unlocked
                                 ? "اضغط لفتح امتحان المحاضرة الأولى"
-                                : "شاهد 30% من المحاضرة الأولى أولًا"}
+                                : "فعّل المحاضرة الثانية أولًا"}
                             </p>
                           </div>
                         </button>
@@ -578,6 +563,7 @@ function CourseContent({
                       {/*
                         =================================
                         فيديو المحاضرة + كود التفعيل
+                        جنب بعض
                         =================================
                       */}
 
@@ -622,7 +608,7 @@ function CourseContent({
                                 flex:
                                   unlocked
                                     ? "1 1 100%"
-                                    : "1 1 100%",
+                                    : "1 1 55%",
 
                                 minWidth:
                                   "260px",
@@ -648,9 +634,7 @@ function CourseContent({
                                 <p>
                                   {unlocked
                                     ? "اضغط لمشاهدة شرح المحاضرة"
-                                    : isThirdSecondLesson
-                                      ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
-                                      : "فعّل المحاضرة لمشاهدة الفيديو"}
+                                    : "فعّل المحاضرة بالكود لمشاهدة الفيديو"}
                                 </p>
 
                                 {lesson.duration && (
@@ -672,172 +656,179 @@ function CourseContent({
                           )}
 
                           {/*
-                            كود المحاضرة
+                            ===========================
+                            كود تفعيل المحاضرة
 
-                            لا يظهر للمحاضرة الثانية
-                            في تالتة لو قفلها سببه الامتحان
+                            يظهر لأي محاضرة مقفولة
+                            ومنها المحاضرة الثانية
+                            ===========================
                           */}
-                          {!unlocked &&
-                            !isThirdSecondLesson && (
+                          {!unlocked && (
+                            <div
+                              style={{
+                                flex:
+                                  "0 1 300px",
+
+                                width:
+                                  "300px",
+
+                                maxWidth:
+                                  "100%",
+
+                                minWidth:
+                                  "240px",
+
+                                padding:
+                                  "14px",
+
+                                boxSizing:
+                                  "border-box",
+
+                                borderRadius:
+                                  "14px",
+
+                                background:
+                                  "#f8f3ed",
+
+                                border:
+                                  "1px solid #eadbcd",
+
+                                display:
+                                  "flex",
+
+                                flexDirection:
+                                  "column",
+
+                                justifyContent:
+                                  "center",
+                              }}
+                            >
                               <div
                                 style={{
-                                  flex:
-                                    "1 1 300px",
+                                  display:
+                                    "flex",
 
-                                  minWidth:
-                                    "260px",
+                                  alignItems:
+                                    "center",
+
+                                  gap:
+                                    "7px",
+
+                                  marginBottom:
+                                    "10px",
+
+                                  color:
+                                    "#6f4930",
+
+                                  fontWeight:
+                                    "bold",
+                                }}
+                              >
+                                <FaKey />
+
+                                تفعيل المحاضرة بالكود
+                              </div>
+
+                              <input
+                                type="text"
+                                value={
+                                  lessonActivationCodes?.[
+                                    lesson.id
+                                  ] ||
+                                  ""
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  onLessonCodeChange?.(
+                                    lesson.id,
+                                    event
+                                      .target
+                                      .value
+                                  )
+                                }
+                                placeholder="اكتب كود المحاضرة"
+                                autoComplete="off"
+                                maxLength={
+                                  20
+                                }
+                                style={{
+                                  width:
+                                    "100%",
+
+                                  minHeight:
+                                    "44px",
 
                                   padding:
-                                    "16px",
+                                    "9px 12px",
+
+                                  marginBottom:
+                                    "8px",
 
                                   boxSizing:
                                     "border-box",
 
+                                  border:
+                                    "1px solid #d7c2ae",
+
                                   borderRadius:
-                                    "14px",
+                                    "10px",
 
                                   background:
-                                    "#f8f3ed",
+                                    "#fff",
 
-                                  border:
-                                    "1px solid #eadbcd",
+                                  color:
+                                    "#31271f",
 
-                                  display:
-                                    "flex",
+                                  WebkitTextFillColor:
+                                    "#31271f",
 
-                                  flexDirection:
-                                    "column",
+                                  caretColor:
+                                    "#31271f",
 
-                                  justifyContent:
+                                  fontSize:
+                                    "14px",
+
+                                  fontWeight:
+                                    "700",
+
+                                  textAlign:
                                     "center",
+
+                                  direction:
+                                    "ltr",
+                                }}
+                              />
+
+                              <button
+                                type="button"
+                                className="course-content-btn"
+                                disabled={
+                                  activatingLessonId ===
+                                  lesson.id
+                                }
+                                onClick={() =>
+                                  onActivateLessonCode?.(
+                                    lesson
+                                  )
+                                }
+                                style={{
+                                  width:
+                                    "100%",
+
+                                  minHeight:
+                                    "44px",
                                 }}
                               >
-                                <div
-                                  style={{
-                                    display:
-                                      "flex",
+                                <FaKey />
 
-                                    alignItems:
-                                      "center",
-
-                                    gap:
-                                      "7px",
-
-                                    marginBottom:
-                                      "11px",
-
-                                    color:
-                                      "#6f4930",
-
-                                    fontWeight:
-                                      "bold",
-                                  }}
-                                >
-                                  <FaKey />
-
-                                  تفعيل المحاضرة بالكود
-                                </div>
-
-                                <input
-                                  type="text"
-                                  value={
-                                    lessonActivationCodes?.[
-                                      lesson.id
-                                    ] ||
-                                    ""
-                                  }
-                                  onChange={(
-                                    event
-                                  ) =>
-                                    onLessonCodeChange?.(
-                                      lesson.id,
-                                      event
-                                        .target
-                                        .value
-                                    )
-                                  }
-                                  placeholder="اكتب كود المحاضرة"
-                                  autoComplete="off"
-                                  maxLength={
-                                    20
-                                  }
-                                  style={{
-                                    width:
-                                      "100%",
-
-                                    minHeight:
-                                      "48px",
-
-                                    padding:
-                                      "10px 14px",
-
-                                    marginBottom:
-                                      "9px",
-
-                                    boxSizing:
-                                      "border-box",
-
-                                    border:
-                                      "1px solid #d7c2ae",
-
-                                    borderRadius:
-                                      "11px",
-
-                                    background:
-                                      "#fff",
-
-                                    color:
-                                      "#31271f",
-
-                                    WebkitTextFillColor:
-                                      "#31271f",
-
-                                    caretColor:
-                                      "#31271f",
-
-                                    fontSize:
-                                      "15px",
-
-                                    fontWeight:
-                                      "700",
-
-                                    textAlign:
-                                      "center",
-
-                                    direction:
-                                      "ltr",
-                                  }}
-                                />
-
-                                <button
-                                  type="button"
-                                  className="course-content-btn"
-                                  disabled={
-                                    activatingLessonId ===
-                                    lesson.id
-                                  }
-                                  onClick={() =>
-                                    onActivateLessonCode?.(
-                                      lesson
-                                    )
-                                  }
-                                  style={{
-                                    width:
-                                      "100%",
-
-                                    minHeight:
-                                      "48px",
-                                  }}
-                                >
-                                  <FaKey />
-
-                                  {activatingLessonId ===
-                                  lesson.id
-                                    ? "جاري التفعيل..."
-                                    : "تفعيل الدرس بالكود"}
-                                </button>
-                              </div>
-                            )}
+                                {activatingLessonId ===
+                                lesson.id
+                                  ? "جاري التفعيل..."
+                                  : "تفعيل الدرس بالكود"}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -946,6 +937,7 @@ function CourseContent({
                         {/*
                           =========================
                           فيديو حل الواجب
+                          يفتح بعد التسليم فقط
                           =========================
                         */}
                         {hasHomeworkSolution && (
@@ -986,11 +978,9 @@ function CourseContent({
                               <p>
                                 {!unlocked
                                   ? "المحاضرة مقفولة"
-                                  : !watched
-                                    ? "شاهد 30% من فيديو الشرح أولًا"
-                                    : !homeworkSubmitted
-                                      ? "سلّم الواجب أولًا لفتح فيديو الحل"
-                                      : "اضغط لمشاهدة فيديو حل الواجب"}
+                                  : !homeworkSubmitted
+                                    ? "سلّم الواجب أولًا لفتح فيديو الحل"
+                                    : "اضغط لمشاهدة فيديو حل الواجب"}
                               </p>
                             </div>
                           </button>
@@ -998,12 +988,10 @@ function CourseContent({
 
                         {/*
                           =========================
-                          الامتحان الأول
+                          الامتحان الأول العادي
 
                           في تالتة الجديدة:
                           لا يظهر تحت المحاضرة الأولى.
-                          لأنه اتنقل ليظهر قبل
-                          فيديو المحاضرة الثانية.
                           =========================
                         */}
                         {hasExam1 &&

@@ -60,23 +60,26 @@ const THIRD_SECONDARY_COURSE_IDS = new Set([
   "third-term-course",
 ]);
 
-const THIRD_LECTURE_1_EXAM_KEY = "thirdLecture1Exam";
-const THIRD_LECTURE_1_EXAM_ID = "third-lecture-1-exam";
+const THIRD_LECTURE_1_EXAM_KEY =
+  "thirdLecture1Exam";
+
+const THIRD_LECTURE_1_EXAM_ID =
+  "third-lecture-1-exam";
 
 /*
   الكورسات المجانية القديمة تظل موجودة في الكود/Firestore
   ولكن لا تظهر للطلاب على المنصة.
 */
-const HIDDEN_LEGACY_FREE_COURSE_IDS = new Set([
-  "free-second-course",
-  "second-course-2",
-  "free-third-course",
-  "third-course-2",
-]);
+const HIDDEN_LEGACY_FREE_COURSE_IDS =
+  new Set([
+    "free-second-course",
+    "second-course-2",
+    "free-third-course",
+    "third-course-2",
+  ]);
 
 /*
   الكورس المجاني الجديد للصف الثاني الثانوي.
-  لا يحتاج كود تفعيل لأن السعر = 0.
 */
 const SECOND_FREE_INTRO_COURSE = {
   id: "second-free-intro-course",
@@ -129,8 +132,6 @@ const SECOND_FREE_INTRO_COURSE = {
 
 /*
   المحاضرة الثانية لتالتة ثانوي.
-  تضاف محليًا إلى كورس الشهر وكورس الترم
-  بدون تعديل بيانات Firestore القديمة.
 */
 const THIRD_SECOND_LECTURE = {
   id: "lesson-2",
@@ -377,11 +378,6 @@ function AllCourses({
         ? [...course.lessons]
         : [];
 
-    /*
-      لو المحاضرة الأولى موجودة نربط بها الامتحان.
-      ولو لم توجد لن ننشئ محاضرة أولى وهمية حتى لا نمسح
-      أو نغيّر محتوى Firestore الحالي.
-    */
     if (lessons.length > 0) {
       lessons[0] = {
         ...lessons[0],
@@ -749,7 +745,6 @@ function AllCourses({
   /*
     ============================
     تحديث selectedCourse
-    عند تحديث بيانات Firestore
     ============================
   */
 
@@ -923,8 +918,49 @@ function AllCourses({
 
   /*
     ============================
+    تقدم المحاضرة
+    ============================
+  */
+
+  function getLessonProgress(
+    courseId,
+    lessonId
+  ) {
+    return (
+      studentData
+        ?.courseProgress?.[
+        courseId
+      ]?.lessons?.[
+        lessonId
+      ] || {}
+    );
+  }
+
+  /*
+    هل المحاضرة اتفتحت بكود محاضرة؟
+  */
+
+  function isLessonManuallyUnlocked(
+    courseId,
+    lessonId
+  ) {
+    const progress =
+      getLessonProgress(
+        courseId,
+        lessonId
+      );
+
+    return (
+      progress.manualUnlocked ===
+        true ||
+      progress.lessonCodeUnlocked ===
+        true
+    );
+  }
+
+  /*
+    ============================
     صلاحية الاشتراك الأساسية
-    بدون شروط تسلسل المحاضرات
     ============================
   */
 
@@ -1000,9 +1036,11 @@ function AllCourses({
     ============================
     صلاحية المحاضرة النهائية
 
-    تالتة ثانوي:
-    المحاضرة الثانية لا تفتح
-    إلا بعد تسليم امتحان المحاضرة الأولى.
+    المحاضرة الثانية لتالتة:
+    تفتح بإحدى طريقتين:
+
+    1- تسليم امتحان المحاضرة الأولى
+    2- أو تفعيل المحاضرة الثانية بكود محاضرة
     ============================
   */
 
@@ -1010,48 +1048,50 @@ function AllCourses({
     course,
     lesson
   ) {
+    if (
+      !course ||
+      !lesson
+    ) {
+      return false;
+    }
+
     const basicAccess =
       hasBasicLessonAccess(
         course,
         lesson
       );
 
-    if (!basicAccess) {
-      return false;
-    }
+    const manuallyUnlocked =
+      isLessonManuallyUnlocked(
+        course.id,
+        lesson.id
+      );
 
     if (
       THIRD_SECONDARY_COURSE_IDS.has(
-        course?.id
+        course.id
       ) &&
-      lesson?.id ===
+      lesson.id ===
         "lesson-2"
     ) {
+      if (
+        manuallyUnlocked
+      ) {
+        return true;
+      }
+
+      if (!basicAccess) {
+        return false;
+      }
+
       return isExamCompleted(
         THIRD_LECTURE_1_EXAM_ID
       );
     }
 
-    return true;
-  }
-
-  /*
-    ============================
-    تقدم المحاضرة
-    ============================
-  */
-
-  function getLessonProgress(
-    courseId,
-    lessonId
-  ) {
     return (
-      studentData
-        ?.courseProgress?.[
-        courseId
-      ]?.lessons?.[
-        lessonId
-      ] || {}
+      basicAccess ||
+      manuallyUnlocked
     );
   }
 
@@ -1348,9 +1388,13 @@ function AllCourses({
     ============================
   */
 
-  async function activateCourseCode(course) {
+  async function activateCourseCode(
+    course
+  ) {
     const enteredCode = (
-      activationCodes[course.id] || ""
+      activationCodes[
+        course.id
+      ] || ""
     )
       .trim()
       .toUpperCase();
@@ -1369,30 +1413,38 @@ function AllCourses({
       return;
     }
 
-    setActivatingCourseId(course.id);
+    setActivatingCourseId(
+      course.id
+    );
 
     try {
-      const codeReference = doc(
-        db,
-        "accessCode",
-        enteredCode
-      );
+      const codeReference =
+        doc(
+          db,
+          "accessCode",
+          enteredCode
+        );
 
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
-        async (transaction) => {
+        async (
+          transaction
+        ) => {
           const codeSnapshot =
             await transaction.get(
               codeReference
             );
 
-          if (!codeSnapshot.exists()) {
+          if (
+            !codeSnapshot.exists()
+          ) {
             throw new Error(
               "CODE_NOT_FOUND"
             );
@@ -1406,7 +1458,9 @@ function AllCourses({
               studentReference
             );
 
-          if (!studentSnapshot.exists()) {
+          if (
+            !studentSnapshot.exists()
+          ) {
             throw new Error(
               "STUDENT_NOT_FOUND"
             );
@@ -1422,7 +1476,9 @@ function AllCourses({
               studentUid,
             });
 
-          if (!validation.valid) {
+          if (
+            !validation.valid
+          ) {
             if (
               codeData.active ===
               false
@@ -1463,7 +1519,8 @@ function AllCourses({
             "fullCourse";
 
           if (
-            accessType === "lesson"
+            accessType ===
+            "lesson"
           ) {
             throw new Error(
               "LESSON_CODE_INSIDE"
@@ -1475,7 +1532,9 @@ function AllCourses({
               "month",
               "term",
               "fullCourse",
-            ].includes(accessType)
+            ].includes(
+              accessType
+            )
           ) {
             throw new Error(
               "INVALID_ACCESS_TYPE"
@@ -1499,14 +1558,17 @@ function AllCourses({
             accessType;
 
           if (
-            oldAccess.active === true
+            oldAccess.active ===
+            true
           ) {
             if (
               oldAccess.accessType ===
                 "term" ||
-              accessType === "term"
+              accessType ===
+                "term"
             ) {
-              finalAccessType = "term";
+              finalAccessType =
+                "term";
             } else if (
               oldAccess.accessType ===
                 "month" ||
@@ -1518,17 +1580,21 @@ function AllCourses({
             }
           }
 
-          oldCourseAccess[course.id] = {
+          oldCourseAccess[
+            course.id
+          ] = {
             ...oldAccess,
 
             active: true,
 
-            courseId: course.id,
+            courseId:
+              course.id,
 
             courseTitle:
               course.title,
 
-            grade: course.grade,
+            grade:
+              course.grade,
 
             accessType:
               finalAccessType,
@@ -1544,7 +1610,8 @@ function AllCourses({
               oldAccess.activatedAt ||
               now,
 
-            lastActivatedAt: now,
+            lastActivatedAt:
+              now,
           };
 
           const oldSubscriptions =
@@ -1558,7 +1625,9 @@ function AllCourses({
 
           const subscriptionIndex =
             oldSubscriptions.findIndex(
-              (subscription) => {
+              (
+                subscription
+              ) => {
                 if (
                   typeof subscription ===
                   "string"
@@ -1579,13 +1648,17 @@ function AllCourses({
             );
 
           const subscriptionData = {
-            id: course.id,
+            id:
+              course.id,
 
-            courseId: course.id,
+            courseId:
+              course.id,
 
-            title: course.title,
+            title:
+              course.title,
 
-            grade: course.grade,
+            grade:
+              course.grade,
 
             image:
               course.image || "",
@@ -1601,11 +1674,13 @@ function AllCourses({
             accessType:
               finalAccessType,
 
-            activatedAt: now,
+            activatedAt:
+              now,
           };
 
           if (
-            subscriptionIndex >= 0
+            subscriptionIndex >=
+            0
           ) {
             oldSubscriptions[
               subscriptionIndex
@@ -1631,7 +1706,8 @@ function AllCourses({
             {
               used: true,
 
-              usedBy: studentUid,
+              usedBy:
+                studentUid,
 
               usedAt: now,
             }
@@ -1653,7 +1729,9 @@ function AllCourses({
       );
 
       setActivationCodes(
-        (previousCodes) => ({
+        (
+          previousCodes
+        ) => ({
           ...previousCodes,
 
           [course.id]: "",
@@ -1669,15 +1747,24 @@ function AllCourses({
         error
       );
 
-      showActivationError(error);
+      showActivationError(
+        error
+      );
     } finally {
-      setActivatingCourseId("");
+      setActivatingCourseId(
+        ""
+      );
     }
   }
 
   /*
     ============================
     تفعيل كود محاضرة
+
+    مهم:
+    الكود يقدر يفتح المحاضرة الثانية
+    حتى لو امتحان المحاضرة الأولى
+    لم يتم تسليمه بعد.
     ============================
   */
 
@@ -1707,53 +1794,38 @@ function AllCourses({
       return;
     }
 
-    /*
-      لو المحاضرة الثانية لتالتة ثانوي
-      مقفولة بسبب الامتحان السابق،
-      الكود لا يتخطى شرط الامتحان.
-    */
-    if (
-      THIRD_SECONDARY_COURSE_IDS.has(
-        course?.id
-      ) &&
-      lesson?.id ===
-        "lesson-2" &&
-      !isExamCompleted(
-        THIRD_LECTURE_1_EXAM_ID
-      )
-    ) {
-      window.alert(
-        "لازم تسلّم امتحان المحاضرة الأولى أولًا لفتح المحاضرة الثانية."
-      );
-      return;
-    }
-
     setActivatingLessonId(
       lesson.id
     );
 
     try {
-      const codeReference = doc(
-        db,
-        "accessCode",
-        enteredCode
-      );
+      const codeReference =
+        doc(
+          db,
+          "accessCode",
+          enteredCode
+        );
 
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
-        async (transaction) => {
+        async (
+          transaction
+        ) => {
           const codeSnapshot =
             await transaction.get(
               codeReference
             );
 
-          if (!codeSnapshot.exists()) {
+          if (
+            !codeSnapshot.exists()
+          ) {
             throw new Error(
               "CODE_NOT_FOUND"
             );
@@ -1767,7 +1839,9 @@ function AllCourses({
               studentReference
             );
 
-          if (!studentSnapshot.exists()) {
+          if (
+            !studentSnapshot.exists()
+          ) {
             throw new Error(
               "STUDENT_NOT_FOUND"
             );
@@ -1783,7 +1857,9 @@ function AllCourses({
               studentUid,
             });
 
-          if (!validation.valid) {
+          if (
+            !validation.valid
+          ) {
             if (
               codeData.active ===
               false
@@ -1829,15 +1905,16 @@ function AllCourses({
           }
 
           /*
-            كود المحاضرة ممكن يكون:
-            - مربوط بمحاضرة محددة
-            - أو كود مرن يفتح المحاضرة
-              اللي الطالب كتب الكود عندها
+            الكود ممكن يكون مربوط
+            بمحاضرة محددة أو مرن.
           */
-         const allowedCodeLessons =
+
+          const allowedCodeLessons =
             [];
 
-          if (codeData.lessonId) {
+          if (
+            codeData.lessonId
+          ) {
             allowedCodeLessons.push(
               codeData.lessonId
             );
@@ -1871,6 +1948,96 @@ function AllCourses({
           const now =
             Timestamp.now();
 
+          /*
+            ============================
+            حفظ فتح المحاضرة بالكود
+            في courseProgress
+            ============================
+          */
+
+          const courseProgress = {
+            ...(savedStudent.courseProgress ||
+              {}),
+          };
+
+          const savedCourseProgress = {
+            ...(courseProgress[
+              course.id
+            ] || {}),
+          };
+
+          const savedLessonsProgress = {
+            ...(savedCourseProgress.lessons ||
+              {}),
+          };
+
+          const oldLessonProgress = {
+            ...(savedLessonsProgress[
+              lesson.id
+            ] || {}),
+          };
+
+          if (
+            oldLessonProgress.manualUnlocked ===
+              true ||
+            oldLessonProgress.lessonCodeUnlocked ===
+              true
+          ) {
+            throw new Error(
+              "LESSON_ALREADY_OPEN"
+            );
+          }
+
+          savedLessonsProgress[
+            lesson.id
+          ] = {
+            ...oldLessonProgress,
+
+            lessonId:
+              lesson.id,
+
+            lessonTitle:
+              lesson.title,
+
+            manualUnlocked:
+              true,
+
+            lessonCodeUnlocked:
+              true,
+
+            activatedWithLessonCode:
+              enteredCode,
+
+            lessonCodeActivatedAt:
+              now,
+
+            lastActivatedAt:
+              now,
+          };
+
+          courseProgress[
+            course.id
+          ] = {
+            ...savedCourseProgress,
+
+            courseId:
+              course.id,
+
+            courseTitle:
+              course.title,
+
+            lessons:
+              savedLessonsProgress,
+
+            updatedAt: now,
+          };
+
+          /*
+            ============================
+            صلاحية الكورس / المحاضرة
+            ============================
+          */
+
           const oldCourseAccess = {
             ...(savedStudent.courseAccess ||
               {}),
@@ -1881,7 +2048,7 @@ function AllCourses({
               course.id
             ] || {};
 
-          if (
+          const hasWholeCourseAccess =
             oldAccess.active ===
               true &&
             (
@@ -1890,80 +2057,95 @@ function AllCourses({
               oldAccess.accessType ===
                 "term" ||
               oldAccess.accessType ===
-                "fullCourse"
-            )
-          ) {
-            throw new Error(
-              "LESSON_ALREADY_OPEN"
+                "fullCourse" ||
+              !oldAccess.accessType
             );
-          }
 
-          let lessonIds =
-            Array.isArray(
-              oldAccess.lessonIds
-            )
-              ? [
-                  ...oldAccess.lessonIds,
-                ]
-              : [];
+          /*
+            لو الطالب عنده شهر أو ترم بالفعل
+            لا نغيّر نوع اشتراكه.
+
+            بنسجل فقط إن المحاضرة اتفتحت
+            بالكود في courseProgress.
+          */
 
           if (
-            oldAccess.lessonId &&
-            !lessonIds.includes(
-              oldAccess.lessonId
-            )
+            !hasWholeCourseAccess
           ) {
-            lessonIds.push(
-              oldAccess.lessonId
-            );
+            let lessonIds =
+              Array.isArray(
+                oldAccess.lessonIds
+              )
+                ? [
+                    ...oldAccess.lessonIds,
+                  ]
+                : [];
+
+            if (
+              oldAccess.lessonId &&
+              !lessonIds.includes(
+                oldAccess.lessonId
+              )
+            ) {
+              lessonIds.push(
+                oldAccess.lessonId
+              );
+            }
+
+            if (
+              !lessonIds.includes(
+                lesson.id
+              )
+            ) {
+              lessonIds.push(
+                lesson.id
+              );
+            }
+
+            oldCourseAccess[
+              course.id
+            ] = {
+              ...oldAccess,
+
+              active: true,
+
+              courseId:
+                course.id,
+
+              courseTitle:
+                course.title,
+
+              grade:
+                course.grade,
+
+              accessType:
+                "lesson",
+
+              lessonId:
+                lessonIds[0] ||
+                lesson.id,
+
+              lessonIds,
+
+              activatedWithCode:
+                enteredCode,
+
+              activatedAt:
+                oldAccess.activatedAt ||
+                now,
+
+              lastActivatedAt:
+                now,
+            };
           }
-
-          if (
-            !lessonIds.includes(
-              lesson.id
-            )
-          ) {
-            lessonIds.push(
-              lesson.id
-            );
-          }
-
-          oldCourseAccess[course.id] = {
-            ...oldAccess,
-
-            active: true,
-
-            courseId: course.id,
-
-            courseTitle:
-              course.title,
-
-            grade: course.grade,
-
-            accessType: "lesson",
-
-            lessonId:
-              lessonIds[0] ||
-              lesson.id,
-
-            lessonIds,
-
-            activatedWithCode:
-              enteredCode,
-
-            activatedAt:
-              oldAccess.activatedAt ||
-              now,
-
-            lastActivatedAt: now,
-          };
 
           transaction.update(
             codeReference,
             {
               used: true,
 
-              usedBy: studentUid,
+              usedBy:
+                studentUid,
 
               usedAt: now,
             }
@@ -1975,17 +2157,23 @@ function AllCourses({
               courseAccess:
                 oldCourseAccess,
 
-              updatedAt: now,
+              courseProgress,
+
+              updatedAt:
+                now,
             }
           );
         }
       );
 
       setLessonActivationCodes(
-        (previousCodes) => ({
+        (
+          previousCodes
+        ) => ({
           ...previousCodes,
 
-          [lesson.id]: "",
+          [lesson.id]:
+            "",
         })
       );
 
@@ -2001,9 +2189,13 @@ function AllCourses({
         error
       );
 
-      showActivationError(error);
+      showActivationError(
+        error
+      );
     } finally {
-      setActivatingLessonId("");
+      setActivatingLessonId(
+        ""
+      );
     }
   }
 
@@ -2063,7 +2255,9 @@ function AllCourses({
     ============================
   */
 
-  function getCourseImage(course) {
+  function getCourseImage(
+    course
+  ) {
     if (
       course.id ===
       "second-free-intro-course"
@@ -2164,39 +2358,65 @@ function AllCourses({
   function openCourseContent(
     course
   ) {
-    setSelectedCourse(course);
+    setSelectedCourse(
+      course
+    );
 
-    setSelectedExam(null);
+    setSelectedExam(
+      null
+    );
 
-    setSelectedHomework(null);
+    setSelectedHomework(
+      null
+    );
 
     setSelectedHomeworkLesson(
       null
     );
 
-    window.scrollTo(0, 0);
+    window.scrollTo(
+      0,
+      0
+    );
   }
 
   function closeCourseContent() {
-    setSelectedCourse(null);
+    setSelectedCourse(
+      null
+    );
 
-    setSelectedExam(null);
+    setSelectedExam(
+      null
+    );
 
-    setSelectedHomework(null);
+    setSelectedHomework(
+      null
+    );
 
     setSelectedHomeworkLesson(
       null
     );
 
-    setActiveLesson(null);
+    setActiveLesson(
+      null
+    );
 
-    setYoutubePlayer(null);
+    setYoutubePlayer(
+      null
+    );
 
-    setVideoIsPlaying(false);
+    setVideoIsPlaying(
+      false
+    );
 
-    setWatchPercent(0);
+    setWatchPercent(
+      0
+    );
 
-    window.scrollTo(0, 0);
+    window.scrollTo(
+      0,
+      0
+    );
   }
 
   /*
@@ -2229,7 +2449,10 @@ function AllCourses({
         )
       ) {
         return parsedUrl.pathname
-          .replace("/", "")
+          .replace(
+            "/",
+            ""
+          )
           .split("?")[0];
       }
 
@@ -2244,7 +2467,9 @@ function AllCourses({
           )
         ) {
           return parsedUrl.pathname
-            .split("/embed/")[1]
+            .split(
+              "/embed/"
+            )[1]
             .split("/")[0];
         }
 
@@ -2254,7 +2479,9 @@ function AllCourses({
           )
         ) {
           return parsedUrl.pathname
-            .split("/shorts/")[1]
+            .split(
+              "/shorts/"
+            )[1]
             .split("/")[0];
         }
 
@@ -2274,6 +2501,13 @@ function AllCourses({
   /*
     ============================
     فتح فيديو المحاضرة
+
+    مفيش هنا شرط امتحان منفصل.
+    hasLessonAccess هي اللي بتحدد
+    هل المحاضرة مفتوحة أم لا.
+
+    لو التانية اتفتحت بالكود
+    هتفتح عادي.
     ============================
   */
 
@@ -2281,24 +2515,10 @@ function AllCourses({
     course,
     lesson
   ) {
-    if (!course || !lesson) {
-      return;
-    }
-
     if (
-      THIRD_SECONDARY_COURSE_IDS.has(
-        course.id
-      ) &&
-      lesson.id ===
-        "lesson-2" &&
-      !isExamCompleted(
-        THIRD_LECTURE_1_EXAM_ID
-      )
+      !course ||
+      !lesson
     ) {
-      window.alert(
-        "لازم تسلّم امتحان المحاضرة الأولى أولًا لفتح المحاضرة الثانية."
-      );
-
       return;
     }
 
@@ -2321,7 +2541,9 @@ function AllCourses({
       "";
 
     if (
-      !hasValue(lessonVideo)
+      !hasValue(
+        lessonVideo
+      )
     ) {
       return;
     }
@@ -2336,12 +2558,17 @@ function AllCourses({
           lessonVideo,
       },
 
-      mode: "lesson",
+      mode:
+        "lesson",
     });
 
-    setYoutubePlayer(null);
+    setYoutubePlayer(
+      null
+    );
 
-    setVideoIsPlaying(false);
+    setVideoIsPlaying(
+      false
+    );
 
     setWatchPercent(
       isLessonWatched(
@@ -2364,7 +2591,10 @@ function AllCourses({
     lesson,
     solutionUrl
   ) {
-    if (!course || !lesson) {
+    if (
+      !course ||
+      !lesson
+    ) {
       return;
     }
 
@@ -2381,6 +2611,11 @@ function AllCourses({
       return;
     }
 
+    /*
+      فيديو الحل لا يفتح
+      إلا بعد تسليم الواجب.
+    */
+
     if (
       !isHomeworkSubmitted(
         course,
@@ -2395,7 +2630,9 @@ function AllCourses({
     }
 
     if (
-      !hasValue(solutionUrl)
+      !hasValue(
+        solutionUrl
+      )
     ) {
       return;
     }
@@ -2414,29 +2651,47 @@ function AllCourses({
           solutionUrl,
       },
 
-      mode: "solution",
+      mode:
+        "solution",
     });
 
-    setYoutubePlayer(null);
+    setYoutubePlayer(
+      null
+    );
 
-    setVideoIsPlaying(false);
+    setVideoIsPlaying(
+      false
+    );
 
-    setWatchPercent(0);
+    setWatchPercent(
+      0
+    );
   }
 
   function closeLesson() {
-    setActiveLesson(null);
+    setActiveLesson(
+      null
+    );
 
-    setYoutubePlayer(null);
+    setYoutubePlayer(
+      null
+    );
 
-    setVideoIsPlaying(false);
+    setVideoIsPlaying(
+      false
+    );
 
-    setWatchPercent(0);
+    setWatchPercent(
+      0
+    );
   }
 
   /*
     ============================
     حفظ مشاهدة 30%
+
+    الـ 30% هنا تظل مطلوبة
+    للواجب داخل المحاضرة الثانية.
     ============================
   */
 
@@ -2466,18 +2721,23 @@ function AllCourses({
       lessonKey
     );
 
-    setIsSavingWatch(true);
+    setIsSavingWatch(
+      true
+    );
 
     try {
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
-        async (transaction) => {
+        async (
+          transaction
+        ) => {
           const studentSnapshot =
             await transaction.get(
               studentReference
@@ -2523,7 +2783,9 @@ function AllCourses({
             oldLessonProgress.videoWatched ===
             true;
 
-          savedLessons[lesson.id] = {
+          savedLessons[
+            lesson.id
+          ] = {
             ...oldLessonProgress,
 
             lessonId:
@@ -2595,7 +2857,9 @@ function AllCourses({
 
           const historyIndex =
             watchHistory.findIndex(
-              (historyItem) =>
+              (
+                historyItem
+              ) =>
                 historyItem?.courseId ===
                   course.id &&
                 historyItem?.lessonId ===
@@ -2639,7 +2903,8 @@ function AllCourses({
           };
 
           if (
-            historyIndex >= 0
+            historyIndex >=
+            0
           ) {
             watchHistory[
               historyIndex
@@ -2678,7 +2943,8 @@ function AllCourses({
                   : Number(
                       savedStudent.watchedVideos ||
                         0
-                    ) + 1,
+                    ) +
+                    1,
 
               updatedAt:
                 now,
@@ -2704,7 +2970,9 @@ function AllCourses({
         "حدث خطأ أثناء تسجيل المشاهدة."
       );
     } finally {
-      setIsSavingWatch(false);
+      setIsSavingWatch(
+        false
+      );
     }
   }
 
@@ -2748,7 +3016,8 @@ function AllCourses({
               (
                 currentSeconds /
                 durationSeconds
-              ) * 100;
+              ) *
+              100;
 
             setWatchPercent(
               Math.min(
@@ -2818,6 +3087,8 @@ function AllCourses({
   /*
     ============================
     فتح الواجب المكتوب
+
+    شرط الـ 30% يظل موجود.
     ============================
   */
 
@@ -2872,13 +3143,6 @@ function AllCourses({
       return;
     }
 
-    /*
-      واجبات المحاضرات الجديدة الخاصة بالكورس
-      نبحث عنها أولًا في الملف المنفصل.
-
-      الواجبات القديمة تظل تعمل من homeworkData
-      بدون تغيير نظام تسليم الواجب الخارجي.
-    */
     const selectedData =
       courseHomeworkData[
         homeworkKey
@@ -2910,11 +3174,17 @@ function AllCourses({
       lesson
     );
 
-    setHomeworkAnswers({});
+    setHomeworkAnswers(
+      {}
+    );
 
-    setHomeworkResult(null);
+    setHomeworkResult(
+      null
+    );
 
-    setActiveLesson(null);
+    setActiveLesson(
+      null
+    );
 
     window.scrollTo(
       0,
@@ -2933,7 +3203,9 @@ function AllCourses({
     }
 
     setHomeworkAnswers(
-      (previousAnswers) => ({
+      (
+        previousAnswers
+      ) => ({
         ...previousAnswers,
 
         [questionId]:
@@ -2970,7 +3242,9 @@ function AllCourses({
         selectedHomework.questions
       )
         ? selectedHomework.questions.filter(
-            (question) =>
+            (
+              question
+            ) =>
               question.cancelled !==
               true
           )
@@ -2989,14 +3263,17 @@ function AllCourses({
 
     const unanswered =
       activeQuestions.filter(
-        (question) =>
+        (
+          question
+        ) =>
           homeworkAnswers[
             question.id
           ] === undefined
       );
 
     if (
-      unanswered.length > 0
+      unanswered.length >
+      0
     ) {
       window.alert(
         `لسه عندك ${unanswered.length} سؤال بدون إجابة.`
@@ -3005,17 +3282,21 @@ function AllCourses({
       return;
     }
 
-    let correctAnswers = 0;
+    let correctAnswers =
+      0;
 
     activeQuestions.forEach(
-      (question) => {
+      (
+        question
+      ) => {
         if (
           homeworkAnswers[
             question.id
           ] ===
           question.correctAnswer
         ) {
-          correctAnswers += 1;
+          correctAnswers +=
+            1;
         }
       }
     );
@@ -3029,7 +3310,8 @@ function AllCourses({
             (
               correctAnswers /
               totalQuestions
-            ) * 100
+            ) *
+              100
           )
         : 0;
 
@@ -3047,7 +3329,9 @@ function AllCourses({
 
       await runTransaction(
         db,
-        async (transaction) => {
+        async (
+          transaction
+        ) => {
           const studentSnapshot =
             await transaction.get(
               studentReference
@@ -3167,7 +3451,9 @@ function AllCourses({
 
           const resultIndex =
             homeworkResults.findIndex(
-              (result) =>
+              (
+                result
+              ) =>
                 result?.courseId ===
                   selectedCourse.id &&
                 result?.lessonId ===
@@ -3226,7 +3512,8 @@ function AllCourses({
           };
 
           if (
-            resultIndex >= 0
+            resultIndex >=
+            0
           ) {
             homeworkResults[
               resultIndex
@@ -3259,7 +3546,8 @@ function AllCourses({
                   : Number(
                       savedStudent.completedHomeworks ||
                         0
-                    ) + 1,
+                    ) +
+                    1,
 
               updatedAt:
                 now,
@@ -3299,15 +3587,21 @@ function AllCourses({
   }
 
   function closeHomework() {
-    setSelectedHomework(null);
+    setSelectedHomework(
+      null
+    );
 
     setSelectedHomeworkLesson(
       null
     );
 
-    setHomeworkAnswers({});
+    setHomeworkAnswers(
+      {}
+    );
 
-    setHomeworkResult(null);
+    setHomeworkResult(
+      null
+    );
 
     window.scrollTo(
       0,
@@ -3318,6 +3612,16 @@ function AllCourses({
   /*
     ============================
     الامتحان
+
+    امتحان المحاضرة الأولى
+    الموجود داخل المحاضرة الثانية:
+
+    - لا يحتاج مشاهدة 30%
+    - يحتاج فقط أن المحاضرة الثانية
+      تكون مفتوحة / متفعلة.
+
+    باقي الامتحانات القديمة
+    تظل كما هي وتحتاج 30%.
     ============================
   */
 
@@ -3331,32 +3635,6 @@ function AllCourses({
       !lesson ||
       !examKey
     ) {
-      return;
-    }
-
-    if (
-      !hasLessonAccess(
-        course,
-        lesson
-      )
-    ) {
-      window.alert(
-        "المحاضرة مقفولة."
-      );
-
-      return;
-    }
-
-    if (
-      !isLessonWatched(
-        course.id,
-        lesson.id
-      )
-    ) {
-      window.alert(
-        "شاهد 30% من الفيديو أولًا."
-      );
-
       return;
     }
 
@@ -3384,6 +3662,96 @@ function AllCourses({
       }
     }
 
+    /*
+      هل ده امتحان المحاضرة الأولى
+      لتالتة ثانوي؟
+    */
+
+    const isThirdLectureOneExam =
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey ===
+          THIRD_LECTURE_1_EXAM_KEY ||
+        examKey ===
+          THIRD_LECTURE_1_EXAM_KEY
+      );
+
+    if (
+      isThirdLectureOneExam
+    ) {
+      /*
+        الامتحان ظاهر داخل المحاضرة الثانية،
+        لذلك بنفحص فتح المحاضرة الثانية نفسها
+        مش مشاهدة المحاضرة الأولى.
+      */
+
+      const secondLesson =
+        Array.isArray(
+          course.lessons
+        )
+          ? course.lessons.find(
+              (
+                courseLesson
+              ) =>
+                courseLesson?.id ===
+                "lesson-2"
+            )
+          : null;
+
+      if (
+        !secondLesson ||
+        !hasLessonAccess(
+          course,
+          secondLesson
+        )
+      ) {
+        window.alert(
+          "فعّل المحاضرة الثانية أولًا لفتح الامتحان."
+        );
+
+        return;
+      }
+
+      /*
+        مهم:
+        لا يوجد شرط مشاهدة 30%
+        لهذا الامتحان.
+      */
+    } else {
+      /*
+        باقي الامتحانات القديمة
+        تظل بنفس النظام القديم.
+      */
+
+      if (
+        !hasLessonAccess(
+          course,
+          lesson
+        )
+      ) {
+        window.alert(
+          "المحاضرة مقفولة."
+        );
+
+        return;
+      }
+
+      if (
+        !isLessonWatched(
+          course.id,
+          lesson.id
+        )
+      ) {
+        window.alert(
+          "شاهد 30% من الفيديو أولًا."
+        );
+
+        return;
+      }
+    }
+
     const selectedExamData =
       examsData[
         finalExamKey
@@ -3408,7 +3776,9 @@ function AllCourses({
       selectedExamData
     );
 
-    setActiveLesson(null);
+    setActiveLesson(
+      null
+    );
 
     window.scrollTo(
       0,
@@ -3417,7 +3787,9 @@ function AllCourses({
   }
 
   function closeExam() {
-    setSelectedExam(null);
+    setSelectedExam(
+      null
+    );
 
     window.scrollTo(
       0,
@@ -3432,7 +3804,9 @@ function AllCourses({
   */
 
   function renderVideoModal() {
-    if (!activeLesson) {
+    if (
+      !activeLesson
+    ) {
       return null;
     }
 
@@ -3468,16 +3842,22 @@ function AllCourses({
           <button
             type="button"
             className="course-lesson-close"
-            onClick={closeLesson}
+            onClick={
+              closeLesson
+            }
           >
             ×
           </button>
 
           <h2>
-            {activeLesson.lesson.title}
+            {
+              activeLesson.lesson
+                .title
+            }
           </h2>
 
-          {activeLesson.lesson.duration && (
+          {activeLesson.lesson
+            .duration && (
             <p className="course-lesson-duration">
               مدة الفيديو:{" "}
               {
@@ -3490,10 +3870,16 @@ function AllCourses({
           <div className="course-youtube-wrapper">
             {videoId ? (
               <YouTube
-                videoId={videoId}
+                videoId={
+                  videoId
+                }
                 opts={{
-                  width: "100%",
-                  height: "100%",
+                  width:
+                    "100%",
+
+                  height:
+                    "100%",
+
                   playerVars: {
                     autoplay: 1,
                     controls: 1,
@@ -3503,11 +3889,15 @@ function AllCourses({
                   },
                 }}
                 style={{
-                  width: "100%",
-                  height: "100%",
+                  width:
+                    "100%",
+                  height:
+                    "100%",
                 }}
                 iframeClassName="youtube-course-player"
-                onReady={(event) =>
+                onReady={(
+                  event
+                ) =>
                   setYoutubePlayer(
                     event.target
                   )
@@ -3519,7 +3909,8 @@ function AllCourses({
                     isMainLesson
                   ) {
                     setVideoIsPlaying(
-                      event.data === 1
+                      event.data ===
+                        1
                     );
                   }
                 }}
@@ -3565,10 +3956,10 @@ function AllCourses({
                   : lessonWatched
                     ? hasHomework
                       ? "✅ تم مشاهدة 30% وفتح الواجب."
-                      : "✅ تم مشاهدة 30% وفتح الامتحان."
+                      : "✅ تم مشاهدة 30%."
                     : hasHomework
                       ? "يتم فتح الواجب بعد مشاهدة 30% من فيديو الشرح."
-                      : "يتم فتح الامتحان بعد مشاهدة 30% من فيديو الشرح."}
+                      : "استمر في مشاهدة المحاضرة."}
               </p>
             </div>
           )}
@@ -3593,7 +3984,9 @@ function AllCourses({
         selectedHomework.questions
       )
         ? selectedHomework.questions.filter(
-            (question) =>
+            (
+              question
+            ) =>
               question.cancelled !==
               true
           )
@@ -3603,29 +3996,44 @@ function AllCourses({
       <section
         style={{
           width: "100%",
-          minHeight: "100vh",
-          padding: "25px",
-          direction: "rtl",
-          boxSizing: "border-box",
+          minHeight:
+            "100vh",
+          padding:
+            "25px",
+          direction:
+            "rtl",
+          boxSizing:
+            "border-box",
         }}
       >
         <button
           type="button"
-          onClick={closeHomework}
+          onClick={
+            closeHomework
+          }
           style={{
-            marginBottom: "25px",
-            padding: "12px 18px",
+            marginBottom:
+              "25px",
+            padding:
+              "12px 18px",
             border:
               "1px solid #8b6546",
-            borderRadius: "12px",
-            background: "#fffaf3",
-            color: "#6b472f",
-            fontWeight: "800",
-            cursor: "pointer",
+            borderRadius:
+              "12px",
+            background:
+              "#fffaf3",
+            color:
+              "#6b472f",
+            fontWeight:
+              "800",
+            cursor:
+              "pointer",
             display:
               "inline-flex",
-            alignItems: "center",
-            gap: "8px",
+            alignItems:
+              "center",
+            gap:
+              "8px",
           }}
         >
           <FaArrowRight />
@@ -3634,24 +4042,32 @@ function AllCourses({
 
         <div
           style={{
-            maxWidth: "900px",
-            margin: "0 auto",
+            maxWidth:
+              "900px",
+            margin:
+              "0 auto",
           }}
         >
           <div
             style={{
-              padding: "25px",
-              marginBottom: "25px",
-              borderRadius: "20px",
+              padding:
+                "25px",
+              marginBottom:
+                "25px",
+              borderRadius:
+                "20px",
               background:
                 "linear-gradient(135deg,#3d281c,#67472f)",
-              color: "#fff",
-              textAlign: "center",
+              color:
+                "#fff",
+              textAlign:
+                "center",
             }}
           >
             <FaClipboardCheck
               style={{
-                fontSize: "38px",
+                fontSize:
+                  "38px",
                 marginBottom:
                   "10px",
               }}
@@ -3679,7 +4095,9 @@ function AllCourses({
 
             <p>
               عدد الأسئلة:{" "}
-              {questions.length}
+              {
+                questions.length
+              }
             </p>
           </div>
 
@@ -3688,7 +4106,8 @@ function AllCourses({
               style={{
                 marginBottom:
                   "25px",
-                padding: "22px",
+                padding:
+                  "22px",
                 borderRadius:
                   "16px",
                 textAlign:
@@ -3739,8 +4158,7 @@ function AllCourses({
               </p>
 
               <p>
-                تم فتح فيديو حل
-                الواجب.
+                تم فتح فيديو حل الواجب.
               </p>
             </div>
           )}
@@ -3797,7 +4215,8 @@ function AllCourses({
                     style={{
                       display:
                         "grid",
-                      gap: "10px",
+                      gap:
+                        "10px",
                     }}
                   >
                     {question.options.map(
@@ -3874,14 +4293,18 @@ function AllCourses({
                 submitHomework
               }
               style={{
-                width: "100%",
-                padding: "16px",
-                border: "none",
+                width:
+                  "100%",
+                padding:
+                  "16px",
+                border:
+                  "none",
                 borderRadius:
                   "14px",
                 background:
                   "#6b472f",
-                color: "#fff",
+                color:
+                  "#fff",
                 fontSize:
                   "18px",
                 fontWeight:
@@ -3908,15 +4331,21 @@ function AllCourses({
     ============================
   */
 
-  if (selectedExam) {
+  if (
+    selectedExam
+  ) {
     return (
       <Exam
-        exam={selectedExam}
+        exam={
+          selectedExam
+        }
         currentStudent={
           studentData ||
           currentStudent
         }
-        onBack={closeExam}
+        onBack={
+          closeExam
+        }
       />
     );
   }
@@ -3927,7 +4356,9 @@ function AllCourses({
     ============================
   */
 
-  if (selectedCourse) {
+  if (
+    selectedCourse
+  ) {
     return (
       <>
         <CourseContent
@@ -4045,8 +4476,7 @@ function AllCourses({
             </h1>
 
             <p>
-              الكورسات المتاحة
-              لطلاب{" "}
+              الكورسات المتاحة لطلاب{" "}
               {studentGrade ||
                 "المرحلة الثانوية"}
             </p>
@@ -4060,8 +4490,7 @@ function AllCourses({
             </div>
 
             <h2>
-              جاري تحميل
-              الكورسات...
+              جاري تحميل الكورسات...
             </h2>
           </div>
         ) : coursesError ? (
@@ -4082,14 +4511,15 @@ function AllCourses({
             </div>
 
             <h2>
-              مفيش كورسات متاحة
-              حاليًا
+              مفيش كورسات متاحة حاليًا
             </h2>
           </div>
         ) : (
           <div className="courses-shop-grid">
             {visibleCourses.map(
-              (course) => {
+              (
+                course
+              ) => {
                 const paid =
                   isPaidCourse(
                     course
@@ -4107,9 +4537,11 @@ function AllCourses({
 
                 const hasWholeCourseAccess =
                   !paid ||
-                  (unlocked &&
+                  (
+                    unlocked &&
                     courseAccess?.accessType !==
-                      "lesson");
+                      "lesson"
+                  );
 
                 return (
                   <article
@@ -4283,9 +4715,7 @@ function AllCourses({
                               ) =>
                                 handleActivationCodeChange(
                                   course.id,
-                                  event
-                                    .target
-                                    .value
+                                  event.target.value
                                 )
                               }
                               placeholder="كود الشهر أو الترم"
