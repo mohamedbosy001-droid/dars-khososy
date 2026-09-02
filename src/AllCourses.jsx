@@ -29,39 +29,25 @@ import {
 } from "react-icons/fa";
 
 import CourseContent from "./CourseContent";
-
 import Exam from "./Exam";
-
 import examsData from "./examData";
-
 import homeworkData from "./homeworkData";
 
 /* الصور القديمة */
-
 import secondFreeCourse from "./assets/second-free-course.jpeg";
-
 import secondCourse2 from "./assets/second-course-2.jpeg";
-
 import thirdFreeCourse from "./assets/third-free-course.jpeg";
-
 import thirdCourse2 from "./assets/third-course-2.jpeg";
 
 /* صورة المحاضرة التمهيدية المجانية الجديدة */
-
 import secondTmhede from "./assets/second-tmhede.jpeg";
 
 /* صور الكورسات المدفوعة */
-
 import firstMonthCourse from "./assets/first-month.jpeg";
-
 import firstTermCourse from "./assets/first-term.jpeg";
-
 import secondMonthCourse from "./assets/second-month.jpeg";
-
 import secondTermCourse from "./assets/second-term.jpeg";
-
 import thirdMonthCourse from "./assets/third-month.jpeg";
-
 import thirdTermCourse from "./assets/third-term.jpeg";
 
 import "./AllCourses.css";
@@ -85,36 +71,55 @@ const HIDDEN_LEGACY_FREE_COURSE_IDS = new Set([
 */
 const SECOND_FREE_INTRO_COURSE = {
   id: "second-free-intro-course",
+
   title: "المحاضرة التمهيدية",
+
   grade: "الصف الثاني الثانوي",
+
   description:
     "المحاضرة التمهيدية في اللغة العربية للصف الثاني الثانوي.",
+
   price: 0,
+
   isFree: true,
+
   active: true,
+
   isPublished: true,
+
   status: "active",
+
   lessons: [
     {
       id: "lesson-1",
+
       title: "المحاضرة التمهيدية",
+
       description:
         "شاهد المحاضرة، وبعد مشاهدة 30% من الفيديو سيفتح الامتحان.",
+
       youtubeUrl:
         "https://www.youtube.com/watch?v=34F77pri94c",
+
       videoUrl:
         "https://www.youtube.com/watch?v=34F77pri94c",
-      videoTitle: "فيديو المحاضرة التمهيدية",
+
+      videoTitle:
+        "فيديو المحاضرة التمهيدية",
+
       exam1: true,
-      exam1Key: "secondFreeIntroExam",
-      exam1Title: "امتحان المحاضرة التمهيدية",
+
+      exam1Key:
+        "secondFreeIntroExam",
+
+      exam1Title:
+        "امتحان المحاضرة التمهيدية",
     },
   ],
 };
 
 function AllCourses({
   currentStudent,
-  targetCourseId = "",
 }) {
   const platformWhatsAppNumber =
     "201114497910";
@@ -300,7 +305,6 @@ function AllCourses({
 
   useEffect(() => {
     setIsLoading(true);
-
     setCoursesError("");
 
     const coursesReference =
@@ -419,7 +423,6 @@ function AllCourses({
                           "",
                       })
                     );
-              
                 } else {
                   const topVideo =
                     courseData.youtubeUrl ||
@@ -427,7 +430,8 @@ function AllCourses({
                     "";
 
                   const topPdf =
-                    courseData.pdfUrl || "";
+                    courseData.pdfUrl ||
+                    "";
 
                   const topHomework =
                     courseData.homeworkUrl ||
@@ -440,56 +444,72 @@ function AllCourses({
                     "";
 
                   const hasOldContent =
-                    hasValue(topVideo) ||
-                    hasValue(topPdf) ||
-                    hasValue(topHomework) ||
-                    hasValue(topSolution);
+                    hasValue(
+                      topVideo
+                    ) ||
+                    hasValue(
+                      topPdf
+                    ) ||
+                    hasValue(
+                      topHomework
+                    ) ||
+                    hasValue(
+                      topSolution
+                    );
 
-                  if (hasOldContent) {
-                    normalizedLessons = [
-                      {
-                        id: "lesson-1",
+                  if (
+                    hasOldContent
+                  ) {
+                    normalizedLessons =
+                      [
+                        {
+                          id:
+                            "lesson-1",
 
-                        title:
-                          courseData.lessonTitle ||
-                          "المحاضرة الأولى",
+                          title:
+                            courseData.lessonTitle ||
+                            "المحاضرة الأولى",
 
-                        description:
-                          courseData.lessonDescription ||
-                          "",
+                          description:
+                            courseData.lessonDescription ||
+                            "",
 
-                        youtubeUrl: topVideo,
+                          youtubeUrl:
+                            topVideo,
 
-                        videoUrl: topVideo,
+                          videoUrl:
+                            topVideo,
 
-                        pdfUrl: topPdf,
+                          pdfUrl:
+                            topPdf,
 
-                        duration:
-                          courseData.duration ||
-                          "",
+                          duration:
+                            courseData.duration ||
+                            "",
 
-                        homeworkUrl:
-                          topHomework,
+                          homeworkUrl:
+                            topHomework,
 
-                        homeworkPdfUrl:
-                          topHomework,
+                          homeworkPdfUrl:
+                            topHomework,
 
-                        homeworkSolutionUrl:
-                          topSolution,
+                          homeworkSolutionUrl:
+                            topSolution,
 
-                        solutionVideoUrl:
-                          topSolution,
+                          solutionVideoUrl:
+                            topSolution,
 
-                        homeworkKey:
-                          courseData.homeworkKey ||
-                          "",
-                      },
-                    ];
+                          homeworkKey:
+                            courseData.homeworkKey ||
+                            "",
+                        },
+                      ];
                   }
                 }
 
                 return {
-                  id: courseDocument.id,
+                  id:
+                    courseDocument.id,
 
                   ...courseData,
 
@@ -499,6 +519,12 @@ function AllCourses({
               }
             );
 
+          /*
+            نحتفظ بكورسات Firestore كما هي،
+            ونضيف الكورس المجاني الجديد محليًا.
+            لو اتضاف نفس الكورس في Firestore بعد كده
+            مش هيتكرر مرتين.
+          */
           setCourses([
             ...loadedCourses.filter(
               (course) =>
@@ -526,35 +552,39 @@ function AllCourses({
         }
       );
 
-    return () => unsubscribe();
+    return () =>
+      unsubscribe();
   }, []);
-
   /*
     ============================
-    متابعة الطالب
+    تحميل بيانات الطالب
     ============================
   */
 
   useEffect(() => {
     if (!studentUid) {
       setStudentData(
-        currentStudent || null
+        currentStudent ||
+          null
       );
 
       return undefined;
     }
 
-    const studentReference = doc(
-      db,
-      "students",
-      studentUid
-    );
+    const studentReference =
+      doc(
+        db,
+        "students",
+        studentUid
+      );
 
     const unsubscribe =
       onSnapshot(
         studentReference,
 
-        (studentSnapshot) => {
+        (
+          studentSnapshot
+        ) => {
           if (
             studentSnapshot.exists()
           ) {
@@ -575,7 +605,8 @@ function AllCourses({
         }
       );
 
-    return () => unsubscribe();
+    return () =>
+      unsubscribe();
   }, [
     studentUid,
     currentStudent,
@@ -623,8 +654,10 @@ function AllCourses({
           return (
             !isHiddenLegacyFreeCourse &&
             belongsToStudentGrade &&
-            (isLocalPreview ||
-              isAvailableOnline)
+            (
+              isLocalPreview ||
+              isAvailableOnline
+            )
           );
         }
       );
@@ -632,40 +665,6 @@ function AllCourses({
       courses,
       studentGrade,
     ]);
-
-  /*
-    ============================
-    فتح الكورس من لينك المشاركة
-    ============================
-  */
-
-  useEffect(() => {
-    if (
-      !targetCourseId ||
-      selectedCourse
-    ) {
-      return;
-    }
-
-    const targetCourse =
-      visibleCourses.find(
-        (course) =>
-          course.id ===
-          targetCourseId
-      );
-
-    if (targetCourse) {
-      setSelectedCourse(
-        targetCourse
-      );
-
-      window.scrollTo(0, 0);
-    }
-  }, [
-    targetCourseId,
-    visibleCourses,
-    selectedCourse,
-  ]);
 
   /*
     ============================
@@ -677,7 +676,9 @@ function AllCourses({
     course
   ) {
     return (
-      Number(course?.price) > 0
+      Number(
+        course?.price
+      ) > 0
     );
   }
 
@@ -703,7 +704,15 @@ function AllCourses({
       return false;
     }
 
-    if (!isPaidCourse(course)) {
+    /*
+      أي كورس سعره صفر يعتبر مجاني
+      ومش محتاج كود تفعيل
+    */
+    if (
+      !isPaidCourse(
+        course
+      )
+    ) {
       return true;
     }
 
@@ -718,18 +727,33 @@ function AllCourses({
     course,
     lesson
   ) {
-    if (!course || !lesson) {
+    if (
+      !course ||
+      !lesson
+    ) {
       return false;
     }
 
-    if (!isPaidCourse(course)) {
+    /*
+      المحاضرات داخل الكورس المجاني
+      مفتوحة تلقائيًا
+    */
+    if (
+      !isPaidCourse(
+        course
+      )
+    ) {
       return true;
     }
 
     const access =
-      getCourseAccess(course);
+      getCourseAccess(
+        course
+      );
 
-    if (!access?.active) {
+    if (
+      !access?.active
+    ) {
       return false;
     }
 
@@ -821,7 +845,10 @@ function AllCourses({
     course,
     lesson
   ) {
-    if (!course || !lesson) {
+    if (
+      !course ||
+      !lesson
+    ) {
       return false;
     }
 
@@ -909,7 +936,9 @@ function AllCourses({
       return "السعر غير محدد";
     }
 
-    if (numericPrice === 0) {
+    if (
+      numericPrice === 0
+    ) {
       return "0 جنيه — مجاني";
     }
 
@@ -922,7 +951,9 @@ function AllCourses({
     ============================
   */
 
-  function openCourseSubscription(course) {
+  function openCourseSubscription(
+    course
+  ) {
     const studentName =
       studentData?.fullName ||
       currentStudent?.fullName ||
@@ -933,21 +964,20 @@ function AllCourses({
       currentStudent?.studentPhone ||
       "";
 
-    const message = encodeURIComponent(
-      `السلام عليكم، أنا الطالب ${studentName}
-
+    const message =
+      encodeURIComponent(
+        `السلام عليكم، أنا الطالب ${studentName}
 رقم الهاتف: ${studentPhone}
-
 السنة الدراسية: ${
-        studentData?.grade ||
-        currentStudent?.grade ||
-        ""
-      }
-
+          studentData?.grade ||
+          currentStudent?.grade ||
+          ""
+        }
 وأرغب في الاشتراك في كورس: ${
-        course?.title || "الكورس"
-      }`
-    );
+          course?.title ||
+          "الكورس"
+        }`
+      );
 
     window.open(
       `https://wa.me/${platformWhatsAppNumber}?text=${message}`,
@@ -966,13 +996,19 @@ function AllCourses({
     courseId,
     value
   ) {
-    setActivationCodes((previousCodes) => ({
-      ...previousCodes,
+    setActivationCodes(
+      (previousCodes) => ({
+        ...previousCodes,
 
-      [courseId]: value
-        .toUpperCase()
-        .replace(/\s/g, ""),
-    }));
+        [courseId]:
+          value
+            .toUpperCase()
+            .replace(
+              /\s/g,
+              ""
+            ),
+      })
+    );
   }
 
   function handleLessonCodeChange(
@@ -983,9 +1019,13 @@ function AllCourses({
       (previousCodes) => ({
         ...previousCodes,
 
-        [lessonId]: value
-          .toUpperCase()
-          .replace(/\s/g, ""),
+        [lessonId]:
+          value
+            .toUpperCase()
+            .replace(
+              /\s/g,
+              ""
+            ),
       })
     );
   }
@@ -999,98 +1039,66 @@ function AllCourses({
   function validateBasicCode({
     codeData,
     course,
-    savedStudent,
+    studentUid,
   }) {
-    if (codeData.active !== true) {
-      throw new Error(
-        "CODE_INACTIVE"
-      );
-    }
-
-    if (codeData.used === true) {
-      throw new Error(
-        "CODE_ALREADY_USED"
-      );
-    }
-
-    const codeGrade =
-      normalizeGrade(
-        codeData.grade
-      );
-
-    const studentSavedGrade =
-      normalizeGrade(
-        savedStudent.grade
-      );
-
-    const courseGrade =
-      normalizeGrade(
-        course.grade
-      );
-
-    if (
-      codeGrade &&
-      codeGrade !== studentSavedGrade
-    ) {
-      throw new Error(
-        "WRONG_GRADE"
-      );
+    if (!codeData) {
+      return {
+        valid: false,
+        message:
+          "كود التفعيل غير موجود.",
+      };
     }
 
     if (
-      codeGrade &&
-      courseGrade &&
-      codeGrade !== courseGrade
+      codeData.active ===
+      false
     ) {
-      throw new Error(
-        "WRONG_COURSE"
-      );
+      return {
+        valid: false,
+        message:
+          "كود التفعيل غير مفعل.",
+      };
     }
 
-    const codeCourseId =
-      normalizeText(
-        codeData.courseId
-      );
+    if (
+      codeData.used === true ||
+      codeData.isUsed === true
+    ) {
+      return {
+        valid: false,
+        message:
+          "كود التفعيل مستخدم بالفعل.",
+      };
+    }
 
-    const currentCourseId =
-      normalizeText(
+    if (
+      codeData.courseId &&
+      codeData.courseId !==
         course.id
-      );
-
-    const codeCourseTitle =
-      normalizeText(
-        codeData.courseTitle
-      );
-
-    const currentCourseTitle =
-      normalizeText(
-        course.title
-      );
-
-    const sameCourseId =
-      Boolean(
-        codeCourseId &&
-          currentCourseId &&
-          codeCourseId ===
-            currentCourseId
-      );
-
-    const sameCourseTitle =
-      Boolean(
-        codeCourseTitle &&
-          currentCourseTitle &&
-          codeCourseTitle ===
-            currentCourseTitle
-      );
+    ) {
+      return {
+        valid: false,
+        message:
+          "كود التفعيل لا يخص هذا الكورس.",
+      };
+    }
 
     if (
-      !sameCourseId &&
-      !sameCourseTitle
+      codeData.studentUid &&
+      codeData.studentUid !==
+        studentUid
     ) {
-      throw new Error(
-        "WRONG_COURSE"
-      );
+      return {
+        valid: false,
+        message:
+          "كود التفعيل مخصص لطالب آخر.",
+      };
     }
+
+    return {
+      valid: true,
+      message: "",
+    };
   }
 
   /*
@@ -1099,13 +1107,9 @@ function AllCourses({
     ============================
   */
 
-  async function activateCourseCode(
-    course
-  ) {
+  async function activateCourseCode(course) {
     const enteredCode = (
-      activationCodes[
-        course.id
-      ] || ""
+      activationCodes[course.id] || ""
     )
       .trim()
       .toUpperCase();
@@ -1114,7 +1118,6 @@ function AllCourses({
       window.alert(
         "برجاء تسجيل الدخول أولًا."
       );
-
       return;
     }
 
@@ -1122,13 +1125,10 @@ function AllCourses({
       window.alert(
         "من فضلك اكتب كود التفعيل أولًا."
       );
-
       return;
     }
 
-    setActivatingCourseId(
-      course.id
-    );
+    setActivatingCourseId(course.id);
 
     try {
       const codeReference = doc(
@@ -1165,9 +1165,7 @@ function AllCourses({
               studentReference
             );
 
-          if (
-            !studentSnapshot.exists()
-          ) {
+          if (!studentSnapshot.exists()) {
             throw new Error(
               "STUDENT_NOT_FOUND"
             );
@@ -1230,8 +1228,7 @@ function AllCourses({
                 "term" ||
               accessType === "term"
             ) {
-              finalAccessType =
-                "term";
+              finalAccessType = "term";
             } else if (
               oldAccess.accessType ===
                 "month" ||
@@ -1243,21 +1240,17 @@ function AllCourses({
             }
           }
 
-          oldCourseAccess[
-            course.id
-          ] = {
+          oldCourseAccess[course.id] = {
             ...oldAccess,
 
             active: true,
 
-            courseId:
-              course.id,
+            courseId: course.id,
 
             courseTitle:
               course.title,
 
-            grade:
-              course.grade,
+            grade: course.grade,
 
             accessType:
               finalAccessType,
@@ -1273,8 +1266,7 @@ function AllCourses({
               oldAccess.activatedAt ||
               now,
 
-            lastActivatedAt:
-              now,
+            lastActivatedAt: now,
           };
 
           const oldSubscriptions =
@@ -1311,14 +1303,11 @@ function AllCourses({
           const subscriptionData = {
             id: course.id,
 
-            courseId:
-              course.id,
+            courseId: course.id,
 
-            title:
-              course.title,
+            title: course.title,
 
-            grade:
-              course.grade,
+            grade: course.grade,
 
             image:
               course.image || "",
@@ -1364,11 +1353,9 @@ function AllCourses({
             {
               used: true,
 
-              usedBy:
-                studentUid,
+              usedBy: studentUid,
 
-              usedAt:
-                now,
+              usedAt: now,
             }
           );
 
@@ -1381,8 +1368,7 @@ function AllCourses({
               subscribedCourses:
                 oldSubscriptions,
 
-              updatedAt:
-                now,
+              updatedAt: now,
             }
           );
         }
@@ -1405,9 +1391,7 @@ function AllCourses({
         error
       );
 
-      showActivationError(
-        error
-      );
+      showActivationError(error);
     } finally {
       setActivatingCourseId("");
     }
@@ -1435,7 +1419,6 @@ function AllCourses({
       window.alert(
         "برجاء تسجيل الدخول أولًا."
       );
-
       return;
     }
 
@@ -1443,7 +1426,6 @@ function AllCourses({
       window.alert(
         "اكتب كود المحاضرة أولًا."
       );
-
       return;
     }
 
@@ -1486,9 +1468,7 @@ function AllCourses({
               studentReference
             );
 
-          if (
-            !studentSnapshot.exists()
-          ) {
+          if (!studentSnapshot.exists()) {
             throw new Error(
               "STUDENT_NOT_FOUND"
             );
@@ -1513,12 +1493,10 @@ function AllCourses({
           }
 
           /*
-            الكود القديم ممكن يكون مربوط
-            بمحاضرة معينة.
-
-            والكود المرن الجديد لو مفيهوش
-            lessonId يفتح المحاضرة اللي
-            الطالب كتب الكود جنبها.
+            كود المحاضرة ممكن يكون:
+            - مربوط بمحاضرة محددة
+            - أو كود مرن يفتح المحاضرة
+              اللي الطالب كتب الكود عندها
           */
 
           const allowedCodeLessons =
@@ -1615,26 +1593,22 @@ function AllCourses({
             );
           }
 
-          oldCourseAccess[
-            course.id
-          ] = {
+          oldCourseAccess[course.id] = {
             ...oldAccess,
 
             active: true,
 
-            courseId:
-              course.id,
+            courseId: course.id,
 
             courseTitle:
               course.title,
 
-            grade:
-              course.grade,
+            grade: course.grade,
 
-            accessType:
-              "lesson",
+            accessType: "lesson",
 
             lessonId:
+              lessonIds[0] ||
               lesson.id,
 
             lessonIds,
@@ -1646,8 +1620,7 @@ function AllCourses({
               oldAccess.activatedAt ||
               now,
 
-            lastActivatedAt:
-              now,
+            lastActivatedAt: now,
           };
 
           transaction.update(
@@ -1655,17 +1628,9 @@ function AllCourses({
             {
               used: true,
 
-              usedBy:
-                studentUid,
+              usedBy: studentUid,
 
-              usedAt:
-                now,
-
-              usedForCourseId:
-                course.id,
-
-              usedForLessonId:
-                lesson.id,
+              usedAt: now,
             }
           );
 
@@ -1675,8 +1640,7 @@ function AllCourses({
               courseAccess:
                 oldCourseAccess,
 
-              updatedAt:
-                now,
+              updatedAt: now,
             }
           );
         }
@@ -1691,7 +1655,10 @@ function AllCourses({
       );
 
       window.alert(
-        "✅ تم فتح المحاضرة بنجاح."
+        `✅ تم فتح ${
+          lesson.title ||
+          "المحاضرة"
+        } بنجاح.`
       );
     } catch (error) {
       console.error(
@@ -1699,200 +1666,222 @@ function AllCourses({
         error
       );
 
-      showActivationError(
-        error
-      );
+      showActivationError(error);
     } finally {
       setActivatingLessonId("");
     }
   }
 
+  /*
+    ============================
+    رسائل أخطاء التفعيل
+    ============================
+  */
+
   function showActivationError(
     error
   ) {
-    switch (error?.message) {
-      case "CODE_NOT_FOUND":
-        window.alert(
-          "الكود غير موجود."
-        );
-        break;
+    const messages = {
+      CODE_NOT_FOUND:
+        "الكود غير صحيح.",
 
-      case "CODE_INACTIVE":
-        window.alert(
-          "الكود غير مفعل."
-        );
-        break;
+      CODE_INACTIVE:
+        "الكود غير مفعل.",
 
-      case "CODE_ALREADY_USED":
-        window.alert(
-          "الكود مستخدم بالفعل."
-        );
-        break;
+      CODE_ALREADY_USED:
+        "هذا الكود تم استخدامه من قبل.",
 
-      case "WRONG_GRADE":
-        window.alert(
-          "الكود غير مخصص للصف الدراسي الخاص بك."
-        );
-        break;
+      WRONG_GRADE:
+        "هذا الكود غير مخصص لسنتك الدراسية.",
 
-      case "WRONG_COURSE":
-        window.alert(
-          "الكود غير مخصص لهذا الكورس."
-        );
-        break;
+      WRONG_COURSE:
+        "هذا الكود غير مخصص لهذا الكورس.",
 
-      case "WRONG_LESSON":
-        window.alert(
-          "الكود غير مخصص لهذه المحاضرة."
-        );
-        break;
+      WRONG_LESSON:
+        "هذا الكود غير مخصص لهذه المحاضرة.",
 
-      case "NOT_LESSON_CODE":
-        window.alert(
-          "هذا الكود ليس كود محاضرة."
-        );
-        break;
+      NOT_LESSON_CODE:
+        "هذا كود شهر أو ترم. استخدمه في خانة التفعيل الموجودة خارج الكورس.",
 
-      case "LESSON_CODE_INSIDE":
-        window.alert(
-          "هذا كود محاضرة، استخدمه داخل المحاضرة."
-        );
-        break;
+      LESSON_CODE_INSIDE:
+        "هذا كود محاضرة. افتح محتوى الكورس واكتب الكود بجانب المحاضرة.",
 
-      case "INVALID_ACCESS_TYPE":
-        window.alert(
-          "نوع الكود غير صحيح."
-        );
-        break;
+      LESSON_ALREADY_OPEN:
+        "المحاضرة مفتوحة بالفعل ضمن اشتراكك.",
 
-      case "LESSON_ALREADY_OPEN":
-        window.alert(
-          "الكورس مفتوح بالفعل ولا تحتاج كود محاضرة."
-        );
-        break;
+      INVALID_ACCESS_TYPE:
+        "نوع كود التفعيل غير صحيح.",
+    };
 
-      case "STUDENT_NOT_FOUND":
-        window.alert(
-          "بيانات الطالب غير موجودة."
-        );
-        break;
-
-      default:
-        window.alert(
-          "حدث خطأ أثناء تفعيل الكود."
-        );
-    }
+    window.alert(
+      messages[error.message] ||
+        "حدث خطأ أثناء تفعيل الكود."
+    );
   }
 
   /*
     ============================
-    فتح الكورس
+    صور الكورسات
     ============================
   */
 
-  function openCourse(
+  function getCourseImage(course) {
+    /*
+      صورة الكورس المجاني الجديد
+    */
+    if (
+      course.id ===
+      "second-free-intro-course"
+    ) {
+      return secondTmhede;
+    }
+
+    if (
+      course.id ===
+      "first-month-course"
+    ) {
+      return firstMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "first-term-course"
+    ) {
+      return firstTermCourse;
+    }
+
+    if (
+      course.id ===
+      "second-month-course"
+    ) {
+      return secondMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "second-term-course"
+    ) {
+      return secondTermCourse;
+    }
+
+    if (
+      course.id ===
+      "third-month-course"
+    ) {
+      return thirdMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "third-term-course"
+    ) {
+      return thirdTermCourse;
+    }
+
+    if (
+      course.id ===
+      "second-course-2"
+    ) {
+      return secondCourse2;
+    }
+
+    if (
+      course.id ===
+      "third-course-2"
+    ) {
+      return thirdCourse2;
+    }
+
+    if (
+      course.id ===
+      "free-second-course"
+    ) {
+      return secondFreeCourse;
+    }
+
+    if (
+      course.id ===
+      "free-third-course"
+    ) {
+      return thirdFreeCourse;
+    }
+
+    if (
+      course.image &&
+      course.image !==
+        "default" &&
+      course.image.startsWith(
+        "http"
+      )
+    ) {
+      return course.image;
+    }
+
+    return secondFreeCourse;
+  }
+
+  /*
+    ============================
+    فتح / إغلاق محتوى الكورس
+    ============================
+  */
+
+  function openCourseContent(
     course
   ) {
-    if (!course) {
-      return;
-    }
+    setSelectedCourse(course);
 
-    setSelectedCourse(
-      course
-    );
+    setSelectedExam(null);
 
-    setSelectedExam(
-      null
-    );
-
-    setSelectedHomework(
-      null
-    );
+    setSelectedHomework(null);
 
     setSelectedHomeworkLesson(
       null
     );
 
-    setHomeworkAnswers(
-      {}
-    );
-
-    setHomeworkResult(
-      null
-    );
-
-    setActiveLesson(
-      null
-    );
-
-    setWatchPercent(
-      0
-    );
-
-    window.scrollTo(
-      0,
-      0
-    );
+    window.scrollTo(0, 0);
   }
 
-  function closeCourse() {
-    setSelectedCourse(
-      null
-    );
+  function closeCourseContent() {
+    setSelectedCourse(null);
 
-    setSelectedExam(
-      null
-    );
+    setSelectedExam(null);
 
-    setSelectedHomework(
-      null
-    );
+    setSelectedHomework(null);
 
     setSelectedHomeworkLesson(
       null
     );
 
-    setHomeworkAnswers(
-      {}
-    );
+    setActiveLesson(null);
 
-    setHomeworkResult(
-      null
-    );
+    setYoutubePlayer(null);
 
-    setActiveLesson(
-      null
-    );
+    setVideoIsPlaying(false);
 
-    setYoutubePlayer(
-      null
-    );
+    setWatchPercent(0);
 
-    setVideoIsPlaying(
-      false
-    );
-
-    setWatchPercent(
-      0
-    );
-
-    window.scrollTo(
-      0,
-      0
-    );
+    window.scrollTo(0, 0);
   }
 
   /*
     ============================
-    فيديو يوتيوب
+    استخراج ID فيديو YouTube
     ============================
   */
 
-  function extractYoutubeVideoId(
+  function extractYouTubeVideoId(
     url
   ) {
     if (!url) {
       return "";
+    }
+
+    if (
+      !url.includes("/") &&
+      !url.includes(".")
+    ) {
+      return url;
     }
 
     try {
@@ -1915,27 +1904,23 @@ function AllCourses({
         )
       ) {
         if (
-          parsedUrl.pathname.startsWith(
-            "/shorts/"
-          )
-        ) {
-          return parsedUrl.pathname
-            .split(
-              "/shorts/"
-            )[1]
-            ?.split("/")[0];
-        }
-
-        if (
-          parsedUrl.pathname.startsWith(
+          parsedUrl.pathname.includes(
             "/embed/"
           )
         ) {
           return parsedUrl.pathname
-            .split(
-              "/embed/"
-            )[1]
-            ?.split("/")[0];
+            .split("/embed/")[1]
+            .split("/")[0];
+        }
+
+        if (
+          parsedUrl.pathname.includes(
+            "/shorts/"
+          )
+        ) {
+          return parsedUrl.pathname
+            .split("/shorts/")[1]
+            .split("/")[0];
         }
 
         return (
@@ -1944,224 +1929,196 @@ function AllCourses({
           ) || ""
         );
       }
-
-      return "";
     } catch {
       return "";
     }
+
+    return "";
   }
 
-  function handleYoutubeReady(
-    event
+  /*
+    ============================
+    فتح فيديو المحاضرة
+    ============================
+  */
+
+  function openLesson(
+    course,
+    lesson
   ) {
-    setYoutubePlayer(
-      event.target
-    );
-  }
-
-  function handleYoutubeStateChange(
-    event
-  ) {
-    const playerState =
-      event.data;
-
-    setVideoIsPlaying(
-      playerState === 1
-    );
-
-    if (
-      playerState === 0 ||
-      playerState === 2
-    ) {
-      saveCurrentWatchProgress();
-    }
-  }
-
-  useEffect(() => {
-    if (
-      !youtubePlayer ||
-      !activeLesson ||
-      !selectedCourse ||
-      !videoIsPlaying
-    ) {
-      return undefined;
+    if (!course || !lesson) {
+      return;
     }
 
-    const interval =
-      window.setInterval(
-        async () => {
-          try {
-            const duration =
-              await youtubePlayer.getDuration();
-
-            const currentTime =
-              await youtubePlayer.getCurrentTime();
-
-            if (
-              !duration ||
-              duration <= 0
-            ) {
-              return;
-            }
-
-            const percent =
-              Math.min(
-                100,
-                Math.max(
-                  0,
-                  Math.floor(
-                    (currentTime /
-                      duration) *
-                      100
-                  )
-                )
-              );
-
-            setWatchPercent(
-              percent
-            );
-
-            if (
-              percent >=
-              REQUIRED_WATCH_PERCENT
-            ) {
-              saveWatchProgress({
-                course:
-                  selectedCourse,
-
-                lesson:
-                  activeLesson,
-
-                watchedPercent:
-                  percent,
-
-                markWatched:
-                  true,
-              });
-            }
-          } catch (error) {
-            console.error(
-              "YouTube progress error:",
-              error
-            );
-          }
-        },
-        5000
-      );
-
-    return () =>
-      window.clearInterval(
-        interval
-      );
-  }, [
-    youtubePlayer,
-    activeLesson,
-    selectedCourse,
-    videoIsPlaying,
-  ]);
-
-  async function saveCurrentWatchProgress() {
     if (
-      !youtubePlayer ||
-      !selectedCourse ||
-      !activeLesson
+      !hasLessonAccess(
+        course,
+        lesson
+      )
+    ) {
+      window.alert(
+        "المحاضرة مقفولة. اكتب كود المحاضرة أولًا."
+      );
+      return;
+    }
+
+    const lessonVideo =
+      lesson.youtubeUrl ||
+      lesson.videoUrl ||
+      "";
+
+    if (
+      !hasValue(lessonVideo)
     ) {
       return;
     }
 
-    try {
-      const duration =
-        await youtubePlayer.getDuration();
+    setActiveLesson({
+      course,
 
-      const currentTime =
-        await youtubePlayer.getCurrentTime();
+      lesson: {
+        ...lesson,
 
-      if (
-        !duration ||
-        duration <= 0
-      ) {
-        return;
-      }
+        youtubeUrl:
+          lessonVideo,
+      },
 
-      const percent =
-        Math.min(
-          100,
-          Math.max(
-            0,
-            Math.floor(
-              (currentTime /
-                duration) *
-                100
-            )
-          )
-        );
+      mode: "lesson",
+    });
 
-      setWatchPercent(
-        percent
-      );
+    setYoutubePlayer(null);
 
-      await saveWatchProgress({
-        course:
-          selectedCourse,
+    setVideoIsPlaying(false);
 
-        lesson:
-          activeLesson,
-
-        watchedPercent:
-          percent,
-
-        markWatched:
-          percent >=
-          REQUIRED_WATCH_PERCENT,
-      });
-    } catch (error) {
-      console.error(
-        "Save current watch progress error:",
-        error
-      );
-    }
+    setWatchPercent(
+      isLessonWatched(
+        course.id,
+        lesson.id
+      )
+        ? REQUIRED_WATCH_PERCENT
+        : 0
+    );
   }
 
-  async function saveWatchProgress({
+  /*
+    ============================
+    فتح فيديو حل الواجب
+    ============================
+  */
+
+  function openHomeworkSolution(
     course,
     lesson,
-    watchedPercent,
-    markWatched,
-  }) {
+    solutionUrl
+  ) {
+    if (!course || !lesson) {
+      return;
+    }
+
     if (
-      !studentUid ||
-      !course ||
-      !lesson
+      !hasLessonAccess(
+        course,
+        lesson
+      )
+    ) {
+      window.alert(
+        "المحاضرة مقفولة."
+      );
+      return;
+    }
+
+    if (
+      !isHomeworkSubmitted(
+        course,
+        lesson
+      )
+    ) {
+      window.alert(
+        "لازم تسلّم الواجب الأول قبل مشاهدة فيديو الحل."
+      );
+      return;
+    }
+
+    if (
+      !hasValue(solutionUrl)
     ) {
       return;
     }
 
-    const savingKey =
+    setActiveLesson({
+      course,
+
+      lesson: {
+        ...lesson,
+
+        title:
+          lesson.homeworkSolutionTitle ||
+          "فيديو حل الواجب",
+
+        youtubeUrl:
+          solutionUrl,
+      },
+
+      mode: "solution",
+    });
+
+    setYoutubePlayer(null);
+
+    setVideoIsPlaying(false);
+
+    setWatchPercent(0);
+  }
+
+  function closeLesson() {
+    setActiveLesson(null);
+
+    setYoutubePlayer(null);
+
+    setVideoIsPlaying(false);
+
+    setWatchPercent(0);
+  }
+
+  /*
+    ============================
+    حفظ مشاهدة 30%
+    ============================
+  */
+
+  async function saveWatchCompletion(
+    course,
+    lesson,
+    currentSeconds,
+    durationSeconds
+  ) {
+    const lessonKey =
       `${course.id}-${lesson.id}`;
 
     if (
+      !studentUid ||
       savingWatchRef.current.has(
-        savingKey
+        lessonKey
+      ) ||
+      isLessonWatched(
+        course.id,
+        lesson.id
       )
     ) {
       return;
     }
 
     savingWatchRef.current.add(
-      savingKey
+      lessonKey
     );
 
-    setIsSavingWatch(
-      true
-    );
+    setIsSavingWatch(true);
 
     try {
-      const studentReference =
-        doc(
-          db,
-          "students",
-          studentUid
-        );
+      const studentReference = doc(
+        db,
+        "students",
+        studentUid
+      );
 
       await runTransaction(
         db,
@@ -2174,379 +2131,422 @@ function AllCourses({
           if (
             !studentSnapshot.exists()
           ) {
-            return;
+            throw new Error(
+              "Student not found."
+            );
           }
 
           const savedStudent =
             studentSnapshot.data();
 
-          const oldCourseProgress = {
+          const now =
+            Timestamp.now();
+
+          const courseProgress = {
             ...(savedStudent.courseProgress ||
               {}),
           };
 
-          const currentCourseProgress = {
-            ...(oldCourseProgress[
+          const savedCourseProgress = {
+            ...(courseProgress[
               course.id
             ] || {}),
           };
 
-          const lessonsProgress = {
-            ...(currentCourseProgress.lessons ||
+          const savedLessons = {
+            ...(savedCourseProgress.lessons ||
               {}),
           };
 
-          const currentLessonProgress = {
-            ...(lessonsProgress[
+          const oldLessonProgress = {
+            ...(savedLessons[
               lesson.id
             ] || {}),
           };
 
-          const previousPercent =
-            Number(
-              currentLessonProgress.watchedPercent
-            ) || 0;
+          const wasAlreadyWatched =
+            oldLessonProgress.videoWatched ===
+            true;
 
-          const finalPercent =
-            Math.max(
-              previousPercent,
-              Number(
-                watchedPercent
-              ) || 0
-            );
+          savedLessons[lesson.id] = {
+            ...oldLessonProgress,
 
-          lessonsProgress[
-            lesson.id
-          ] = {
-            ...currentLessonProgress,
+            lessonId:
+              lesson.id,
 
-            watchedPercent:
-              finalPercent,
+            lessonTitle:
+              lesson.title,
 
             videoWatched:
-              currentLessonProgress.videoWatched ===
-                true ||
-              markWatched ===
-                true ||
-              finalPercent >=
-                REQUIRED_WATCH_PERCENT,
+              true,
+
+            watchedPercent:
+              REQUIRED_WATCH_PERCENT,
+
+            watchedSeconds:
+              Math.floor(
+                currentSeconds
+              ),
+
+            videoDurationSeconds:
+              Math.floor(
+                durationSeconds
+              ),
+
+            homeworkUnlocked:
+              true,
+
+            examUnlocked:
+              true,
+
+            homeworkSolutionUnlocked:
+              oldLessonProgress.homeworkSolutionUnlocked ===
+              true,
+
+            firstWatchedAt:
+              oldLessonProgress.firstWatchedAt ||
+              now,
 
             lastWatchedAt:
-              Timestamp.now(),
+              now,
           };
 
-          currentCourseProgress.lessons =
-            lessonsProgress;
-
-          oldCourseProgress[
+          courseProgress[
             course.id
-          ] =
-            currentCourseProgress;
+          ] = {
+            ...savedCourseProgress,
+
+            courseId:
+              course.id,
+
+            courseTitle:
+              course.title,
+
+            lessons:
+              savedLessons,
+
+            updatedAt:
+              now,
+          };
+
+          const watchHistory =
+            Array.isArray(
+              savedStudent.watchHistory
+            )
+              ? [
+                  ...savedStudent.watchHistory,
+                ]
+              : [];
+
+          const historyIndex =
+            watchHistory.findIndex(
+              (historyItem) =>
+                historyItem?.courseId ===
+                  course.id &&
+                historyItem?.lessonId ===
+                  lesson.id
+            );
+
+          const historyItem = {
+            id:
+              `${course.id}-${lesson.id}`,
+
+            courseId:
+              course.id,
+
+            courseName:
+              course.title,
+
+            lessonId:
+              lesson.id,
+
+            lessonName:
+              lesson.title,
+
+            watchedPercent:
+              REQUIRED_WATCH_PERCENT,
+
+            watchedSeconds:
+              Math.floor(
+                currentSeconds
+              ),
+
+            videoDurationSeconds:
+              Math.floor(
+                durationSeconds
+              ),
+
+            videoWatched:
+              true,
+
+            lastWatch:
+              now,
+          };
+
+          if (
+            historyIndex >= 0
+          ) {
+            watchHistory[
+              historyIndex
+            ] = {
+              ...watchHistory[
+                historyIndex
+              ],
+
+              ...historyItem,
+            };
+          } else {
+            watchHistory.push({
+              ...historyItem,
+
+              firstWatch:
+                now,
+
+              watchCount:
+                1,
+            });
+          }
 
           transaction.update(
             studentReference,
             {
-              courseProgress:
-                oldCourseProgress,
+              courseProgress,
+
+              watchHistory,
+
+              watchedVideos:
+                wasAlreadyWatched
+                  ? Number(
+                      savedStudent.watchedVideos ||
+                        0
+                    )
+                  : Number(
+                      savedStudent.watchedVideos ||
+                        0
+                    ) + 1,
 
               updatedAt:
-                Timestamp.now(),
+                now,
             }
           );
         }
       );
+
+      setWatchPercent(
+        REQUIRED_WATCH_PERCENT
+      );
     } catch (error) {
       console.error(
-        "Watch progress save error:",
+        "Error saving video watch:",
         error
       );
-    } finally {
+
       savingWatchRef.current.delete(
-        savingKey
+        lessonKey
       );
 
-      setIsSavingWatch(
-        false
+      window.alert(
+        "حدث خطأ أثناء تسجيل المشاهدة."
       );
+    } finally {
+      setIsSavingWatch(false);
     }
   }
 
   /*
     ============================
-    فتح الامتحان
+    متابعة الفيديو
     ============================
   */
 
-  function openExam(
-    course,
-    lesson,
-    examKey
+  useEffect(() => {
+    if (
+      !youtubePlayer ||
+      !activeLesson ||
+      !videoIsPlaying ||
+      activeLesson.mode !==
+        "lesson"
+    ) {
+      return undefined;
+    }
+
+    const intervalId =
+      window.setInterval(
+        async () => {
+          try {
+            const currentSeconds =
+              await youtubePlayer.getCurrentTime();
+
+            const durationSeconds =
+              await youtubePlayer.getDuration();
+
+            if (
+              !durationSeconds ||
+              !Number.isFinite(
+                durationSeconds
+              )
+            ) {
+              return;
+            }
+
+            const calculatedPercent =
+              (
+                currentSeconds /
+                durationSeconds
+              ) * 100;
+
+            setWatchPercent(
+              Math.min(
+                Math.round(
+                  calculatedPercent
+                ),
+                100
+              )
+            );
+
+            if (
+              calculatedPercent >=
+              REQUIRED_WATCH_PERCENT
+            ) {
+              await saveWatchCompletion(
+                activeLesson.course,
+                activeLesson.lesson,
+                currentSeconds,
+                durationSeconds
+              );
+            }
+          } catch (error) {
+            console.error(
+              "YouTube progress error:",
+              error
+            );
+          }
+        },
+        1000
+      );
+
+    return () =>
+      window.clearInterval(
+        intervalId
+      );
+  }, [
+    youtubePlayer,
+    activeLesson,
+    videoIsPlaying,
+  ]);
+
+  /*
+    ============================
+    PDF
+    ============================
+  */
+
+  function openPdf(
+    lesson
   ) {
     if (
-      !course ||
-      !lesson
+      !lesson ||
+      !hasValue(
+        lesson.pdfUrl
+      )
     ) {
       return;
     }
 
-    const watched =
-      isLessonWatched(
-        course.id,
-        lesson.id
-      );
-
-    if (!watched) {
-      window.alert(
-        `لازم تشاهد ${REQUIRED_WATCH_PERCENT}% على الأقل من الفيديو علشان الامتحان يفتح.`
-      );
-
-      return;
-    }
-
-    const exam =
-      examsData?.[
-        examKey
-      ];
-
-    if (!exam) {
-      window.alert(
-        "الامتحان غير متاح حاليًا."
-      );
-
-      return;
-    }
-
-    setSelectedExam(
-      exam
-    );
-
-    setSelectedHomework(
-      null
-    );
-
-    window.scrollTo(
-      0,
-      0
-    );
-  }
-
-  function closeExam() {
-    setSelectedExam(null);
-
-    window.scrollTo(
-      0,
-      0
+    window.open(
+      lesson.pdfUrl,
+      "_blank",
+      "noopener,noreferrer"
     );
   }
 
   /*
     ============================
-    فتح الفيديو
+    فتح الواجب المكتوب
     ============================
   */
 
-  function openLessonVideo(
-    course,
-    lesson,
-    mode = "lesson"
+  function openHomework(
+    lesson
   ) {
     if (
-      !course ||
+      !selectedCourse ||
       !lesson
     ) {
       return;
     }
 
     if (
-      mode === "lesson" &&
       !hasLessonAccess(
-        course,
+        selectedCourse,
         lesson
       )
     ) {
       window.alert(
-        "المحاضرة غير مفعلة على حسابك."
+        "المحاضرة مقفولة."
       );
-
       return;
     }
 
-    setActiveLesson({
-      course,
-      lesson,
-      mode,
-    });
-
-    setYoutubePlayer(
-      null
-    );
-
-    setVideoIsPlaying(
-      false
-    );
-
-    const progress =
-      getLessonProgress(
-        course.id,
+    if (
+      !isLessonWatched(
+        selectedCourse.id,
         lesson.id
+      )
+    ) {
+      window.alert(
+        "شاهد 30% من فيديو الشرح أولًا."
       );
-
-    setWatchPercent(
-      Number(
-        progress.watchedPercent
-      ) || 0
-    );
-  }
-
-  function closeLesson() {
-    saveCurrentWatchProgress();
-
-    setActiveLesson(
-      null
-    );
-
-    setYoutubePlayer(
-      null
-    );
-
-    setVideoIsPlaying(
-      false
-    );
-
-    setWatchPercent(
-      0
-    );
-  }
-
-  /*
-    ============================
-    الواجب
-    ============================
-  */
-
-  function getHomeworkForLesson(
-    lesson
-  ) {
-    if (!lesson) {
-      return null;
+      return;
     }
 
     const homeworkKey =
-      lesson.homeworkKey ||
-      "";
+      lesson.homeworkKey;
 
     if (
-      homeworkKey &&
-      homeworkData?.[
+      !hasValue(
         homeworkKey
-      ]
-    ) {
-      return homeworkData[
-        homeworkKey
-      ];
-    }
-
-    return null;
-  }
-
-  function openHomework(
-    course,
-    lesson
-  ) {
-    if (
-      !course ||
-      !lesson
-    ) {
-      return;
-    }
-
-    const watched =
-      isLessonWatched(
-        course.id,
-        lesson.id
-      );
-
-    if (!watched) {
-      window.alert(
-        `شاهد ${REQUIRED_WATCH_PERCENT}% من الفيديو أولًا علشان الواجب يفتح.`
-      );
-
-      return;
-    }
-
-    const homework =
-      getHomeworkForLesson(
-        lesson
-      );
-
-    if (!homework) {
-      window.alert(
-        "الواجب غير متاح حاليًا."
-      );
-
-      return;
-    }
-
-    if (
-      isHomeworkSubmitted(
-        course,
-        lesson
       )
     ) {
       window.alert(
-        "تم تسليم الواجب بالفعل."
+        "لم يتم ربط واجب بهذه المحاضرة."
+      );
+      return;
+    }
+
+    const selectedData =
+      homeworkData[
+        homeworkKey
+      ];
+
+    if (
+      !selectedData
+    ) {
+      window.alert(
+        "تعذر تحميل بيانات الواجب."
+      );
+
+      console.error(
+        "Homework key not found:",
+        homeworkKey
       );
 
       return;
     }
 
     setSelectedHomework(
-      homework
-    );
-
-    setSelectedHomeworkLesson({
-      course,
-      lesson,
-    });
-
-    setHomeworkAnswers(
-      {}
-    );
-
-    setHomeworkResult(
-      null
-    );
-
-    setSelectedExam(
-      null
-    );
-
-    setActiveLesson(
-      null
-    );
-
-    window.scrollTo(
-      0,
-      0
-    );
-  }
-
-  function closeHomework() {
-    setSelectedHomework(
-      null
+      selectedData
     );
 
     setSelectedHomeworkLesson(
-      null
+      lesson
     );
 
-    setHomeworkAnswers(
-      {}
-    );
+    setHomeworkAnswers({});
 
-    setHomeworkResult(
-      null
-    );
+    setHomeworkResult(null);
+
+    setActiveLesson(null);
 
     window.scrollTo(
       0,
@@ -2558,6 +2558,12 @@ function AllCourses({
     questionId,
     optionIndex
   ) {
+    if (
+      homeworkResult
+    ) {
+      return;
+    }
+
     setHomeworkAnswers(
       (previousAnswers) => ({
         ...previousAnswers,
@@ -2578,30 +2584,41 @@ function AllCourses({
     if (
       !selectedHomework ||
       !selectedHomeworkLesson ||
-      !studentUid
+      !selectedCourse
     ) {
       return;
     }
 
-    const questions =
+    if (!studentUid) {
+      window.alert(
+        "برجاء تسجيل الدخول أولًا."
+      );
+      return;
+    }
+
+    const activeQuestions =
       Array.isArray(
         selectedHomework.questions
       )
-        ? selectedHomework.questions
+        ? selectedHomework.questions.filter(
+            (question) =>
+              question.cancelled !==
+              true
+          )
         : [];
 
     if (
-      questions.length === 0
+      activeQuestions.length ===
+      0
     ) {
       window.alert(
         "لا توجد أسئلة في الواجب."
       );
-
       return;
     }
 
-    const unansweredQuestions =
-      questions.filter(
+    const unanswered =
+      activeQuestions.filter(
         (question) =>
           homeworkAnswers[
             question.id
@@ -2609,149 +2626,47 @@ function AllCourses({
       );
 
     if (
-      unansweredQuestions.length >
-      0
+      unanswered.length > 0
     ) {
-      const continueSubmit =
-        window.confirm(
-          `يوجد ${unansweredQuestions.length} سؤال بدون إجابة. هل تريد تسليم الواجب؟`
-        );
-
-      if (!continueSubmit) {
-        return;
-      }
-    }
-
-    const confirmSubmit =
-      window.confirm(
-        "هل أنت متأكد من تسليم الواجب؟ لن تتمكن من المحاولة مرة أخرى إلا إذا أعاد المدرس فتحه."
+      window.alert(
+        `لسه عندك ${unanswered.length} سؤال بدون إجابة.`
       );
-
-    if (!confirmSubmit) {
       return;
     }
+
+    let correctAnswers = 0;
+
+    activeQuestions.forEach(
+      (question) => {
+        if (
+          homeworkAnswers[
+            question.id
+          ] ===
+          question.correctAnswer
+        ) {
+          correctAnswers += 1;
+        }
+      }
+    );
+
+    const totalQuestions =
+      activeQuestions.length;
+
+    const percentage =
+      totalQuestions > 0
+        ? Math.round(
+            (
+              correctAnswers /
+              totalQuestions
+            ) * 100
+          )
+        : 0;
 
     setIsSubmittingHomework(
       true
     );
 
     try {
-      const {
-        course,
-        lesson,
-      } =
-        selectedHomeworkLesson;
-
-      let score = 0;
-
-      const reviewedAnswers =
-        questions.map(
-          (
-            question,
-            index
-          ) => {
-            const selectedOption =
-              homeworkAnswers[
-                question.id
-              ];
-
-            const correctOption =
-              question.correctAnswer;
-
-            const isCorrect =
-              selectedOption ===
-              correctOption;
-
-            if (isCorrect) {
-              score += 1;
-            }
-
-            return {
-              questionId:
-                question.id,
-
-              questionNumber:
-                index + 1,
-
-              question:
-                question.question,
-
-              options:
-                Array.isArray(
-                  question.options
-                )
-                  ? question.options
-                  : [],
-
-              selectedOption:
-                selectedOption ??
-                null,
-
-              correctOption,
-
-              isCorrect,
-            };
-          }
-        );
-
-      const totalQuestions =
-        questions.length;
-
-      const percentage =
-        totalQuestions > 0
-          ? Math.round(
-              (score /
-                totalQuestions) *
-                100
-            )
-          : 0;
-
-      const now =
-        Timestamp.now();
-
-      const resultData = {
-        homeworkId:
-          selectedHomework.id ||
-          lesson.homeworkKey ||
-          `${course.id}-${lesson.id}-homework`,
-
-        homeworkTitle:
-          selectedHomework.title ||
-          lesson.homeworkTitle ||
-          "واجب المحاضرة",
-
-        courseId:
-          course.id,
-
-        courseTitle:
-          course.title,
-
-        lessonId:
-          lesson.id,
-
-        lessonTitle:
-          lesson.title,
-
-        score,
-
-        totalQuestions,
-
-        percentage,
-
-        completed: true,
-
-        submitted: true,
-
-        homeworkSubmitted:
-          true,
-
-        submittedAt:
-          now,
-
-        answers:
-          reviewedAnswers,
-      };
-
       const studentReference =
         doc(
           db,
@@ -2778,92 +2693,48 @@ function AllCourses({
           const savedStudent =
             studentSnapshot.data();
 
-          /*
-            ----------------------------
-            homeworkResults
-            ----------------------------
-          */
+          const now =
+            Timestamp.now();
 
-          const oldHomeworkResults =
-            Array.isArray(
-              savedStudent.homeworkResults
-            )
-              ? [
-                  ...savedStudent.homeworkResults,
-                ]
-              : [];
-
-          const existingResultIndex =
-            oldHomeworkResults.findIndex(
-              (result) =>
-                result?.courseId ===
-                  course.id &&
-                result?.lessonId ===
-                  lesson.id
-            );
-
-          if (
-            existingResultIndex >=
-            0
-          ) {
-            const oldResult =
-              oldHomeworkResults[
-                existingResultIndex
-              ];
-
-            if (
-              oldResult?.completed ===
-                true ||
-              oldResult?.submitted ===
-                true
-            ) {
-              throw new Error(
-                "HOMEWORK_ALREADY_SUBMITTED"
-              );
-            }
-
-            oldHomeworkResults[
-              existingResultIndex
-            ] =
-              resultData;
-          } else {
-            oldHomeworkResults.push(
-              resultData
-            );
-          }
-
-          /*
-            ----------------------------
-            courseProgress
-            ----------------------------
-          */
-
-          const oldCourseProgress = {
+          const courseProgress = {
             ...(savedStudent.courseProgress ||
               {}),
           };
 
-          const currentCourseProgress = {
-            ...(oldCourseProgress[
-              course.id
+          const oldCourseProgress = {
+            ...(courseProgress[
+              selectedCourse.id
             ] || {}),
           };
 
           const lessonsProgress = {
-            ...(currentCourseProgress.lessons ||
+            ...(oldCourseProgress.lessons ||
               {}),
           };
 
-          const lessonProgress = {
+          const oldLessonProgress = {
             ...(lessonsProgress[
-              lesson.id
+              selectedHomeworkLesson.id
             ] || {}),
           };
 
+          const wasAlreadySubmitted =
+            oldLessonProgress.homeworkSubmitted ===
+            true;
+
           lessonsProgress[
-            lesson.id
+            selectedHomeworkLesson.id
           ] = {
-            ...lessonProgress,
+            ...oldLessonProgress,
+
+            lessonId:
+              selectedHomeworkLesson.id,
+
+            lessonTitle:
+              selectedHomeworkLesson.title,
+
+            homeworkUnlocked:
+              true,
 
             homeworkSubmitted:
               true,
@@ -2874,8 +2745,17 @@ function AllCourses({
             homeworkDone:
               true,
 
+            homeworkSolutionUnlocked:
+              true,
+
+            homeworkId:
+              selectedHomework.id,
+
+            homeworkTitle:
+              selectedHomework.title,
+
             homeworkScore:
-              score,
+              correctAnswers,
 
             homeworkTotal:
               totalQuestions,
@@ -2885,36 +2765,130 @@ function AllCourses({
 
             homeworkSubmittedAt:
               now,
-
-            homeworkSolutionUnlocked:
-              true,
           };
 
-          currentCourseProgress.lessons =
-            lessonsProgress;
+          courseProgress[
+            selectedCourse.id
+          ] = {
+            ...oldCourseProgress,
 
-          oldCourseProgress[
-            course.id
-          ] =
-            currentCourseProgress;
+            courseId:
+              selectedCourse.id,
 
-          const completedHomeworks =
-            Number(
-              savedStudent.completedHomeworks
-            ) || 0;
+            courseTitle:
+              selectedCourse.title,
+
+            lessons:
+              lessonsProgress,
+
+            updatedAt:
+              now,
+          };
+
+          const homeworkResults =
+            Array.isArray(
+              savedStudent.homeworkResults
+            )
+              ? [
+                  ...savedStudent.homeworkResults,
+                ]
+              : [];
+
+          const resultIndex =
+            homeworkResults.findIndex(
+              (result) =>
+                result?.courseId ===
+                  selectedCourse.id &&
+                result?.lessonId ===
+                  selectedHomeworkLesson.id &&
+                result?.homeworkId ===
+                  selectedHomework.id
+            );
+
+          const resultData = {
+            id:
+              `${selectedCourse.id}-${selectedHomeworkLesson.id}-${selectedHomework.id}`,
+
+            homeworkId:
+              selectedHomework.id,
+
+            homeworkTitle:
+              selectedHomework.title,
+
+            courseId:
+              selectedCourse.id,
+
+            courseTitle:
+              selectedCourse.title,
+
+            lessonId:
+              selectedHomeworkLesson.id,
+
+            lessonTitle:
+              selectedHomeworkLesson.title,
+
+            grade:
+              selectedCourse.grade,
+
+            score:
+              correctAnswers,
+
+            total:
+              totalQuestions,
+
+            percentage,
+
+            answers:
+              homeworkAnswers,
+
+            submitted:
+              true,
+
+            completed:
+              true,
+
+            homeworkSubmitted:
+              true,
+
+            submittedAt:
+              now,
+          };
+
+          if (
+            resultIndex >= 0
+          ) {
+            homeworkResults[
+              resultIndex
+            ] = {
+              ...homeworkResults[
+                resultIndex
+              ],
+
+              ...resultData,
+            };
+          } else {
+            homeworkResults.push(
+              resultData
+            );
+          }
 
           transaction.update(
             studentReference,
             {
-              homeworkResults:
-                oldHomeworkResults,
+              courseProgress,
 
-              courseProgress:
-                oldCourseProgress,
+              homeworkResults,
 
               completedHomeworks:
-                completedHomeworks +
-                1,
+                wasAlreadySubmitted
+                  ? Number(
+                      savedStudent.completedHomeworks ||
+                        0
+                    )
+                  : Number(
+                      savedStudent.completedHomeworks ||
+                        0
+                    ) + 1,
 
               updatedAt:
                 now,
@@ -2923,9 +2897,15 @@ function AllCourses({
         }
       );
 
-      setHomeworkResult(
-        resultData
-      );
+      setHomeworkResult({
+        score:
+          correctAnswers,
+
+        total:
+          totalQuestions,
+
+        percentage,
+      });
 
       window.scrollTo(
         0,
@@ -2937,25 +2917,9 @@ function AllCourses({
         error
       );
 
-      if (
-        error?.message ===
-        "HOMEWORK_ALREADY_SUBMITTED"
-      ) {
-        window.alert(
-          "تم تسليم الواجب بالفعل."
-        );
-      } else if (
-        error?.message ===
-        "STUDENT_NOT_FOUND"
-      ) {
-        window.alert(
-          "بيانات الطالب غير موجودة."
-        );
-      } else {
-        window.alert(
-          "حدث خطأ أثناء تسليم الواجب."
-        );
-      }
+      window.alert(
+        "حدث خطأ أثناء تسليم الواجب."
+      );
     } finally {
       setIsSubmittingHomework(
         false
@@ -2963,489 +2927,502 @@ function AllCourses({
     }
   }
 
+  function closeHomework() {
+    setSelectedHomework(null);
+
+    setSelectedHomeworkLesson(
+      null
+    );
+
+    setHomeworkAnswers({});
+
+    setHomeworkResult(null);
+
+    window.scrollTo(
+      0,
+      0
+    );
+  }
+
   /*
     ============================
-    صور الكورسات
+    الامتحان
     ============================
   */
 
-  function getCourseImage(
-    course
+  function openExam(
+    course,
+    lesson,
+    examKey
   ) {
-    if (!course) {
-      return secondFreeCourse;
+    if (
+      !course ||
+      !lesson ||
+      !examKey
+    ) {
+      return;
     }
-
-    const savedImage =
-      typeof course.image ===
-      "string"
-        ? course.image.trim()
-        : "";
 
     if (
-      savedImage &&
-      savedImage !==
-        "default"
-    ) {
-      return savedImage;
-    }
-
-    switch (course.id) {
-      case "first-month-course":
-        return firstMonthCourse;
-
-      case "first-term-course":
-        return firstTermCourse;
-
-      case "second-month-course":
-        return secondMonthCourse;
-
-      case "second-term-course":
-        return secondTermCourse;
-
-      case "third-month-course":
-        return thirdMonthCourse;
-
-      case "third-term-course":
-        return thirdTermCourse;
-
-      case "second-free-intro-course":
-        return secondTmhede;
-
-      case "free-second-course":
-        return secondFreeCourse;
-
-      case "second-course-2":
-        return secondCourse2;
-
-      case "free-third-course":
-        return thirdFreeCourse;
-
-      case "third-course-2":
-        return thirdCourse2;
-
-      default:
-        return secondFreeCourse;
-    }
-  }
-
-  /*
-    ============================
-    في حالة الامتحان
-    ============================
-  */
-
-  if (
-    selectedExam &&
-    selectedCourse
-  ) {
-    return (
-      <Exam
-        exam={selectedExam}
-        currentStudent={
-          studentData ||
-          currentStudent
-        }
-        onBack={closeExam}
-      />
-    );
-  }
-
-  /*
-    ============================
-    شاشة الواجب
-    ============================
-  */
-
-  if (
-    selectedHomework &&
-    selectedHomeworkLesson
-  ) {
-    const questions =
-      Array.isArray(
-        selectedHomework.questions
-      )
-        ? selectedHomework.questions
-        : [];
-
-    return (
-      <div className="all-courses-page">
-        <div className="all-courses-container">
-          <button
-            type="button"
-            className="course-back-button"
-            onClick={
-              closeHomework
-            }
-          >
-            <FaArrowRight />
-
-            الرجوع إلى الكورس
-          </button>
-
-          <section className="homework-page-card">
-            <div className="homework-page-heading">
-              <span className="homework-page-icon">
-                <FaClipboardCheck />
-              </span>
-
-              <div>
-                <h2>
-                  {selectedHomework.title ||
-                    "واجب المحاضرة"}
-                </h2>
-
-                <p>
-                  {
-                    selectedHomeworkLesson
-                      .course.title
-                  }
-                  {" — "}
-                  {
-                    selectedHomeworkLesson
-                      .lesson.title
-                  }
-                </p>
-              </div>
-            </div>
-
-            {homeworkResult ? (
-              <div className="homework-result-box">
-                <FaCheckCircle />
-
-                <h3>
-                  تم تسليم الواجب
-                </h3>
-
-                <strong>
-                  {
-                    homeworkResult.score
-                  }
-                  {" / "}
-                  {
-                    homeworkResult.totalQuestions
-                  }
-                </strong>
-
-                <p>
-                  النسبة:{" "}
-                  {
-                    homeworkResult.percentage
-                  }
-                  %
-                </p>
-
-                <div className="homework-review-list">
-                  {homeworkResult.answers.map(
-                    (
-                      answer,
-                      index
-                    ) => (
-                      <article
-                        key={
-                          answer.questionId ||
-                          index
-                        }
-                        className={`homework-review-item ${
-                          answer.isCorrect
-                            ? "correct"
-                            : "wrong"
-                        }`}
-                      >
-                        <h4>
-                          سؤال{" "}
-                          {
-                            answer.questionNumber
-                          }
-                          :{" "}
-                          {
-                            answer.question
-                          }
-                        </h4>
-
-                        <p>
-                          إجابتك:{" "}
-                          {answer.selectedOption ===
-                          null
-                            ? "بدون إجابة"
-                            : answer.options?.[
-                                answer
-                                  .selectedOption
-                              ] ||
-                              "بدون إجابة"}
-                        </p>
-
-                        {!answer.isCorrect && (
-                          <p>
-                            الإجابة الصحيحة:{" "}
-                            {answer.options?.[
-                              answer
-                                .correctOption
-                            ] ||
-                              "غير متاحة"}
-                          </p>
-                        )}
-                      </article>
-                    )
-                  )}
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="homework-questions-list">
-                  {questions.map(
-                    (
-                      question,
-                      questionIndex
-                    ) => (
-                      <article
-                        className="homework-question-card"
-                        key={
-                          question.id ||
-                          questionIndex
-                        }
-                      >
-                        <h3>
-                          سؤال{" "}
-                          {
-                            questionIndex +
-                            1
-                          }
-                        </h3>
-
-                        <p className="homework-question-text">
-                          {
-                            question.question
-                          }
-                        </p>
-
-                        <div className="homework-options-list">
-                          {(
-                            question.options ||
-                            []
-                          ).map(
-                            (
-                              option,
-                              optionIndex
-                            ) => (
-                              <label
-                                className={`homework-option ${
-                                  homeworkAnswers[
-                                    question.id
-                                  ] ===
-                                  optionIndex
-                                    ? "selected"
-                                    : ""
-                                }`}
-                                key={
-                                  optionIndex
-                                }
-                              >
-                                <input
-                                  type="radio"
-                                  name={`homework-${question.id}`}
-                                  checked={
-                                    homeworkAnswers[
-                                      question.id
-                                    ] ===
-                                    optionIndex
-                                  }
-                                  onChange={() =>
-                                    handleHomeworkAnswer(
-                                      question.id,
-                                      optionIndex
-                                    )
-                                  }
-                                />
-
-                                <span>
-                                  {option}
-                                </span>
-                              </label>
-                            )
-                          )}
-                        </div>
-                      </article>
-                    )
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="homework-submit-button"
-                  onClick={
-                    submitHomework
-                  }
-                  disabled={
-                    isSubmittingHomework
-                  }
-                >
-                  {isSubmittingHomework
-                    ? "جاري تسليم الواجب..."
-                    : "تسليم الواجب"}
-                </button>
-              </>
-            )}
-          </section>
-        </div>
-      </div>
-    );
-  }
-
-  /*
-    ============================
-    مشاهدة المحاضرة
-    ============================
-  */
-
-  if (
-    activeLesson &&
-    selectedCourse
-  ) {
-    const lesson =
-      activeLesson.lesson ||
-      activeLesson;
-
-    const videoUrl =
-      lesson.youtubeUrl ||
-      lesson.videoUrl ||
-      "";
-
-    const youtubeVideoId =
-      extractYoutubeVideoId(
-        videoUrl
-      );
-
-    const lessonProgress =
-      getLessonProgress(
-        selectedCourse.id,
+      !isLessonWatched(
+        course.id,
         lesson.id
+      )
+    ) {
+      window.alert(
+        "شاهد 30% من الفيديو أولًا."
       );
+      return;
+    }
 
-    const currentPercent =
-      Math.max(
-        Number(
-          lessonProgress.watchedPercent
-        ) || 0,
-        Number(
-          watchPercent
-        ) || 0
+    let finalExamKey =
+      examKey;
+
+    if (
+      course.id ===
+      "second-course-2"
+    ) {
+      if (
+        examKey ===
+        "exam1"
+      ) {
+        finalExamKey =
+          "secondCourse2Exam1";
+      }
+
+      if (
+        examKey ===
+        "exam2"
+      ) {
+        finalExamKey =
+          "secondCourse2Exam2";
+      }
+    }
+
+    const selectedExamData =
+      examsData[
+        finalExamKey
+      ];
+
+    if (
+      !selectedExamData
+    ) {
+      window.alert(
+        "تعذر تحميل بيانات الامتحان."
       );
+      return;
+    }
+
+    setSelectedExam(
+      selectedExamData
+    );
+
+    setActiveLesson(null);
+
+    window.scrollTo(
+      0,
+      0
+    );
+  }
+
+  function closeExam() {
+    setSelectedExam(null);
+
+    window.scrollTo(
+      0,
+      0
+    );
+  }
+
+  /*
+    ============================
+    مودال الفيديو
+    ============================
+  */
+
+  function renderVideoModal() {
+    if (!activeLesson) {
+      return null;
+    }
+
+    const videoId = extractYouTubeVideoId(
+      activeLesson.lesson.youtubeUrl
+    );
+
+    const isMainLesson =
+      activeLesson.mode === "lesson";
+
+    const lessonWatched = isMainLesson
+      ? isLessonWatched(
+          activeLesson.course.id,
+          activeLesson.lesson.id
+        )
+      : true;
 
     return (
-      <div className="all-courses-page">
-        <div className="all-courses-container">
+      <div className="course-lesson-overlay">
+        <div className="course-lesson-modal">
           <button
             type="button"
-            className="course-back-button"
-            onClick={
-              closeLesson
-            }
+            className="course-lesson-close"
+            onClick={closeLesson}
           >
-            <FaArrowRight />
-            الرجوع إلى الكورس
+            ×
           </button>
 
-          <section className="lesson-watch-page">
-            <div className="lesson-watch-heading">
-              <span>
-                {
-                  selectedCourse.title
+          <h2>{activeLesson.lesson.title}</h2>
+
+          {activeLesson.lesson.duration && (
+            <p className="course-lesson-duration">
+              مدة الفيديو: {activeLesson.lesson.duration}
+            </p>
+          )}
+
+          <div className="course-youtube-wrapper">
+            {videoId ? (
+              <YouTube
+                videoId={videoId}
+                opts={{
+                  width: "100%",
+                  height: "100%",
+                  playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    rel: 0,
+                    modestbranding: 1,
+                    playsinline: 1,
+                  },
+                }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                iframeClassName="youtube-course-player"
+                onReady={(event) =>
+                  setYoutubePlayer(event.target)
                 }
-              </span>
-
-              <h2>
-                {
-                  lesson.title
-                }
-              </h2>
-
-              {lesson.description && (
-                <p>
-                  {
-                    lesson.description
+                onStateChange={(event) => {
+                  if (isMainLesson) {
+                    setVideoIsPlaying(
+                      event.data === 1
+                    );
                   }
-                </p>
-              )}
-            </div>
-
-            {youtubeVideoId ? (
-              <div className="lesson-video-wrapper">
-                <YouTube
-                  videoId={
-                    youtubeVideoId
-                  }
-                  className="lesson-youtube-player"
-                  iframeClassName="lesson-youtube-iframe"
-                  onReady={
-                    handleYoutubeReady
-                  }
-                  onStateChange={
-                    handleYoutubeStateChange
-                  }
-                  opts={{
-                    width: "100%",
-                    height: "100%",
-                    playerVars: {
-                      rel: 0,
-                      modestbranding: 1,
-                    },
-                  }}
-                />
-              </div>
+                }}
+              />
             ) : (
-              <div className="all-courses-empty">
-                <h2>
-                  الفيديو غير متاح حاليًا
-                </h2>
+              <div>
+                لم تتم إضافة رابط فيديو صحيح.
               </div>
             )}
+          </div>
 
-            <div className="lesson-watch-progress">
-              <div className="lesson-watch-progress-info">
-                <span>
-                  نسبة المشاهدة
-                </span>
+          {isMainLesson && (
+            <div className="course-watch-progress">
+              <div className="course-watch-progress-heading">
+                <span>نسبة المشاهدة</span>
 
                 <strong>
-                  {
-                    currentPercent
-                  }
-                  %
+                  {lessonWatched
+                    ? "تم تسجيل 30%"
+                    : `${watchPercent}%`}
                 </strong>
               </div>
 
-              <div className="lesson-watch-progress-bar">
+              <div className="course-watch-progress-bar">
                 <div
-                  className="lesson-watch-progress-fill"
+                  className="course-watch-progress-fill"
                   style={{
                     width: `${Math.min(
-                      currentPercent,
+                      lessonWatched
+                        ? REQUIRED_WATCH_PERCENT
+                        : watchPercent,
                       100
                     )}%`,
                   }}
                 />
               </div>
 
-              <p>
-                بعد مشاهدة{" "}
-                {
-                  REQUIRED_WATCH_PERCENT
-                }
-                % من الفيديو هتقدر تدخل
-                الامتحان والواجب الخاص
-                بالمحاضرة.
+              <p className="course-watch-message">
+                {isSavingWatch
+                  ? "جاري تسجيل المشاهدة..."
+                  : lessonWatched
+                    ? "✅ تم مشاهدة 30% وفتح الامتحان."
+                    : "يتم فتح الامتحان بعد مشاهدة 30% من فيديو الشرح."}
               </p>
-
-              {isSavingWatch && (
-                <small>
-                  جاري حفظ نسبة المشاهدة...
-                </small>
-              )}
             </div>
-          </section>
+          )}
         </div>
       </div>
+    );
+  }
+
+  /*
+    ============================
+    صفحة الواجب
+    ============================
+  */
+
+  if (
+    selectedHomework &&
+    selectedHomeworkLesson &&
+    selectedCourse
+  ) {
+    const questions = Array.isArray(
+      selectedHomework.questions
+    )
+      ? selectedHomework.questions.filter(
+          (question) =>
+            question.cancelled !== true
+        )
+      : [];
+
+    return (
+      <section
+        style={{
+          width: "100%",
+          minHeight: "100vh",
+          padding: "25px",
+          direction: "rtl",
+          boxSizing: "border-box",
+        }}
+      >
+        <button
+          type="button"
+          onClick={closeHomework}
+          style={{
+            marginBottom: "25px",
+            padding: "12px 18px",
+            border: "1px solid #8b6546",
+            borderRadius: "12px",
+            background: "#fffaf3",
+            color: "#6b472f",
+            fontWeight: "800",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <FaArrowRight />
+          الرجوع إلى المحاضرة
+        </button>
+
+        <div
+          style={{
+            maxWidth: "900px",
+            margin: "0 auto",
+          }}
+        >
+          <div
+            style={{
+              padding: "25px",
+              marginBottom: "25px",
+              borderRadius: "20px",
+              background:
+                "linear-gradient(135deg,#3d281c,#67472f)",
+              color: "#fff",
+              textAlign: "center",
+            }}
+          >
+            <FaClipboardCheck
+              style={{
+                fontSize: "38px",
+                marginBottom: "10px",
+              }}
+            />
+
+            <h1
+              style={{
+                margin: "0 0 8px",
+              }}
+            >
+              {selectedHomework.title ||
+                "واجب المحاضرة"}
+            </h1>
+
+            <p style={{ margin: 0 }}>
+              {selectedHomeworkLesson.title}
+            </p>
+
+            <p>
+              عدد الأسئلة: {questions.length}
+            </p>
+          </div>
+
+          {homeworkResult && (
+            <div
+              style={{
+                marginBottom: "25px",
+                padding: "22px",
+                borderRadius: "16px",
+                textAlign: "center",
+                background: "#e8f7ee",
+                color: "#176b43",
+                fontWeight: "bold",
+              }}
+            >
+              <FaCheckCircle
+                style={{
+                  fontSize: "30px",
+                  marginBottom: "8px",
+                }}
+              />
+
+              <h2>تم تسليم الواجب ✅</h2>
+
+              <p
+                style={{
+                  fontSize: "20px",
+                }}
+              >
+                درجتك: {homeworkResult.score} من{" "}
+                {homeworkResult.total}
+              </p>
+
+              <p>
+                النسبة: {homeworkResult.percentage}%
+              </p>
+
+              <p>
+                تم فتح فيديو حل الواجب.
+              </p>
+            </div>
+          )}
+
+          {questions.map(
+            (question, questionIndex) => {
+              const selectedAnswer =
+                homeworkAnswers[question.id];
+
+              return (
+                <div
+                  key={question.id}
+                  style={{
+                    marginBottom: "18px",
+                    padding: "22px",
+                    borderRadius: "16px",
+                    border:
+                      "1px solid #d9c1aa",
+                    background: "#fffaf3",
+                    boxShadow:
+                      "0 7px 18px rgba(0,0,0,0.07)",
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: "0 0 18px",
+                      lineHeight: "1.9",
+                      color: "#4a2f1f",
+                    }}
+                  >
+                    {questionIndex + 1}.{" "}
+                    {question.question}
+                  </h3>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: "10px",
+                    }}
+                  >
+                    {question.options.map(
+                      (option, optionIndex) => {
+                        const checked =
+                          selectedAnswer ===
+                          optionIndex;
+
+                        return (
+                          <button
+                            key={optionIndex}
+                            type="button"
+                            disabled={
+                              !!homeworkResult
+                            }
+                            onClick={() =>
+                              handleHomeworkAnswer(
+                                question.id,
+                                optionIndex
+                              )
+                            }
+                            style={{
+                              width: "100%",
+                              padding:
+                                "14px 16px",
+                              borderRadius:
+                                "12px",
+                              border: checked
+                                ? "2px solid #8b6546"
+                                : "1px solid #d9c1aa",
+                              background: checked
+                                ? "#f3e5d5"
+                                : "#fff",
+                              color: "#3d281c",
+                              textAlign:
+                                "right",
+                              fontWeight:
+                                "700",
+                              cursor:
+                                homeworkResult
+                                  ? "default"
+                                  : "pointer",
+                            }}
+                          >
+                            {option}
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              );
+            }
+          )}
+
+          {!homeworkResult && (
+            <button
+              type="button"
+              disabled={
+                isSubmittingHomework
+              }
+              onClick={submitHomework}
+              style={{
+                width: "100%",
+                padding: "16px",
+                border: "none",
+                borderRadius: "14px",
+                background: "#6b472f",
+                color: "#fff",
+                fontSize: "18px",
+                fontWeight: "900",
+                cursor: "pointer",
+                marginBottom: "30px",
+              }}
+            >
+              {isSubmittingHomework
+                ? "جاري تسليم الواجب..."
+                : "تسليم الواجب"}
+            </button>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  /*
+    ============================
+    صفحة الامتحان
+    ============================
+  */
+
+  if (selectedExam) {
+    return (
+      <Exam
+        exam={selectedExam}
+        currentStudent={
+          studentData || currentStudent
+        }
+        onBack={closeExam}
+      />
     );
   }
 
@@ -3456,518 +3433,80 @@ function AllCourses({
   */
 
   if (selectedCourse) {
-    const selectedLessons =
-      Array.isArray(
-        selectedCourse.lessons
-      )
-        ? selectedCourse.lessons
-        : [];
-
-    const courseIsPaid =
-      isPaidCourse(
-        selectedCourse
-      );
-
-    const courseAccess =
-      hasCourseAccess(
-        selectedCourse
-      );
-
     return (
-      <div className="all-courses-page">
-        <div className="all-courses-container">
-          <button
-            type="button"
-            className="course-back-button"
-            onClick={
-              closeCourse
-            }
-          >
-            <FaArrowRight />
-            الرجوع إلى جميع الكورسات
-          </button>
+      <>
+        <CourseContent
+          course={selectedCourse}
+          onBack={closeCourseContent}
+          isLessonUnlocked={(lesson) =>
+            hasLessonAccess(
+              selectedCourse,
+              lesson
+            )
+          }
+          getLessonWatched={(lesson) =>
+            isLessonWatched(
+              selectedCourse.id,
+              lesson.id
+            )
+          }
+          getHomeworkSubmitted={(lesson) =>
+            isHomeworkSubmitted(
+              selectedCourse,
+              lesson
+            )
+          }
+          lessonActivationCodes={
+            lessonActivationCodes
+          }
+          onLessonCodeChange={
+            handleLessonCodeChange
+          }
+          activatingLessonId={
+            activatingLessonId
+          }
+          onActivateLessonCode={(lesson) =>
+            activateLessonCode(
+              selectedCourse,
+              lesson
+            )
+          }
+          onOpenVideo={(lesson) =>
+            openLesson(
+              selectedCourse,
+              lesson
+            )
+          }
+          onOpenPdf={(lesson) =>
+            openPdf(lesson)
+          }
+          onOpenHomework={(lesson) =>
+            openHomework(lesson)
+          }
+          onOpenHomeworkSolution={(
+            lesson,
+            solutionUrl
+          ) =>
+            openHomeworkSolution(
+              selectedCourse,
+              lesson,
+              solutionUrl
+            )
+          }
+          onOpenExam={(
+            lesson,
+            examKey
+          ) =>
+            openExam(
+              selectedCourse,
+              lesson,
+              examKey
+            )
+          }
+        />
 
-          <section className="selected-course-header">
-            <div className="selected-course-image-wrapper">
-              <img
-                src={getCourseImage(
-                  selectedCourse
-                )}
-                alt={
-                  selectedCourse.title
-                }
-                className="selected-course-image"
-                onError={(
-                  event
-                ) => {
-                  event.currentTarget.onerror =
-                    null;
-
-                  event.currentTarget.src =
-                    secondFreeCourse;
-                }}
-              />
-            </div>
-
-            <div className="selected-course-details">
-              <span className="selected-course-grade">
-                {
-                  selectedCourse.grade
-                }
-              </span>
-
-              <h1>
-                {
-                  selectedCourse.title
-                }
-              </h1>
-
-              <p>
-                {selectedCourse.description ||
-                  "شرح منظم وتدريبات واختبارات تساعدك على فهم المنهج وتحقيق أفضل نتيجة."}
-              </p>
-
-              <div className="selected-course-price">
-                {courseIsPaid ? (
-                  <>
-                    <span>
-                      سعر الكورس
-                    </span>
-
-                    <strong>
-                      {getDisplayedPrice(
-                        selectedCourse.price
-                      )}
-                    </strong>
-                  </>
-                ) : (
-                  <strong>
-                    الكورس مجاني
-                  </strong>
-                )}
-              </div>
-
-              {courseIsPaid &&
-                courseAccess && (
-                  <div className="course-access-success">
-                    <FaCheckCircle />
-                    الكورس مفعل على حسابك
-                  </div>
-                )}
-            </div>
-          </section>
-
-          {courseIsPaid &&
-            !courseAccess && (
-              <section className="course-activation-section">
-                <div className="course-activation-heading">
-                  <h2>
-                    تفعيل الكورس
-                  </h2>
-
-                  <p>
-                    اكتب كود الاشتراك الخاص
-                    بالشهر أو الترم.
-                  </p>
-                </div>
-
-                <div className="course-activation-box">
-                  <input
-                    type="text"
-                    value={
-                      activationCodes[
-                        selectedCourse.id
-                      ] || ""
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      handleActivationCodeChange(
-                        selectedCourse.id,
-                        event.target.value
-                      )
-                    }
-                    placeholder="اكتب كود التفعيل"
-                    maxLength={40}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      activateCourseCode(
-                        selectedCourse
-                      )
-                    }
-                    disabled={
-                      activatingCourseId ===
-                      selectedCourse.id
-                    }
-                  >
-                    {activatingCourseId ===
-                    selectedCourse.id
-                      ? "جاري التفعيل..."
-                      : "تفعيل الكورس"}
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  className="course-whatsapp-button"
-                  onClick={() =>
-                    openCourseSubscription(
-                      selectedCourse
-                    )
-                  }
-                >
-                  <FaWhatsapp />
-                  الاشتراك عن طريق واتساب
-                </button>
-              </section>
-            )}
-
-          <section className="course-lessons-section">
-            <div className="course-lessons-heading">
-              <FaBookOpen />
-
-              <div>
-                <h2>
-                  محتوى الكورس
-                </h2>
-
-                <p>
-                  اختر المحاضرة التي تريد
-                  مذاكرتها.
-                </p>
-              </div>
-            </div>
-
-            {selectedLessons.length ===
-            0 ? (
-              <div className="all-courses-empty">
-                <FaBookOpen />
-
-                <h2>
-                  لا توجد محاضرات داخل
-                  الكورس حاليًا
-                </h2>
-              </div>
-            ) : (
-              <div className="course-lessons-list">
-                {selectedLessons.map(
-                  (
-                    lesson,
-                    lessonIndex
-                  ) => {
-                    const unlocked =
-                      hasLessonAccess(
-                        selectedCourse,
-                        lesson
-                      );
-
-                    const watched =
-                      isLessonWatched(
-                        selectedCourse.id,
-                        lesson.id
-                      );
-
-                    const homeworkSubmitted =
-                      isHomeworkSubmitted(
-                        selectedCourse,
-                        lesson
-                      );
-
-                    const homework =
-                      getHomeworkForLesson(
-                        lesson
-                      );
-
-                    const progress =
-                      getLessonProgress(
-                        selectedCourse.id,
-                        lesson.id
-                      );
-
-                    const watchedPercent =
-                      Number(
-                        progress.watchedPercent
-                      ) || 0;
-
-                    const examKey =
-                      lesson.exam1Key ||
-                      lesson.examKey ||
-                      "";
-
-                    const hasExam =
-                      Boolean(
-                        examKey &&
-                          examsData?.[
-                            examKey
-                          ]
-                      );
-
-                    const hasPdf =
-                      Boolean(
-                        lesson.pdfUrl
-                      );
-
-                    const isFreeCourse =
-                      !isPaidCourse(
-                        selectedCourse
-                      );
-
-                    return (
-                      <article
-                        className="course-lesson-card"
-                        key={
-                          lesson.id ||
-                          lessonIndex
-                        }
-                      >
-                        <div className="course-lesson-number">
-                          {
-                            lessonIndex +
-                            1
-                          }
-                        </div>
-
-                        <div className="course-lesson-main">
-                          <div className="course-lesson-title-row">
-                            <div>
-                              <h3>
-                                {lesson.title ||
-                                  `المحاضرة ${
-                                    lessonIndex +
-                                    1
-                                  }`}
-                              </h3>
-
-                              {lesson.description && (
-                                <p>
-                                  {
-                                    lesson.description
-                                  }
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="course-lesson-status">
-                              {unlocked ? (
-                                <span className="lesson-unlocked">
-                                  <FaCheckCircle />
-                                  مفتوحة
-                                </span>
-                              ) : (
-                                <span className="lesson-locked">
-                                  غير مفعلة
-                                </span>
-                              )}
-
-                              {watched && (
-                                <span className="lesson-watched">
-                                  تم مشاهدة{" "}
-                                  {
-                                    REQUIRED_WATCH_PERCENT
-                                  }
-                                  %+
-                                </span>
-                              )}
-
-                              {homeworkSubmitted && (
-                                <span className="lesson-homework-done">
-                                  تم تسليم الواجب
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {unlocked && (
-                            <div className="course-lesson-progress">
-                              <div>
-                                <span>
-                                  المشاهدة
-                                </span>
-
-                                <strong>
-                                  {
-                                    watchedPercent
-                                  }
-                                  %
-                                </strong>
-                              </div>
-
-                              <div className="course-lesson-progress-bar">
-                                <div
-                                  className="course-lesson-progress-fill"
-                                  style={{
-                                    width: `${Math.min(
-                                      watchedPercent,
-                                      100
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {!unlocked &&
-                            courseIsPaid &&
-                            !courseAccess && (
-                              <div className="lesson-code-section">
-                                <p>
-                                  لو معاك كود
-                                  محاضرة منفصلة
-                                  اكتبه هنا:
-                                </p>
-
-                                <div className="lesson-code-box">
-                                  <input
-                                    type="text"
-                                    value={
-                                      lessonActivationCodes[
-                                        lesson.id
-                                      ] || ""
-                                    }
-                                    onChange={(
-                                      event
-                                    ) =>
-                                      handleLessonCodeChange(
-                                        lesson.id,
-                                        event.target.value
-                                      )
-                                    }
-                                    placeholder="كود المحاضرة"
-                                  />
-
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      activateLessonCode(
-                                        selectedCourse,
-                                        lesson
-                                      )
-                                    }
-                                    disabled={
-                                      activatingLessonId ===
-                                      lesson.id
-                                    }
-                                  >
-                                    {activatingLessonId ===
-                                    lesson.id
-                                      ? "جاري..."
-                                      : "تفعيل"}
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-
-                          <div className="course-lesson-actions">
-                            <button
-                              type="button"
-                              className="lesson-action-button video"
-                              disabled={
-                                !unlocked &&
-                                !isFreeCourse
-                              }
-                              onClick={() =>
-                                openLessonVideo(
-                                  selectedCourse,
-                                  lesson
-                                )
-                              }
-                            >
-                              <FaPlay />
-                              مشاهدة المحاضرة
-                            </button>
-
-                            {hasPdf && (
-                              <button
-                                type="button"
-                                className="lesson-action-button pdf"
-                                disabled={
-                                  !unlocked &&
-                                  !isFreeCourse
-                                }
-                                onClick={() =>
-                                  window.open(
-                                    lesson.pdfUrl,
-                                    "_blank",
-                                    "noopener,noreferrer"
-                                  )
-                                }
-                              >
-                                <FaFilePdf />
-                                ملف المحاضرة
-                              </button>
-                            )}
-
-                            {homework && (
-                              <button
-                                type="button"
-                                className="lesson-action-button homework"
-                                disabled={
-                                  !watched ||
-                                  homeworkSubmitted
-                                }
-                                onClick={() =>
-                                  openHomework(
-                                    selectedCourse,
-                                    lesson
-                                  )
-                                }
-                              >
-                                <FaClipboardCheck />
-
-                                {homeworkSubmitted
-                                  ? "تم تسليم الواجب"
-                                  : "حل الواجب"}
-                              </button>
-                            )}
-
-                            {hasExam && (
-                              <button
-                                type="button"
-                                className="lesson-action-button exam"
-                                disabled={
-                                  !watched
-                                }
-                                onClick={() =>
-                                  openExam(
-                                    selectedCourse,
-                                    lesson,
-                                    examKey
-                                  )
-                                }
-                              >
-                                <FaGraduationCap />
-                                دخول الامتحان
-                              </button>
-                            )}
-                          </div>
-
-                          {!watched &&
-                            unlocked &&
-                            (hasExam ||
-                              homework) && (
-                              <p className="lesson-watch-note">
-                                شاهد{" "}
-                                {
-                                  REQUIRED_WATCH_PERCENT
-                                }
-                                % على الأقل من
-                                الفيديو لفتح
-                                الامتحان والواجب.
-                              </p>
-                            )}
-                        </div>
-                      </article>
-                    );
-                  }
-                )}
-              </div>
-            )}
-          </section>
-        </div>
-      </div>
+        {renderVideoModal()}
+      </>
     );
   }
 
@@ -3978,15 +3517,13 @@ function AllCourses({
   */
 
   return (
-    <section className="all-courses-page">
-      <div className="all-courses-container">
+    <>
+      <section className="all-courses-page">
         <div className="all-courses-title">
           <FaBookOpen />
 
           <div>
-            <h1>
-              جميع الكورسات
-            </h1>
+            <h1>جميع الكورسات</h1>
 
             <p>
               الكورسات المتاحة لطلاب{" "}
@@ -3998,7 +3535,9 @@ function AllCourses({
 
         {isLoading ? (
           <div className="all-courses-empty">
-            <FaGraduationCap />
+            <div className="all-courses-empty-icon">
+              <FaGraduationCap />
+            </div>
 
             <h2>
               جاري تحميل الكورسات...
@@ -4006,159 +3545,277 @@ function AllCourses({
           </div>
         ) : coursesError ? (
           <div className="all-courses-empty">
-            <FaBookOpen />
+            <h2>حدث خطأ</h2>
 
-            <h2>
-              تعذر تحميل الكورسات
-            </h2>
-
-            <p>
-              {coursesError}
-            </p>
+            <p>{coursesError}</p>
           </div>
-        ) : visibleCourses.length ===
-          0 ? (
+        ) : visibleCourses.length === 0 ? (
           <div className="all-courses-empty">
-            <FaGraduationCap />
+            <div className="all-courses-empty-icon">
+              <FaGraduationCap />
+            </div>
 
             <h2>
-              لا توجد كورسات متاحة
-              حاليًا
+              مفيش كورسات متاحة حاليًا
             </h2>
-
-            <p>
-              أول ما يتم إضافة كورسات
-              للسنة الدراسية الخاصة بك
-              هتظهر هنا.
-            </p>
           </div>
         ) : (
-          <div className="all-courses-grid">
-            {visibleCourses.map(
-              (course) => {
-                const paid =
-                  isPaidCourse(
-                    course
-                  );
+          <div className="courses-shop-grid">
+            {visibleCourses.map((course) => {
+              const paid =
+                isPaidCourse(course);
 
-                const access =
-                  hasCourseAccess(
-                    course
-                  );
+              const unlocked =
+                hasCourseAccess(course);
 
-                const lessons =
-                  Array.isArray(
-                    course.lessons
-                  )
-                    ? course.lessons
-                    : [];
+              const courseAccess =
+                getCourseAccess(course);
 
-                return (
-                  <article
-                    className={`all-course-card ${
-                      targetCourseId ===
-                      course.id
-                        ? "shared-target-course"
-                        : ""
-                    }`}
-                    key={
-                      course.id
-                    }
-                  >
-                    <div className="all-course-card-image">
+              const hasWholeCourseAccess =
+                !paid ||
+                (unlocked &&
+                  courseAccess?.accessType !==
+                    "lesson");
+
+              return (
+                <article
+                  className="course-shop-card"
+                  key={course.id}
+                >
+                  <div className="course-shop-main">
+                    <div className="course-shop-image-wrapper">
                       <img
                         src={getCourseImage(
                           course
                         )}
                         alt={
-                          course.title
+                          course.title ||
+                          "صورة الكورس"
                         }
-                        onError={(
-                          event
-                        ) => {
-                          event.currentTarget.onerror =
-                            null;
-
-                          event.currentTarget.src =
-                            secondFreeCourse;
-                        }}
+                        className="course-shop-image"
                       />
 
-                      {!paid && (
-                        <span className="all-course-free-badge">
-                          مجاني
-                        </span>
-                      )}
-
-                      {paid &&
-                        access && (
-                          <span className="all-course-active-badge">
-                            مفعل
-                          </span>
-                        )}
+                      <span
+                        style={{
+                          position:
+                            "absolute",
+                          top: "14px",
+                          right: "14px",
+                          padding:
+                            "8px 14px",
+                          borderRadius:
+                            "30px",
+                          background: paid
+                            ? hasWholeCourseAccess
+                              ? "#168d55"
+                              : "#31271f"
+                            : "#168d55",
+                          color: "#fff",
+                          fontWeight:
+                            "bold",
+                        }}
+                      >
+                        {!paid
+                          ? "مجاني"
+                          : hasWholeCourseAccess
+                            ? "مشترك"
+                            : courseAccess?.accessType ===
+                                "lesson"
+                              ? "عندك محاضرة مفعلة"
+                              : "اشتراك"}
+                      </span>
                     </div>
 
-                    <div className="all-course-card-content">
-                      <span className="all-course-grade">
-                        {
-                          course.grade
-                        }
+                    <div className="course-shop-content">
+                      <span className="course-shop-grade">
+                        {course.grade ||
+                          studentGrade}
                       </span>
 
                       <h2>
-                        {
-                          course.title
-                        }
+                        {course.title ||
+                          "كورس اللغة العربية"}
                       </h2>
 
                       <p>
                         {course.description ||
-                          "شرح منظم، تدريبات واختبارات تساعدك على فهم المنهج."}
+                          "شرح منظم وتدريبات واختبارات."}
                       </p>
 
-                      <div className="all-course-meta">
-                        <span>
-                          <FaBookOpen />
-                          {
-                            lessons.length
-                          }{" "}
-                          محاضرة
-                        </span>
-
+                      <div className="course-shop-footer">
                         <strong>
-                          {paid
-                            ? getDisplayedPrice(
-                                course.price
-                              )
-                            : "مجاني"}
+                          {getDisplayedPrice(
+                            course.price
+                          )}
                         </strong>
                       </div>
+                    </div>
+                  </div>
 
+                  <div className="course-card-actions">
+                    <button
+                      type="button"
+                      className="course-content-btn"
+                      onClick={() =>
+                        openCourseContent(
+                          course
+                        )
+                      }
+                    >
+                      <FaBookOpen />
+                      محتوى الكورس
+                    </button>
+
+                    {hasWholeCourseAccess ? (
                       <button
                         type="button"
-                        className="all-course-open-button"
-                        onClick={() =>
-                          openCourse(
-                            course
-                          )
+                        className="course-start-btn"
+                        disabled={
+                          !course.lessons
+                            ?.length
                         }
+                        onClick={() => {
+                          const firstAvailable =
+                            course.lessons?.find(
+                              (lesson) =>
+                                hasLessonAccess(
+                                  course,
+                                  lesson
+                                ) &&
+                                hasValue(
+                                  lesson.youtubeUrl ||
+                                    lesson.videoUrl
+                                )
+                            );
+
+                          if (
+                            firstAvailable
+                          ) {
+                            openLesson(
+                              course,
+                              firstAvailable
+                            );
+                          } else {
+                            openCourseContent(
+                              course
+                            );
+                          }
+                        }}
                       >
                         <FaPlay />
-
-                        {paid &&
-                        !access
-                          ? "عرض تفاصيل الكورس"
-                          : "دخول الكورس"}
+                        ابدأ
                       </button>
-                    </div>
-                  </article>
-                );
-              }
-            )}
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="course-start-btn"
+                          onClick={() =>
+                            openCourseSubscription(
+                              course
+                            )
+                          }
+                        >
+                          <FaWhatsapp />
+                          اشترك الآن
+                        </button>
+
+                        <div
+                          style={{
+                            width: "100%",
+                            marginTop:
+                              "12px",
+                          }}
+                        >
+                          <input
+                            type="text"
+                            value={
+                              activationCodes[
+                                course.id
+                              ] || ""
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              handleActivationCodeChange(
+                                course.id,
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            placeholder="كود الشهر أو الترم"
+                            autoComplete="off"
+                            maxLength={20}
+                            style={{
+                              width:
+                                "100%",
+                              minHeight:
+                                "48px",
+                              padding:
+                                "10px 14px",
+                              borderRadius:
+                                "12px",
+                              border:
+                                "1px solid #d7c2ae",
+                              fontSize:
+                                "16px",
+                              fontWeight:
+                                "700",
+                              textAlign:
+                                "center",
+                              boxSizing:
+                                "border-box",
+                              marginBottom:
+                                "10px",
+                              direction:
+                                "ltr",
+                              color:
+                                "#222",
+                              background:
+                                "#fff",
+                              WebkitTextFillColor:
+                                "#222",
+                              caretColor:
+                                "#222",
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            className="course-content-btn"
+                            style={{
+                              width:
+                                "100%",
+                            }}
+                            disabled={
+                              activatingCourseId ===
+                              course.id
+                            }
+                            onClick={() =>
+                              activateCourseCode(
+                                course
+                              )
+                            }
+                          >
+                            {activatingCourseId ===
+                            course.id
+                              ? "جاري التفعيل..."
+                              : "تفعيل اشتراك الكورس"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
-        </div>
-    </section>
+      </section>
+
+      {renderVideoModal()}
+    </>
   );
 }
 
