@@ -32,6 +32,7 @@ import CourseContent from "./CourseContent";
 import Exam from "./Exam";
 import examsData from "./examData";
 import homeworkData from "./homeworkData";
+import courseHomeworkData from "./courseHomeworkData";
 
 /* الصور القديمة */
 import secondFreeCourse from "./assets/second-free-course.jpeg";
@@ -53,6 +54,14 @@ import thirdTermCourse from "./assets/third-term.jpeg";
 import "./AllCourses.css";
 
 const REQUIRED_WATCH_PERCENT = 30;
+
+const THIRD_SECONDARY_COURSE_IDS = new Set([
+  "third-month-course",
+  "third-term-course",
+]);
+
+const THIRD_LECTURE_1_EXAM_KEY = "thirdLecture1Exam";
+const THIRD_LECTURE_1_EXAM_ID = "third-lecture-1-exam";
 
 /*
   الكورسات المجانية القديمة تظل موجودة في الكود/Firestore
@@ -118,6 +127,52 @@ const SECOND_FREE_INTRO_COURSE = {
   ],
 };
 
+/*
+  المحاضرة الثانية لتالتة ثانوي.
+  تضاف محليًا إلى كورس الشهر وكورس الترم
+  بدون تعديل بيانات Firestore القديمة.
+*/
+const THIRD_SECOND_LECTURE = {
+  id: "lesson-2",
+
+  title:
+    "المحاضرة الثانية ( ادب الاحياء والبعث )",
+
+  description:
+    "شاهد 30% من المحاضرة لفتح الواجب، وبعد تسليم الواجب يفتح فيديو الحل.",
+
+  youtubeUrl:
+    "https://youtu.be/zLFTHNBX4qo",
+
+  videoUrl:
+    "https://youtu.be/zLFTHNBX4qo",
+
+  videoTitle:
+    "المحاضرة الثانية ( ادب الاحياء والبعث )",
+
+  homeworkEnabled: true,
+
+  homeworkKey:
+    "thirdLecture2Homework",
+
+  homeworkTitle:
+    "واجب المحاضرة الثانية",
+
+  homeworkSolutionUrl:
+    "https://youtu.be/6pv2Rb6UPr4",
+
+  solutionVideoUrl:
+    "https://youtu.be/6pv2Rb6UPr4",
+
+  homeworkSolutionTitle:
+    "حل واجب المحاضرة الثانية",
+
+  requiresPreviousExam: true,
+
+  requiredExamId:
+    THIRD_LECTURE_1_EXAM_ID,
+};
+
 function AllCourses({
   currentStudent,
 }) {
@@ -146,7 +201,7 @@ function AllCourses({
 
   /*
     ============================
-    الواجب
+    الواجب داخل الكورس
     ============================
   */
 
@@ -299,6 +354,94 @@ function AllCourses({
 
   /*
     ============================
+    تجهيز محتوى تالتة ثانوي
+    ============================
+  */
+
+  function prepareThirdSecondaryCourse(
+    course
+  ) {
+    if (
+      !course ||
+      !THIRD_SECONDARY_COURSE_IDS.has(
+        course.id
+      )
+    ) {
+      return course;
+    }
+
+    let lessons =
+      Array.isArray(
+        course.lessons
+      )
+        ? [...course.lessons]
+        : [];
+
+    /*
+      لو المحاضرة الأولى موجودة نربط بها الامتحان.
+      ولو لم توجد لن ننشئ محاضرة أولى وهمية حتى لا نمسح
+      أو نغيّر محتوى Firestore الحالي.
+    */
+    if (lessons.length > 0) {
+      lessons[0] = {
+        ...lessons[0],
+
+        id:
+          lessons[0].id ||
+          "lesson-1",
+
+        exam1: true,
+
+        exam1Key:
+          THIRD_LECTURE_1_EXAM_KEY,
+
+        exam1Title:
+          "امتحان المحاضرة الأولى",
+      };
+    }
+
+    const secondLessonIndex =
+      lessons.findIndex(
+        (lesson) =>
+          lesson?.id ===
+            "lesson-2" ||
+          lesson?.courseLectureKey ===
+            "third-lecture-2"
+      );
+
+    if (
+      secondLessonIndex >= 0
+    ) {
+      lessons[
+        secondLessonIndex
+      ] = {
+        ...lessons[
+          secondLessonIndex
+        ],
+
+        ...THIRD_SECOND_LECTURE,
+
+        courseLectureKey:
+          "third-lecture-2",
+      };
+    } else {
+      lessons.push({
+        ...THIRD_SECOND_LECTURE,
+
+        courseLectureKey:
+          "third-lecture-2",
+      });
+    }
+
+    return {
+      ...course,
+
+      lessons,
+    };
+  }
+
+  /*
+    ============================
     تحميل الكورسات
     ============================
   */
@@ -382,10 +525,6 @@ function AllCourses({
                           lesson.duration ||
                           "",
 
-                        /*
-                          الواجب الجديد
-                        */
-
                         homeworkKey:
                           lesson.homeworkKey ||
                           "",
@@ -397,10 +536,6 @@ function AllCourses({
                         homeworkTitle:
                           lesson.homeworkTitle ||
                           "واجب المحاضرة",
-
-                        /*
-                          دعم القديم
-                        */
 
                         homeworkUrl:
                           lesson.homeworkUrl ||
@@ -507,7 +642,7 @@ function AllCourses({
                   }
                 }
 
-                return {
+                const normalizedCourse = {
                   id:
                     courseDocument.id,
 
@@ -516,15 +651,13 @@ function AllCourses({
                   lessons:
                     normalizedLessons,
                 };
+
+                return prepareThirdSecondaryCourse(
+                  normalizedCourse
+                );
               }
             );
 
-          /*
-            نحتفظ بكورسات Firestore كما هي،
-            ونضيف الكورس المجاني الجديد محليًا.
-            لو اتضاف نفس الكورس في Firestore بعد كده
-            مش هيتكرر مرتين.
-          */
           setCourses([
             ...loadedCourses.filter(
               (course) =>
@@ -555,6 +688,7 @@ function AllCourses({
     return () =>
       unsubscribe();
   }, []);
+
   /*
     ============================
     تحميل بيانات الطالب
@@ -611,6 +745,32 @@ function AllCourses({
     studentUid,
     currentStudent,
   ]);
+
+  /*
+    ============================
+    تحديث selectedCourse
+    عند تحديث بيانات Firestore
+    ============================
+  */
+
+  useEffect(() => {
+    if (!selectedCourse) {
+      return;
+    }
+
+    const updatedCourse =
+      courses.find(
+        (course) =>
+          course.id ===
+          selectedCourse.id
+      );
+
+    if (updatedCourse) {
+      setSelectedCourse(
+        updatedCourse
+      );
+    }
+  }, [courses]);
 
   /*
     ============================
@@ -704,10 +864,6 @@ function AllCourses({
       return false;
     }
 
-    /*
-      أي كورس سعره صفر يعتبر مجاني
-      ومش محتاج كود تفعيل
-    */
     if (
       !isPaidCourse(
         course
@@ -723,7 +879,56 @@ function AllCourses({
     );
   }
 
-  function hasLessonAccess(
+  /*
+    ============================
+    هل الامتحان تم تسليمه؟
+    ============================
+  */
+
+  function isExamCompleted(
+    examId
+  ) {
+    if (!examId) {
+      return false;
+    }
+
+    const savedAttempt =
+      studentData
+        ?.examAttempts?.[
+        examId
+      ];
+
+    if (
+      savedAttempt?.completed ===
+      true
+    ) {
+      return true;
+    }
+
+    const examResults =
+      Array.isArray(
+        studentData?.examResults
+      )
+        ? studentData.examResults
+        : [];
+
+    return examResults.some(
+      (savedResult) =>
+        savedResult?.examId ===
+          examId &&
+        savedResult?.completed ===
+          true
+    );
+  }
+
+  /*
+    ============================
+    صلاحية الاشتراك الأساسية
+    بدون شروط تسلسل المحاضرات
+    ============================
+  */
+
+  function hasBasicLessonAccess(
     course,
     lesson
   ) {
@@ -734,10 +939,6 @@ function AllCourses({
       return false;
     }
 
-    /*
-      المحاضرات داخل الكورس المجاني
-      مفتوحة تلقائيًا
-    */
     if (
       !isPaidCourse(
         course
@@ -793,6 +994,45 @@ function AllCourses({
     }
 
     return false;
+  }
+
+  /*
+    ============================
+    صلاحية المحاضرة النهائية
+
+    تالتة ثانوي:
+    المحاضرة الثانية لا تفتح
+    إلا بعد تسليم امتحان المحاضرة الأولى.
+    ============================
+  */
+
+  function hasLessonAccess(
+    course,
+    lesson
+  ) {
+    const basicAccess =
+      hasBasicLessonAccess(
+        course,
+        lesson
+      );
+
+    if (!basicAccess) {
+      return false;
+    }
+
+    if (
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course?.id
+      ) &&
+      lesson?.id ===
+        "lesson-2"
+    ) {
+      return isExamCompleted(
+        THIRD_LECTURE_1_EXAM_ID
+      );
+    }
+
+    return true;
   }
 
   /*
@@ -1039,7 +1279,8 @@ function AllCourses({
   function validateBasicCode({
     codeData,
     course,
-    studentUid,
+    studentUid:
+      codeStudentUid,
   }) {
     if (!codeData) {
       return {
@@ -1086,7 +1327,7 @@ function AllCourses({
     if (
       codeData.studentUid &&
       codeData.studentUid !==
-        studentUid
+        codeStudentUid
     ) {
       return {
         valid: false,
@@ -1174,11 +1415,48 @@ function AllCourses({
           const savedStudent =
             studentSnapshot.data();
 
-          validateBasicCode({
-            codeData,
-            course,
-            savedStudent,
-          });
+          const validation =
+            validateBasicCode({
+              codeData,
+              course,
+              studentUid,
+            });
+
+          if (!validation.valid) {
+            if (
+              codeData.active ===
+              false
+            ) {
+              throw new Error(
+                "CODE_INACTIVE"
+              );
+            }
+
+            if (
+              codeData.used ===
+                true ||
+              codeData.isUsed ===
+                true
+            ) {
+              throw new Error(
+                "CODE_ALREADY_USED"
+              );
+            }
+
+            if (
+              codeData.courseId &&
+              codeData.courseId !==
+                course.id
+            ) {
+              throw new Error(
+                "WRONG_COURSE"
+              );
+            }
+
+            throw new Error(
+              "INVALID_CODE"
+            );
+          }
 
           const accessType =
             codeData.accessType ||
@@ -1429,6 +1707,27 @@ function AllCourses({
       return;
     }
 
+    /*
+      لو المحاضرة الثانية لتالتة ثانوي
+      مقفولة بسبب الامتحان السابق،
+      الكود لا يتخطى شرط الامتحان.
+    */
+    if (
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course?.id
+      ) &&
+      lesson?.id ===
+        "lesson-2" &&
+      !isExamCompleted(
+        THIRD_LECTURE_1_EXAM_ID
+      )
+    ) {
+      window.alert(
+        "لازم تسلّم امتحان المحاضرة الأولى أولًا لفتح المحاضرة الثانية."
+      );
+      return;
+    }
+
     setActivatingLessonId(
       lesson.id
     );
@@ -1477,11 +1776,48 @@ function AllCourses({
           const savedStudent =
             studentSnapshot.data();
 
-          validateBasicCode({
-            codeData,
-            course,
-            savedStudent,
-          });
+          const validation =
+            validateBasicCode({
+              codeData,
+              course,
+              studentUid,
+            });
+
+          if (!validation.valid) {
+            if (
+              codeData.active ===
+              false
+            ) {
+              throw new Error(
+                "CODE_INACTIVE"
+              );
+            }
+
+            if (
+              codeData.used ===
+                true ||
+              codeData.isUsed ===
+                true
+            ) {
+              throw new Error(
+                "CODE_ALREADY_USED"
+              );
+            }
+
+            if (
+              codeData.courseId &&
+              codeData.courseId !==
+                course.id
+            ) {
+              throw new Error(
+                "WRONG_COURSE"
+              );
+            }
+
+            throw new Error(
+              "INVALID_CODE"
+            );
+          }
 
           if (
             codeData.accessType !==
@@ -1498,8 +1834,7 @@ function AllCourses({
             - أو كود مرن يفتح المحاضرة
               اللي الطالب كتب الكود عندها
           */
-
-          const allowedCodeLessons =
+         const allowedCodeLessons =
             [];
 
           if (codeData.lessonId) {
@@ -1711,6 +2046,9 @@ function AllCourses({
 
       INVALID_ACCESS_TYPE:
         "نوع كود التفعيل غير صحيح.",
+
+      INVALID_CODE:
+        "كود التفعيل غير صحيح.",
     };
 
     window.alert(
@@ -1726,9 +2064,6 @@ function AllCourses({
   */
 
   function getCourseImage(course) {
-    /*
-      صورة الكورس المجاني الجديد
-    */
     if (
       course.id ===
       "second-free-intro-course"
@@ -1951,6 +2286,23 @@ function AllCourses({
     }
 
     if (
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      lesson.id ===
+        "lesson-2" &&
+      !isExamCompleted(
+        THIRD_LECTURE_1_EXAM_ID
+      )
+    ) {
+      window.alert(
+        "لازم تسلّم امتحان المحاضرة الأولى أولًا لفتح المحاضرة الثانية."
+      );
+
+      return;
+    }
+
+    if (
       !hasLessonAccess(
         course,
         lesson
@@ -1959,6 +2311,7 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة. اكتب كود المحاضرة أولًا."
       );
+
       return;
     }
 
@@ -2024,6 +2377,7 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة."
       );
+
       return;
     }
 
@@ -2034,8 +2388,9 @@ function AllCourses({
       )
     ) {
       window.alert(
-        "لازم تسلّم الواجب الأول قبل مشاهدة فيديو الحل."
+        "لازم تسلّم الواجب أولًا قبل مشاهدة فيديو الحل."
       );
+
       return;
     }
 
@@ -2485,6 +2840,7 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة."
       );
+
       return;
     }
 
@@ -2497,6 +2853,7 @@ function AllCourses({
       window.alert(
         "شاهد 30% من فيديو الشرح أولًا."
       );
+
       return;
     }
 
@@ -2511,10 +2868,21 @@ function AllCourses({
       window.alert(
         "لم يتم ربط واجب بهذه المحاضرة."
       );
+
       return;
     }
 
+    /*
+      واجبات المحاضرات الجديدة الخاصة بالكورس
+      نبحث عنها أولًا في الملف المنفصل.
+
+      الواجبات القديمة تظل تعمل من homeworkData
+      بدون تغيير نظام تسليم الواجب الخارجي.
+    */
     const selectedData =
+      courseHomeworkData[
+        homeworkKey
+      ] ||
       homeworkData[
         homeworkKey
       ];
@@ -2576,7 +2944,7 @@ function AllCourses({
 
   /*
     ============================
-    تسليم الواجب
+    تسليم الواجب داخل الكورس
     ============================
   */
 
@@ -2593,6 +2961,7 @@ function AllCourses({
       window.alert(
         "برجاء تسجيل الدخول أولًا."
       );
+
       return;
     }
 
@@ -2614,6 +2983,7 @@ function AllCourses({
       window.alert(
         "لا توجد أسئلة في الواجب."
       );
+
       return;
     }
 
@@ -2631,6 +3001,7 @@ function AllCourses({
       window.alert(
         `لسه عندك ${unanswered.length} سؤال بدون إجابة.`
       );
+
       return;
     }
 
@@ -2964,6 +3335,19 @@ function AllCourses({
     }
 
     if (
+      !hasLessonAccess(
+        course,
+        lesson
+      )
+    ) {
+      window.alert(
+        "المحاضرة مقفولة."
+      );
+
+      return;
+    }
+
+    if (
       !isLessonWatched(
         course.id,
         lesson.id
@@ -2972,6 +3356,7 @@ function AllCourses({
       window.alert(
         "شاهد 30% من الفيديو أولًا."
       );
+
       return;
     }
 
@@ -3010,6 +3395,12 @@ function AllCourses({
       window.alert(
         "تعذر تحميل بيانات الامتحان."
       );
+
+      console.error(
+        "Exam key not found:",
+        finalExamKey
+      );
+
       return;
     }
 
@@ -3045,19 +3436,31 @@ function AllCourses({
       return null;
     }
 
-    const videoId = extractYouTubeVideoId(
-      activeLesson.lesson.youtubeUrl
-    );
+    const videoId =
+      extractYouTubeVideoId(
+        activeLesson.lesson.youtubeUrl
+      );
 
     const isMainLesson =
-      activeLesson.mode === "lesson";
+      activeLesson.mode ===
+      "lesson";
 
-    const lessonWatched = isMainLesson
-      ? isLessonWatched(
-          activeLesson.course.id,
-          activeLesson.lesson.id
-        )
-      : true;
+    const lessonWatched =
+      isMainLesson
+        ? isLessonWatched(
+            activeLesson.course.id,
+            activeLesson.lesson.id
+          )
+        : true;
+
+    const hasHomework =
+      activeLesson.lesson
+        ?.homeworkEnabled ===
+        true ||
+      hasValue(
+        activeLesson.lesson
+          ?.homeworkKey
+      );
 
     return (
       <div className="course-lesson-overlay">
@@ -3070,11 +3473,17 @@ function AllCourses({
             ×
           </button>
 
-          <h2>{activeLesson.lesson.title}</h2>
+          <h2>
+            {activeLesson.lesson.title}
+          </h2>
 
           {activeLesson.lesson.duration && (
             <p className="course-lesson-duration">
-              مدة الفيديو: {activeLesson.lesson.duration}
+              مدة الفيديو:{" "}
+              {
+                activeLesson.lesson
+                  .duration
+              }
             </p>
           )}
 
@@ -3099,10 +3508,16 @@ function AllCourses({
                 }}
                 iframeClassName="youtube-course-player"
                 onReady={(event) =>
-                  setYoutubePlayer(event.target)
+                  setYoutubePlayer(
+                    event.target
+                  )
                 }
-                onStateChange={(event) => {
-                  if (isMainLesson) {
+                onStateChange={(
+                  event
+                ) => {
+                  if (
+                    isMainLesson
+                  ) {
                     setVideoIsPlaying(
                       event.data === 1
                     );
@@ -3119,7 +3534,9 @@ function AllCourses({
           {isMainLesson && (
             <div className="course-watch-progress">
               <div className="course-watch-progress-heading">
-                <span>نسبة المشاهدة</span>
+                <span>
+                  نسبة المشاهدة
+                </span>
 
                 <strong>
                   {lessonWatched
@@ -3146,8 +3563,12 @@ function AllCourses({
                 {isSavingWatch
                   ? "جاري تسجيل المشاهدة..."
                   : lessonWatched
-                    ? "✅ تم مشاهدة 30% وفتح الامتحان."
-                    : "يتم فتح الامتحان بعد مشاهدة 30% من فيديو الشرح."}
+                    ? hasHomework
+                      ? "✅ تم مشاهدة 30% وفتح الواجب."
+                      : "✅ تم مشاهدة 30% وفتح الامتحان."
+                    : hasHomework
+                      ? "يتم فتح الواجب بعد مشاهدة 30% من فيديو الشرح."
+                      : "يتم فتح الامتحان بعد مشاهدة 30% من فيديو الشرح."}
               </p>
             </div>
           )}
@@ -3167,14 +3588,16 @@ function AllCourses({
     selectedHomeworkLesson &&
     selectedCourse
   ) {
-    const questions = Array.isArray(
-      selectedHomework.questions
-    )
-      ? selectedHomework.questions.filter(
-          (question) =>
-            question.cancelled !== true
-        )
-      : [];
+    const questions =
+      Array.isArray(
+        selectedHomework.questions
+      )
+        ? selectedHomework.questions.filter(
+            (question) =>
+              question.cancelled !==
+              true
+          )
+        : [];
 
     return (
       <section
@@ -3192,13 +3615,15 @@ function AllCourses({
           style={{
             marginBottom: "25px",
             padding: "12px 18px",
-            border: "1px solid #8b6546",
+            border:
+              "1px solid #8b6546",
             borderRadius: "12px",
             background: "#fffaf3",
             color: "#6b472f",
             fontWeight: "800",
             cursor: "pointer",
-            display: "inline-flex",
+            display:
+              "inline-flex",
             alignItems: "center",
             gap: "8px",
           }}
@@ -3227,113 +3652,168 @@ function AllCourses({
             <FaClipboardCheck
               style={{
                 fontSize: "38px",
-                marginBottom: "10px",
+                marginBottom:
+                  "10px",
               }}
             />
 
             <h1
               style={{
-                margin: "0 0 8px",
+                margin:
+                  "0 0 8px",
               }}
             >
               {selectedHomework.title ||
                 "واجب المحاضرة"}
             </h1>
 
-            <p style={{ margin: 0 }}>
-              {selectedHomeworkLesson.title}
+            <p
+              style={{
+                margin: 0,
+              }}
+            >
+              {
+                selectedHomeworkLesson.title
+              }
             </p>
 
             <p>
-              عدد الأسئلة: {questions.length}
+              عدد الأسئلة:{" "}
+              {questions.length}
             </p>
           </div>
 
           {homeworkResult && (
             <div
               style={{
-                marginBottom: "25px",
+                marginBottom:
+                  "25px",
                 padding: "22px",
-                borderRadius: "16px",
-                textAlign: "center",
-                background: "#e8f7ee",
-                color: "#176b43",
-                fontWeight: "bold",
+                borderRadius:
+                  "16px",
+                textAlign:
+                  "center",
+                background:
+                  "#e8f7ee",
+                color:
+                  "#176b43",
+                fontWeight:
+                  "bold",
               }}
             >
               <FaCheckCircle
                 style={{
-                  fontSize: "30px",
-                  marginBottom: "8px",
+                  fontSize:
+                    "30px",
+                  marginBottom:
+                    "8px",
                 }}
               />
 
-              <h2>تم تسليم الواجب ✅</h2>
+              <h2>
+                تم تسليم الواجب ✅
+              </h2>
 
               <p
                 style={{
-                  fontSize: "20px",
+                  fontSize:
+                    "20px",
                 }}
               >
-                درجتك: {homeworkResult.score} من{" "}
-                {homeworkResult.total}
+                درجتك:{" "}
+                {
+                  homeworkResult.score
+                }{" "}
+                من{" "}
+                {
+                  homeworkResult.total
+                }
               </p>
 
               <p>
-                النسبة: {homeworkResult.percentage}%
+                النسبة:{" "}
+                {
+                  homeworkResult.percentage
+                }
+                %
               </p>
 
               <p>
-                تم فتح فيديو حل الواجب.
+                تم فتح فيديو حل
+                الواجب.
               </p>
             </div>
           )}
 
           {questions.map(
-            (question, questionIndex) => {
+            (
+              question,
+              questionIndex
+            ) => {
               const selectedAnswer =
-                homeworkAnswers[question.id];
+                homeworkAnswers[
+                  question.id
+                ];
 
               return (
                 <div
-                  key={question.id}
+                  key={
+                    question.id
+                  }
                   style={{
-                    marginBottom: "18px",
-                    padding: "22px",
-                    borderRadius: "16px",
+                    marginBottom:
+                      "18px",
+                    padding:
+                      "22px",
+                    borderRadius:
+                      "16px",
                     border:
                       "1px solid #d9c1aa",
-                    background: "#fffaf3",
+                    background:
+                      "#fffaf3",
                     boxShadow:
                       "0 7px 18px rgba(0,0,0,0.07)",
                   }}
                 >
                   <h3
                     style={{
-                      margin: "0 0 18px",
-                      lineHeight: "1.9",
-                      color: "#4a2f1f",
+                      margin:
+                        "0 0 18px",
+                      lineHeight:
+                        "1.9",
+                      color:
+                        "#4a2f1f",
                     }}
                   >
-                    {questionIndex + 1}.{" "}
-                    {question.question}
+                    {questionIndex +
+                      1}
+                    .{" "}
+                    {
+                      question.question
+                    }
                   </h3>
 
                   <div
                     style={{
-                      display: "grid",
+                      display:
+                        "grid",
                       gap: "10px",
                     }}
                   >
                     {question.options.map(
-                      (option, optionIndex) => {
+                      (
+                        option,
+                        optionIndex
+                      ) => {
                         const checked =
                           selectedAnswer ===
                           optionIndex;
 
                         return (
                           <button
-                            key={optionIndex}
+                            key={
+                              optionIndex
+                            }
                             type="button"
                             disabled={
                               !!homeworkResult
@@ -3345,18 +3825,22 @@ function AllCourses({
                               )
                             }
                             style={{
-                              width: "100%",
+                              width:
+                                "100%",
                               padding:
                                 "14px 16px",
                               borderRadius:
                                 "12px",
-                              border: checked
-                                ? "2px solid #8b6546"
-                                : "1px solid #d9c1aa",
-                              background: checked
-                                ? "#f3e5d5"
-                                : "#fff",
-                              color: "#3d281c",
+                              border:
+                                checked
+                                  ? "2px solid #8b6546"
+                                  : "1px solid #d9c1aa",
+                              background:
+                                checked
+                                  ? "#f3e5d5"
+                                  : "#fff",
+                              color:
+                                "#3d281c",
                               textAlign:
                                 "right",
                               fontWeight:
@@ -3367,7 +3851,9 @@ function AllCourses({
                                   : "pointer",
                             }}
                           >
-                            {option}
+                            {
+                              option
+                            }
                           </button>
                         );
                       }
@@ -3384,18 +3870,26 @@ function AllCourses({
               disabled={
                 isSubmittingHomework
               }
-              onClick={submitHomework}
+              onClick={
+                submitHomework
+              }
               style={{
                 width: "100%",
                 padding: "16px",
                 border: "none",
-                borderRadius: "14px",
-                background: "#6b472f",
+                borderRadius:
+                  "14px",
+                background:
+                  "#6b472f",
                 color: "#fff",
-                fontSize: "18px",
-                fontWeight: "900",
-                cursor: "pointer",
-                marginBottom: "30px",
+                fontSize:
+                  "18px",
+                fontWeight:
+                  "900",
+                cursor:
+                  "pointer",
+                marginBottom:
+                  "30px",
               }}
             >
               {isSubmittingHomework
@@ -3419,7 +3913,8 @@ function AllCourses({
       <Exam
         exam={selectedExam}
         currentStudent={
-          studentData || currentStudent
+          studentData ||
+          currentStudent
         }
         onBack={closeExam}
       />
@@ -3436,21 +3931,31 @@ function AllCourses({
     return (
       <>
         <CourseContent
-          course={selectedCourse}
-          onBack={closeCourseContent}
-          isLessonUnlocked={(lesson) =>
+          course={
+            selectedCourse
+          }
+          onBack={
+            closeCourseContent
+          }
+          isLessonUnlocked={(
+            lesson
+          ) =>
             hasLessonAccess(
               selectedCourse,
               lesson
             )
           }
-          getLessonWatched={(lesson) =>
+          getLessonWatched={(
+            lesson
+          ) =>
             isLessonWatched(
               selectedCourse.id,
               lesson.id
             )
           }
-          getHomeworkSubmitted={(lesson) =>
+          getHomeworkSubmitted={(
+            lesson
+          ) =>
             isHomeworkSubmitted(
               selectedCourse,
               lesson
@@ -3465,23 +3970,35 @@ function AllCourses({
           activatingLessonId={
             activatingLessonId
           }
-          onActivateLessonCode={(lesson) =>
+          onActivateLessonCode={(
+            lesson
+          ) =>
             activateLessonCode(
               selectedCourse,
               lesson
             )
           }
-          onOpenVideo={(lesson) =>
+          onOpenVideo={(
+            lesson
+          ) =>
             openLesson(
               selectedCourse,
               lesson
             )
           }
-          onOpenPdf={(lesson) =>
-            openPdf(lesson)
+          onOpenPdf={(
+            lesson
+          ) =>
+            openPdf(
+              lesson
+            )
           }
-          onOpenHomework={(lesson) =>
-            openHomework(lesson)
+          onOpenHomework={(
+            lesson
+          ) =>
+            openHomework(
+              lesson
+            )
           }
           onOpenHomeworkSolution={(
             lesson,
@@ -3523,10 +4040,13 @@ function AllCourses({
           <FaBookOpen />
 
           <div>
-            <h1>جميع الكورسات</h1>
+            <h1>
+              جميع الكورسات
+            </h1>
 
             <p>
-              الكورسات المتاحة لطلاب{" "}
+              الكورسات المتاحة
+              لطلاب{" "}
               {studentGrade ||
                 "المرحلة الثانوية"}
             </p>
@@ -3540,276 +4060,303 @@ function AllCourses({
             </div>
 
             <h2>
-              جاري تحميل الكورسات...
+              جاري تحميل
+              الكورسات...
             </h2>
           </div>
         ) : coursesError ? (
           <div className="all-courses-empty">
-            <h2>حدث خطأ</h2>
+            <h2>
+              حدث خطأ
+            </h2>
 
-            <p>{coursesError}</p>
+            <p>
+              {coursesError}
+            </p>
           </div>
-        ) : visibleCourses.length === 0 ? (
+        ) : visibleCourses.length ===
+          0 ? (
           <div className="all-courses-empty">
             <div className="all-courses-empty-icon">
               <FaGraduationCap />
             </div>
 
             <h2>
-              مفيش كورسات متاحة حاليًا
+              مفيش كورسات متاحة
+              حاليًا
             </h2>
           </div>
         ) : (
           <div className="courses-shop-grid">
-            {visibleCourses.map((course) => {
-              const paid =
-                isPaidCourse(course);
+            {visibleCourses.map(
+              (course) => {
+                const paid =
+                  isPaidCourse(
+                    course
+                  );
 
-              const unlocked =
-                hasCourseAccess(course);
+                const unlocked =
+                  hasCourseAccess(
+                    course
+                  );
 
-              const courseAccess =
-                getCourseAccess(course);
+                const courseAccess =
+                  getCourseAccess(
+                    course
+                  );
 
-              const hasWholeCourseAccess =
-                !paid ||
-                (unlocked &&
-                  courseAccess?.accessType !==
-                    "lesson");
+                const hasWholeCourseAccess =
+                  !paid ||
+                  (unlocked &&
+                    courseAccess?.accessType !==
+                      "lesson");
 
-              return (
-                <article
-                  className="course-shop-card"
-                  key={course.id}
-                >
-                  <div className="course-shop-main">
-                    <div className="course-shop-image-wrapper">
-                      <img
-                        src={getCourseImage(
-                          course
-                        )}
-                        alt={
-                          course.title ||
-                          "صورة الكورس"
-                        }
-                        className="course-shop-image"
-                      />
-
-                      <span
-                        style={{
-                          position:
-                            "absolute",
-                          top: "14px",
-                          right: "14px",
-                          padding:
-                            "8px 14px",
-                          borderRadius:
-                            "30px",
-                          background: paid
-                            ? hasWholeCourseAccess
-                              ? "#168d55"
-                              : "#31271f"
-                            : "#168d55",
-                          color: "#fff",
-                          fontWeight:
-                            "bold",
-                        }}
-                      >
-                        {!paid
-                          ? "مجاني"
-                          : hasWholeCourseAccess
-                            ? "مشترك"
-                            : courseAccess?.accessType ===
-                                "lesson"
-                              ? "عندك محاضرة مفعلة"
-                              : "اشتراك"}
-                      </span>
-                    </div>
-
-                    <div className="course-shop-content">
-                      <span className="course-shop-grade">
-                        {course.grade ||
-                          studentGrade}
-                      </span>
-
-                      <h2>
-                        {course.title ||
-                          "كورس اللغة العربية"}
-                      </h2>
-
-                      <p>
-                        {course.description ||
-                          "شرح منظم وتدريبات واختبارات."}
-                      </p>
-
-                      <div className="course-shop-footer">
-                        <strong>
-                          {getDisplayedPrice(
-                            course.price
+                return (
+                  <article
+                    className="course-shop-card"
+                    key={
+                      course.id
+                    }
+                  >
+                    <div className="course-shop-main">
+                      <div className="course-shop-image-wrapper">
+                        <img
+                          src={getCourseImage(
+                            course
                           )}
-                        </strong>
+                          alt={
+                            course.title ||
+                            "صورة الكورس"
+                          }
+                          className="course-shop-image"
+                        />
+
+                        <span
+                          style={{
+                            position:
+                              "absolute",
+                            top:
+                              "14px",
+                            right:
+                              "14px",
+                            padding:
+                              "8px 14px",
+                            borderRadius:
+                              "30px",
+                            background:
+                              paid
+                                ? hasWholeCourseAccess
+                                  ? "#168d55"
+                                  : "#31271f"
+                                : "#168d55",
+                            color:
+                              "#fff",
+                            fontWeight:
+                              "bold",
+                          }}
+                        >
+                          {!paid
+                            ? "مجاني"
+                            : hasWholeCourseAccess
+                              ? "مشترك"
+                              : courseAccess?.accessType ===
+                                  "lesson"
+                                ? "عندك محاضرة مفعلة"
+                                : "اشتراك"}
+                        </span>
+                      </div>
+
+                      <div className="course-shop-content">
+                        <span className="course-shop-grade">
+                          {course.grade ||
+                            studentGrade}
+                        </span>
+
+                        <h2>
+                          {course.title ||
+                            "كورس اللغة العربية"}
+                        </h2>
+
+                        <p>
+                          {course.description ||
+                            "شرح منظم وتدريبات واختبارات."}
+                        </p>
+
+                        <div className="course-shop-footer">
+                          <strong>
+                            {getDisplayedPrice(
+                              course.price
+                            )}
+                          </strong>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="course-card-actions">
-                    <button
-                      type="button"
-                      className="course-content-btn"
-                      onClick={() =>
-                        openCourseContent(
-                          course
-                        )
-                      }
-                    >
-                      <FaBookOpen />
-                      محتوى الكورس
-                    </button>
-
-                    {hasWholeCourseAccess ? (
+                    <div className="course-card-actions">
                       <button
                         type="button"
-                        className="course-start-btn"
-                        disabled={
-                          !course.lessons
-                            ?.length
+                        className="course-content-btn"
+                        onClick={() =>
+                          openCourseContent(
+                            course
+                          )
                         }
-                        onClick={() => {
-                          const firstAvailable =
-                            course.lessons?.find(
-                              (lesson) =>
-                                hasLessonAccess(
-                                  course,
-                                  lesson
-                                ) &&
-                                hasValue(
-                                  lesson.youtubeUrl ||
-                                    lesson.videoUrl
-                                )
-                            );
-
-                          if (
-                            firstAvailable
-                          ) {
-                            openLesson(
-                              course,
-                              firstAvailable
-                            );
-                          } else {
-                            openCourseContent(
-                              course
-                            );
-                          }
-                        }}
                       >
-                        <FaPlay />
-                        ابدأ
+                        <FaBookOpen />
+                        محتوى الكورس
                       </button>
-                    ) : (
-                      <>
+
+                      {hasWholeCourseAccess ? (
                         <button
                           type="button"
                           className="course-start-btn"
-                          onClick={() =>
-                            openCourseSubscription(
-                              course
-                            )
+                          disabled={
+                            !course.lessons
+                              ?.length
                           }
-                        >
-                          <FaWhatsapp />
-                          اشترك الآن
-                        </button>
+                          onClick={() => {
+                            const firstAvailable =
+                              course.lessons?.find(
+                                (
+                                  lesson
+                                ) =>
+                                  hasLessonAccess(
+                                    course,
+                                    lesson
+                                  ) &&
+                                  hasValue(
+                                    lesson.youtubeUrl ||
+                                      lesson.videoUrl
+                                  )
+                              );
 
-                        <div
-                          style={{
-                            width: "100%",
-                            marginTop:
-                              "12px",
+                            if (
+                              firstAvailable
+                            ) {
+                              openLesson(
+                                course,
+                                firstAvailable
+                              );
+                            } else {
+                              openCourseContent(
+                                course
+                              );
+                            }
                           }}
                         >
-                          <input
-                            type="text"
-                            value={
-                              activationCodes[
-                                course.id
-                              ] || ""
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              handleActivationCodeChange(
-                                course.id,
-                                event
-                                  .target
-                                  .value
-                              )
-                            }
-                            placeholder="كود الشهر أو الترم"
-                            autoComplete="off"
-                            maxLength={20}
-                            style={{
-                              width:
-                                "100%",
-                              minHeight:
-                                "48px",
-                              padding:
-                                "10px 14px",
-                              borderRadius:
-                                "12px",
-                              border:
-                                "1px solid #d7c2ae",
-                              fontSize:
-                                "16px",
-                              fontWeight:
-                                "700",
-                              textAlign:
-                                "center",
-                              boxSizing:
-                                "border-box",
-                              marginBottom:
-                                "10px",
-                              direction:
-                                "ltr",
-                              color:
-                                "#222",
-                              background:
-                                "#fff",
-                              WebkitTextFillColor:
-                                "#222",
-                              caretColor:
-                                "#222",
-                            }}
-                          />
-
+                          <FaPlay />
+                          ابدأ
+                        </button>
+                      ) : (
+                        <>
                           <button
                             type="button"
-                            className="course-content-btn"
-                            style={{
-                              width:
-                                "100%",
-                            }}
-                            disabled={
-                              activatingCourseId ===
-                              course.id
-                            }
+                            className="course-start-btn"
                             onClick={() =>
-                              activateCourseCode(
+                              openCourseSubscription(
                                 course
                               )
                             }
                           >
-                            {activatingCourseId ===
-                            course.id
-                              ? "جاري التفعيل..."
-                              : "تفعيل اشتراك الكورس"}
+                            <FaWhatsapp />
+                            اشترك الآن
                           </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+
+                          <div
+                            style={{
+                              width:
+                                "100%",
+                              marginTop:
+                                "12px",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={
+                                activationCodes[
+                                  course.id
+                                ] ||
+                                ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                handleActivationCodeChange(
+                                  course.id,
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              placeholder="كود الشهر أو الترم"
+                              autoComplete="off"
+                              maxLength={
+                                20
+                              }
+                              style={{
+                                width:
+                                  "100%",
+                                minHeight:
+                                  "48px",
+                                padding:
+                                  "10px 14px",
+                                borderRadius:
+                                  "12px",
+                                border:
+                                  "1px solid #d7c2ae",
+                                fontSize:
+                                  "16px",
+                                fontWeight:
+                                  "700",
+                                textAlign:
+                                  "center",
+                                boxSizing:
+                                  "border-box",
+                                marginBottom:
+                                  "10px",
+                                direction:
+                                  "ltr",
+                                color:
+                                  "#222",
+                                background:
+                                  "#fff",
+                                WebkitTextFillColor:
+                                  "#222",
+                                caretColor:
+                                  "#222",
+                              }}
+                            />
+
+                            <button
+                              type="button"
+                              className="course-content-btn"
+                              style={{
+                                width:
+                                  "100%",
+                              }}
+                              disabled={
+                                activatingCourseId ===
+                                course.id
+                              }
+                              onClick={() =>
+                                activateCourseCode(
+                                  course
+                                )
+                              }
+                            >
+                              {activatingCourseId ===
+                              course.id
+                                ? "جاري التفعيل..."
+                                : "تفعيل اشتراك الكورس"}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                );
+              }
+            )}
           </div>
         )}
       </section>
