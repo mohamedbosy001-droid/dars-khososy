@@ -2400,27 +2400,102 @@ function AllCourses({
     setActiveLesson(
       null
     );
-    /*
+
+    setYoutubePlayer(
+      null
+    );
+
+    setVideoIsPlaying(
+      false
+    );
+
+    setWatchPercent(
+      0
+    );
+
+    window.scrollTo(
+      0,
+      0
+    );
+  }
+
+  /*
     ============================
-    فيديو YouTube
-    حماية المشغل داخل المنصة
+    استخراج ID فيديو YouTube
     ============================
   */
 
-  function protectYouTubeWrapper(
-    event
+  function extractYouTubeVideoId(
+    url
   ) {
-    if (
-      event?.preventDefault
-    ) {
-      event.preventDefault();
+    if (!url) {
+      return "";
     }
 
     if (
-      event?.stopPropagation
+      !url.includes("/") &&
+      !url.includes(".")
     ) {
-      event.stopPropagation();
+      return url;
     }
+
+    try {
+      const parsedUrl =
+        new URL(url);
+
+      if (
+        parsedUrl.hostname.includes(
+          "youtu.be"
+        )
+      ) {
+        return parsedUrl.pathname
+          .replace(
+            "/",
+            ""
+          )
+          .split("?")[0];
+      }
+
+      if (
+        parsedUrl.hostname.includes(
+          "youtube.com"
+        )
+      ) {
+        if (
+          parsedUrl.pathname.includes(
+            "/embed/"
+          )
+        ) {
+          return parsedUrl.pathname
+            .split(
+              "/embed/"
+            )[1]
+            .split("/")[0];
+        }
+
+        if (
+          parsedUrl.pathname.includes(
+            "/shorts/"
+          )
+        ) {
+          return parsedUrl.pathname
+            .split(
+              "/shorts/"
+            )[1]
+            .split("/")[0];
+        }
+
+        return (
+          parsedUrl.searchParams.get(
+            "v"
+          ) || ""
+        );
+      }
+    } catch {
+      return "";
+    }
+
+    return "";
   }
 
   /*
@@ -3762,18 +3837,8 @@ function AllCourses({
       );
 
     return (
-      <div
-        className="course-lesson-overlay"
-        onContextMenu={
-          protectYouTubeWrapper
-        }
-      >
-        <div
-          className="course-lesson-modal"
-          onContextMenu={
-            protectYouTubeWrapper
-          }
-        >
+      <div className="course-lesson-overlay">
+        <div className="course-lesson-modal">
           <button
             type="button"
             className="course-lesson-close"
@@ -3802,23 +3867,7 @@ function AllCourses({
             </p>
           )}
 
-          <div
-            className="course-youtube-wrapper"
-            onContextMenu={
-              protectYouTubeWrapper
-            }
-            onDragStart={
-              protectYouTubeWrapper
-            }
-            style={{
-              userSelect:
-                "none",
-              WebkitUserSelect:
-                "none",
-              WebkitTouchCallout:
-                "none",
-            }}
-          >
+          <div className="course-youtube-wrapper">
             {videoId ? (
               <YouTube
                 videoId={
@@ -3831,18 +3880,12 @@ function AllCourses({
                   height:
                     "100%",
 
-                  host:
-                    "https://www.youtube-nocookie.com",
-
                   playerVars: {
                     autoplay: 1,
                     controls: 1,
                     rel: 0,
                     modestbranding: 1,
                     playsinline: 1,
-                    fs: 0,
-                    iv_load_policy: 3,
-                    disablekb: 1,
                   },
                 }}
                 style={{
@@ -4323,8 +4366,8 @@ function AllCourses({
             selectedCourse
           }
           isThirdLecture1ExamCompleted={isExamCompleted(
-            THIRD_LECTURE_1_EXAM_ID
-          )}
+  THIRD_LECTURE_1_EXAM_ID
+)}
           onBack={
             closeCourseContent
           }
@@ -4755,5 +4798,5 @@ function AllCourses({
     </>
   );
 }
-}
+
 export default AllCourses;
