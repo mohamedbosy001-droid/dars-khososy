@@ -640,7 +640,7 @@ const homeworkData = {
   "second-center-homework-1": {
     id: "second-center-homework-1",
 
-    title: "واجب تانية ثانوي",
+    title:"واجب المحاضرة الأولي",
 
     grade: "الثاني الثانوي",
 
