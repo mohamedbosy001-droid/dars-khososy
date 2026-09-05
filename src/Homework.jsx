@@ -16,6 +16,8 @@ import {
 
 import { auth, db } from "./firebase";
 
+import homeworkData from "./homeworkData";
+
 import {
   FaArrowRight,
   FaArrowLeft,
@@ -29,9 +31,285 @@ import {
 
 import "./Homework.css";
 
-/* =========================
+/* =========================================================
+   Helpers عامة
+========================================================= */
+
+function normalizeGrade(value) {
+  const text = String(value || "")
+    .trim()
+    .replace(/^الصف\s+/u, "");
+
+  if (
+    text.includes("الثاني") ||
+    text.includes("الثانى") ||
+    text.includes("تاني") ||
+    text.includes("تانية")
+  ) {
+    return "الثاني الثانوي";
+  }
+
+  if (
+    text.includes("الثالث") ||
+    text.includes("تالت") ||
+    text.includes("تالتة")
+  ) {
+    return "الثالث الثانوي";
+  }
+
+  return text;
+}
+
+function normalizeArabicText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+
+    /* إزالة التشكيل */
+    .replace(
+      /[\u0617-\u061A\u064B-\u0652]/g,
+      ""
+    )
+
+    /* إزالة التطويل */
+    .replace(/ـ/g, "")
+
+    /* توحيد الألف */
+    .replace(/[أإآٱ]/g, "ا")
+
+    /* توحيد الياء */
+    .replace(/ى/g, "ي")
+
+    /* توحيد الهاء والتاء المربوطة */
+    .replace(/ة/g, "ه")
+
+    /* إزالة علامات الترقيم */
+    .replace(
+      /[.,،؛;:!?؟"'“”‘’()[\]{}]/g,
+      " "
+    )
+
+    /* مسافات */
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isEssayQuestion(question) {
+  return (
+    question?.type === "essay" ||
+    !Array.isArray(question?.options)
+  );
+}
+
+function isQuestionAnswered(
+  question,
+  answer
+) {
+  if (question?.cancelled) {
+    return true;
+  }
+
+  if (isEssayQuestion(question)) {
+    return (
+      typeof answer === "string" &&
+      answer.trim().length > 0
+    );
+  }
+
+  return (
+    answer !== undefined &&
+    answer !== null
+  );
+}
+
+function getQuestionDisplayNumber(
+  question,
+  index
+) {
+  return (
+    question?.number ??
+    question?.questionNumber ??
+    index + 1
+  );
+}
+
+/* =========================================================
+   تصحيح المقالي
+========================================================= */
+
+function getImportantWords(text) {
+  const ignoredWords = new Set([
+    "هو",
+    "هي",
+    "في",
+    "من",
+    "على",
+    "عن",
+    "الى",
+    "إلى",
+    "و",
+    "او",
+    "أو",
+    "ان",
+    "إن",
+    "انه",
+    "أنه",
+    "لان",
+    "لأن",
+    "ب",
+    "ال",
+    "اسلوب",
+    "أسلوب",
+    "وسيله",
+    "وسيلة",
+    "نوع",
+  ]);
+
+  return normalizeArabicText(text)
+    .split(" ")
+    .map((word) => word.trim())
+    .filter(
+      (word) =>
+        word.length > 1 &&
+        !ignoredWords.has(word)
+    );
+}
+
+function calculateAnswerSimilarity(
+  firstText,
+  secondText
+) {
+  const firstWords =
+    getImportantWords(firstText);
+
+  const secondWords =
+    getImportantWords(secondText);
+
+  if (
+    firstWords.length === 0 ||
+    secondWords.length === 0
+  ) {
+    return 0;
+  }
+
+  const firstSet = new Set(
+    firstWords
+  );
+
+  const secondSet = new Set(
+    secondWords
+  );
+
+  let common = 0;
+
+  firstSet.forEach((word) => {
+    if (secondSet.has(word)) {
+      common += 1;
+    }
+  });
+
+  const largestLength = Math.max(
+    firstSet.size,
+    secondSet.size
+  );
+
+  if (largestLength === 0) {
+    return 0;
+  }
+
+  return common / largestLength;
+}
+
+function isEssayAnswerCorrect(
+  studentAnswer,
+  question
+) {
+  const normalizedStudent =
+    normalizeArabicText(
+      studentAnswer
+    );
+
+  if (!normalizedStudent) {
+    return false;
+  }
+
+  const acceptedAnswers =
+    Array.isArray(
+      question?.acceptedAnswers
+    )
+      ? question.acceptedAnswers
+      : [];
+
+  if (
+    acceptedAnswers.length === 0
+  ) {
+    return false;
+  }
+
+  for (const acceptedAnswer of acceptedAnswers) {
+    const normalizedAccepted =
+      normalizeArabicText(
+        acceptedAnswer
+      );
+
+    if (
+      normalizedStudent ===
+      normalizedAccepted
+    ) {
+      return true;
+    }
+
+    const studentWords =
+      getImportantWords(
+        normalizedStudent
+      );
+
+    const acceptedWords =
+      getImportantWords(
+        normalizedAccepted
+      );
+
+    /*
+      الإجابات القصيرة جدًا
+      مثل:
+      خبري
+      إنشائي
+      تعليل
+
+      لازم تكون مطابقة مباشرة،
+      حتى لا نقبل إجابة عكسية.
+    */
+
+    if (
+      studentWords.length <= 1 ||
+      acceptedWords.length <= 1
+    ) {
+      continue;
+    }
+
+    const similarity =
+      calculateAnswerSimilarity(
+        normalizedStudent,
+        normalizedAccepted
+      );
+
+    /*
+      قبول الصياغة المختلفة
+      لو المعنى والكلمات الأساسية
+      متقاربين جدًا.
+    */
+
+    if (similarity >= 0.7) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/* =========================================================
    الواجب الأول - كما هو
-========================= */
+========================================================= */
 
 const FIRST_HOMEWORK_CANCELLED_QUESTIONS = [
   7,
@@ -81,41 +359,50 @@ const FIRST_HOMEWORK_CORRECT_ANSWERS = {
   37: 2,
 };
 
-const FIRST_HOMEWORK_QUESTIONS = Array.from(
-  {
-    length: 37,
-  },
-  (_, index) => {
-    const questionNumber = index + 1;
+const FIRST_HOMEWORK_QUESTIONS =
+  Array.from(
+    {
+      length: 37,
+    },
+    (_, index) => {
+      const questionNumber =
+        index + 1;
 
-    const isCancelled =
-      FIRST_HOMEWORK_CANCELLED_QUESTIONS.includes(
-        questionNumber
-      );
+      const isCancelled =
+        FIRST_HOMEWORK_CANCELLED_QUESTIONS.includes(
+          questionNumber
+        );
 
-    return {
-      id: `homework-1-q${questionNumber}`,
+      return {
+        id: `homework-1-q${questionNumber}`,
 
-      questionNumber,
+        questionNumber,
 
-      question: `السؤال ${questionNumber}`,
+        question: `السؤال ${questionNumber}`,
 
-      options: ["أ", "ب", "ج", "د"],
+        options: [
+          "أ",
+          "ب",
+          "ج",
+          "د",
+        ],
 
-      cancelled: isCancelled,
+        cancelled:
+          isCancelled,
 
-      correctAnswer: isCancelled
-        ? null
-        : FIRST_HOMEWORK_CORRECT_ANSWERS[
-            questionNumber
-          ],
-    };
-  }
-);
+        correctAnswer:
+          isCancelled
+            ? null
+            : FIRST_HOMEWORK_CORRECT_ANSWERS[
+                questionNumber
+              ],
+      };
+    }
+  );
 
-/* =========================
-   الواجب الثاني
-========================= */
+/* =========================================================
+   الواجب الثاني - تالتة ثانوي
+========================================================= */
 
 const SECOND_HOMEWORK_CORRECT_ANSWERS = {
   1: 3,
@@ -140,43 +427,100 @@ const SECOND_HOMEWORK_CORRECT_ANSWERS = {
   20: 1,
 };
 
-const SECOND_HOMEWORK_QUESTIONS = Array.from(
-  {
-    length: 20,
-  },
-  (_, index) => {
-    const questionNumber = index + 1;
+const SECOND_HOMEWORK_QUESTIONS =
+  Array.from(
+    {
+      length: 20,
+    },
+    (_, index) => {
+      const questionNumber =
+        index + 1;
 
-    return {
-      id: `third-homework-2-q${questionNumber}`,
+      return {
+        id: `third-homework-2-q${questionNumber}`,
 
-      questionNumber,
+        questionNumber,
 
-      question: `السؤال ${questionNumber}`,
+        question: `السؤال ${questionNumber}`,
 
-      options: ["أ", "ب", "ج", "د"],
-
-      cancelled: false,
-
-      correctAnswer:
-        SECOND_HOMEWORK_CORRECT_ANSWERS[
-          questionNumber
+        options: [
+          "أ",
+          "ب",
+          "ج",
+          "د",
         ],
-    };
-  }
-);
 
-/* =========================
+        cancelled: false,
+
+        correctAnswer:
+          SECOND_HOMEWORK_CORRECT_ANSWERS[
+            questionNumber
+          ],
+      };
+    }
+  );
+
+/* =========================================================
+   واجب تانية ثانوي من homeworkData
+========================================================= */
+
+const SECOND_CENTER_HOMEWORK_SOURCE =
+  homeworkData?.[
+    "second-center-homework-1"
+  ] || null;
+
+const SECOND_CENTER_HOMEWORK =
+  SECOND_CENTER_HOMEWORK_SOURCE
+    ? {
+        ...SECOND_CENTER_HOMEWORK_SOURCE,
+
+        id:
+          SECOND_CENTER_HOMEWORK_SOURCE.id ||
+          "second-center-homework-1",
+
+        title:
+          SECOND_CENTER_HOMEWORK_SOURCE.title ||
+          "واجب تانية ثانوي",
+
+        grade:
+          SECOND_CENTER_HOMEWORK_SOURCE.grade ||
+          "الثاني الثانوي",
+
+        studentType: "center",
+
+        centerOnly: true,
+
+        videoId:
+          SECOND_CENTER_HOMEWORK_SOURCE.videoId ||
+          "LosP4RjBCfM",
+
+        questions:
+          Array.isArray(
+            SECOND_CENTER_HOMEWORK_SOURCE.questions
+          )
+            ? SECOND_CENTER_HOMEWORK_SOURCE.questions
+            : [],
+      }
+    : null;
+
+/* =========================================================
    بيانات الواجبات
-========================= */
+========================================================= */
 
 const HOMEWORKS = [
   {
     id: "homework-1",
 
-    title: "واجب المحاضرة الأولي",
+    title:
+      "واجب المحاضرة الأولي",
 
-    videoId: "qa2X7xgsay0",
+    grade:
+      "الثالث الثانوي",
+
+    studentType: "center",
+
+    videoId:
+      "qa2X7xgsay0",
 
     questions:
       FIRST_HOMEWORK_QUESTIONS,
@@ -185,39 +529,107 @@ const HOMEWORKS = [
   {
     id: "third-homework-2",
 
-    title: "واجب المحاضرة الثانية",
+    title:
+      "واجب المحاضرة الثانية",
 
-    videoId: "6pv2Rb6UPr4",
+    grade:
+      "الثالث الثانوي",
+
+    studentType: "center",
+
+    videoId:
+      "6pv2Rb6UPr4",
 
     questions:
       SECOND_HOMEWORK_QUESTIONS,
   },
+
+  ...(SECOND_CENTER_HOMEWORK
+    ? [
+        SECOND_CENTER_HOMEWORK,
+      ]
+    : []),
 ];
+
+/* =========================================================
+   هل الطالب مسموح له بالواجب؟
+========================================================= */
+
+function canStudentAccessHomework(
+  student,
+  homework
+) {
+  if (
+    !student ||
+    !homework
+  ) {
+    return false;
+  }
+
+  if (
+    student.studentType !==
+    "center"
+  ) {
+    return false;
+  }
+
+  const studentGrade =
+    normalizeGrade(
+      student.grade
+    );
+
+  const homeworkGrade =
+    normalizeGrade(
+      homework.grade
+    );
+
+  if (
+    homeworkGrade &&
+    studentGrade !==
+      homeworkGrade
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+/* =========================================================
+   Component
+========================================================= */
 
 function Homework({
   currentStudent,
 }) {
-  const [openedSection, setOpenedSection] =
-    useState(null);
+  const [
+    openedSection,
+    setOpenedSection,
+  ] = useState(null);
 
   const [
     activeHomeworkId,
     setActiveHomeworkId,
   ] = useState(null);
 
-  const [answers, setAnswers] =
-    useState({});
+  const [
+    answers,
+    setAnswers,
+  ] = useState({});
 
   const [
     currentQuestionIndex,
     setCurrentQuestionIndex,
   ] = useState(0);
 
-  const [submitted, setSubmitted] =
-    useState(false);
+  const [
+    submitted,
+    setSubmitted,
+  ] = useState(false);
 
-  const [result, setResult] =
-    useState(null);
+  const [
+    result,
+    setResult,
+  ] = useState(null);
 
   const [
     isLoadingAttempt,
@@ -244,27 +656,53 @@ function Homework({
     auth.currentUser?.uid ||
     "";
 
+  const studentGrade =
+    normalizeGrade(
+      currentStudent?.grade
+    );
+
   const isAllowedStudent =
     currentStudent?.studentType ===
       "center" &&
-    (currentStudent?.grade ===
-      "الثالث الثانوي" ||
-      currentStudent?.grade ===
-        "الصف الثالث الثانوي");
+    (
+      studentGrade ===
+        "الثالث الثانوي" ||
+      studentGrade ===
+        "الثاني الثانوي"
+    );
+
+  /* =========================================================
+     الواجبات المناسبة للطالب
+  ========================================================= */
+
+  const studentHomeworks =
+    useMemo(() => {
+      return HOMEWORKS.filter(
+        (homework) =>
+          canStudentAccessHomework(
+            currentStudent,
+            homework
+          )
+      );
+    }, [currentStudent]);
 
   const activeHomework =
     useMemo(
       () =>
-        HOMEWORKS.find(
+        studentHomeworks.find(
           (homework) =>
             homework.id ===
             activeHomeworkId
         ) || null,
-      [activeHomeworkId]
+      [
+        activeHomeworkId,
+        studentHomeworks,
+      ]
     );
 
   const questions =
-    activeHomework?.questions || [];
+    activeHomework?.questions ||
+    [];
 
   const currentQuestion =
     questions[
@@ -274,23 +712,27 @@ function Homework({
   const answeredQuestionsCount =
     questions.filter(
       (question) =>
-        question.cancelled ||
-        answers[question.id] !==
-          undefined
+        isQuestionAnswered(
+          question,
+          answers[
+            question.id
+          ]
+        )
     ).length;
 
   const progressPercentage =
     questions.length > 0
       ? Math.round(
-          (answeredQuestionsCount /
-            questions.length) *
-            100
+          (
+            answeredQuestionsCount /
+            questions.length
+          ) * 100
         )
       : 0;
 
-  /* =========================
+  /* =========================================================
      تحميل حالة كل الواجبات
-  ========================= */
+  ========================================================= */
 
   useEffect(() => {
     async function loadDashboard() {
@@ -298,16 +740,23 @@ function Homework({
         !studentUid ||
         !isAllowedStudent
       ) {
-        setIsLoadingDashboard(false);
+        setIsLoadingDashboard(
+          false
+        );
         return;
       }
 
+      setIsLoadingDashboard(
+        true
+      );
+
       try {
-        const studentReference = doc(
-          db,
-          "students",
-          studentUid
-        );
+        const studentReference =
+          doc(
+            db,
+            "students",
+            studentUid
+          );
 
         const studentSnapshot =
           await getDoc(
@@ -337,9 +786,10 @@ function Homework({
             ? studentData.homeworkResults
             : [];
 
-        const nextStatuses = {};
+        const nextStatuses =
+          {};
 
-        HOMEWORKS.forEach(
+        studentHomeworks.forEach(
           (homework) => {
             const attempt =
               attempts[
@@ -347,22 +797,27 @@ function Homework({
               ];
 
             const savedResult =
-              results.find(
-                (item) =>
-                  item?.homeworkId ===
-                  homework.id
-              );
+              [...results]
+                .reverse()
+                .find(
+                  (item) =>
+                    item?.homeworkId ===
+                    homework.id
+                );
 
             const savedAnswers =
-              attempt?.answers || {};
+              attempt?.answers ||
+              {};
 
             const answeredCount =
               homework.questions.filter(
                 (question) =>
-                  question.cancelled ||
-                  savedAnswers[
-                    question.id
-                  ] !== undefined
+                  isQuestionAnswered(
+                    question,
+                    savedAnswers[
+                      question.id
+                    ]
+                  )
               ).length;
 
             nextStatuses[
@@ -376,12 +831,17 @@ function Homework({
 
               score:
                 savedResult?.score ??
-                attempt?.result?.score ??
+                attempt?.result
+                  ?.score ??
                 0,
 
               totalQuestions:
-                savedResult?.totalQuestions ??
-                homework.questions.length,
+                savedResult
+                  ?.totalQuestions ??
+                attempt?.result
+                  ?.totalQuestions ??
+                homework.questions
+                  .length,
 
               answeredCount,
             };
@@ -397,7 +857,9 @@ function Homework({
           error
         );
       } finally {
-        setIsLoadingDashboard(false);
+        setIsLoadingDashboard(
+          false
+        );
       }
     }
 
@@ -405,11 +867,12 @@ function Homework({
   }, [
     studentUid,
     isAllowedStudent,
+    studentHomeworks,
   ]);
 
-  /* =========================
+  /* =========================================================
      تحميل الواجب المختار
-  ========================= */
+  ========================================================= */
 
   useEffect(() => {
     async function loadHomeworkAttempt() {
@@ -421,26 +884,33 @@ function Homework({
         return;
       }
 
-      setIsLoadingAttempt(true);
+      setIsLoadingAttempt(
+        true
+      );
 
       setAnswers({});
 
-      setCurrentQuestionIndex(0);
+      setCurrentQuestionIndex(
+        0
+      );
 
       setSubmitted(false);
 
       setResult(null);
 
       try {
-        const studentReference = doc(
-          db,
-          "students",
-          studentUid
-        );
+        const studentReference =
+          doc(
+            db,
+            "students",
+            studentUid
+          );
 
         await runTransaction(
           db,
-          async (transaction) => {
+          async (
+            transaction
+          ) => {
             const studentSnapshot =
               await transaction.get(
                 studentReference
@@ -457,15 +927,12 @@ function Homework({
             const studentData =
               studentSnapshot.data();
 
-            const studentIsAllowed =
-              studentData.studentType ===
-                "center" &&
-              (studentData.grade ===
-                "الثالث الثانوي" ||
-                studentData.grade ===
-                  "الصف الثالث الثانوي");
-
-            if (!studentIsAllowed) {
+            if (
+              !canStudentAccessHomework(
+                studentData,
+                activeHomework
+              )
+            ) {
               throw new Error(
                 "HOMEWORK_NOT_ALLOWED"
               );
@@ -493,11 +960,15 @@ function Homework({
                 : [];
 
             const savedResult =
-              homeworkResults.find(
-                (savedHomeworkResult) =>
-                  savedHomeworkResult?.homeworkId ===
-                  activeHomework.id
-              );
+              [...homeworkResults]
+                .reverse()
+                .find(
+                  (
+                    savedHomeworkResult
+                  ) =>
+                    savedHomeworkResult?.homeworkId ===
+                    activeHomework.id
+                );
 
             if (
               savedAttempt?.completed ===
@@ -511,7 +982,9 @@ function Homework({
                   null
               );
 
-              setSubmitted(true);
+              setSubmitted(
+                true
+              );
 
               setAnswers(
                 savedAttempt?.answers ||
@@ -538,8 +1011,8 @@ function Homework({
                   ),
                   Math.max(
                     activeHomework
-                      .questions.length -
-                      1,
+                      .questions
+                      .length - 1,
                     0
                   )
                 )
@@ -557,13 +1030,28 @@ function Homework({
               title:
                 activeHomework.title,
 
+              courseId:
+                activeHomework.courseId ||
+                "",
+
+              lessonId:
+                activeHomework.lessonId ||
+                "",
+
+              grade:
+                activeHomework.grade ||
+                "",
+
               started: true,
 
               completed: false,
 
+              submitted: false,
+
               answers: {},
 
-              currentQuestionIndex: 0,
+              currentQuestionIndex:
+                0,
 
               startedAt:
                 Timestamp.now(),
@@ -598,7 +1086,9 @@ function Homework({
           );
         }
       } finally {
-        setIsLoadingAttempt(false);
+        setIsLoadingAttempt(
+          false
+        );
       }
     }
 
@@ -609,6 +1099,10 @@ function Homework({
     isAllowedStudent,
     activeHomework,
   ]);
+
+  /* =========================================================
+     حفظ التقدم
+  ========================================================= */
 
   async function saveAttemptProgress(
     nextAnswers,
@@ -624,11 +1118,12 @@ function Homework({
     }
 
     try {
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await updateDoc(
         studentReference,
@@ -654,6 +1149,10 @@ function Homework({
     }
   }
 
+  /* =========================================================
+     الاختياري
+  ========================================================= */
+
   function chooseAnswer(
     questionId,
     optionIndex
@@ -665,26 +1164,97 @@ function Homework({
     const question =
       questions.find(
         (item) =>
-          item.id === questionId
+          item.id ===
+          questionId
       );
 
-    if (question?.cancelled) {
+    if (
+      question?.cancelled ||
+      isEssayQuestion(
+        question
+      )
+    ) {
       return;
     }
 
     const nextAnswers = {
       ...answers,
 
-      [questionId]: optionIndex,
+      [questionId]:
+        optionIndex,
     };
 
-    setAnswers(nextAnswers);
+    setAnswers(
+      nextAnswers
+    );
 
     saveAttemptProgress(
       nextAnswers,
       currentQuestionIndex
     );
   }
+
+  /* =========================================================
+     المقالي
+  ========================================================= */
+
+  function writeEssayAnswer(
+    questionId,
+    value
+  ) {
+    if (submitted) {
+      return;
+    }
+
+    const question =
+      questions.find(
+        (item) =>
+          item.id ===
+          questionId
+      );
+
+    if (
+      !question ||
+      question.cancelled ||
+      !isEssayQuestion(
+        question
+      )
+    ) {
+      return;
+    }
+
+    const nextAnswers = {
+      ...answers,
+
+      [questionId]:
+        value,
+    };
+
+    setAnswers(
+      nextAnswers
+    );
+  }
+
+  function saveEssayAnswer(
+    questionId
+  ) {
+    if (submitted) {
+      return;
+    }
+
+    const nextAnswers = {
+      ...answers,
+    };
+
+    saveAttemptProgress(
+      nextAnswers,
+      currentQuestionIndex
+    );
+  }
+
+  /* =========================================================
+     التنقل
+  ========================================================= */
 
   function goToQuestion(
     questionIndex
@@ -714,13 +1284,15 @@ function Homework({
 
   function goToPreviousQuestion() {
     goToQuestion(
-      currentQuestionIndex - 1
+      currentQuestionIndex -
+        1
     );
   }
 
   function goToNextQuestion() {
     goToQuestion(
-      currentQuestionIndex + 1
+      currentQuestionIndex +
+        1
     );
   }
 
@@ -749,7 +1321,9 @@ function Homework({
         homeworkId
       ];
 
-    if (!status?.completed) {
+    if (
+      !status?.completed
+    ) {
       return;
     }
 
@@ -757,7 +1331,9 @@ function Homework({
       homeworkId
     );
 
-    setOpenedSection("video");
+    setOpenedSection(
+      "video"
+    );
 
     window.scrollTo({
       top: 0,
@@ -768,11 +1344,15 @@ function Homework({
   function goBackToHomeworkHome() {
     setOpenedSection(null);
 
-    setActiveHomeworkId(null);
+    setActiveHomeworkId(
+      null
+    );
 
     setAnswers({});
 
-    setCurrentQuestionIndex(0);
+    setCurrentQuestionIndex(
+      0
+    );
 
     setSubmitted(false);
 
@@ -783,6 +1363,10 @@ function Homework({
       behavior: "smooth",
     });
   }
+
+  /* =========================================================
+     تسليم الواجب
+  ========================================================= */
 
   async function submitHomework() {
     if (!activeHomework) {
@@ -808,8 +1392,12 @@ function Homework({
     const answeredActiveQuestions =
       activeQuestions.filter(
         (question) =>
-          answers[question.id] !==
-          undefined
+          isQuestionAnswered(
+            question,
+            answers[
+              question.id
+            ]
+          )
       ).length;
 
     if (
@@ -826,14 +1414,25 @@ function Homework({
       }
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(
+      true
+    );
 
     try {
       let score = 0;
 
       const reviewedAnswers =
         questions.map(
-          (question, index) => {
+          (
+            question,
+            index
+          ) => {
+            const questionNumber =
+              getQuestionDisplayNumber(
+                question,
+                index
+              );
+
             if (
               question.cancelled
             ) {
@@ -843,13 +1442,21 @@ function Homework({
                 questionId:
                   question.id,
 
-                questionNumber:
-                  index + 1,
+                questionNumber,
+
+                answerType:
+                  "cancelled",
 
                 selectedOption:
                   null,
 
+                selectedAnswer:
+                  null,
+
                 correctOption:
+                  null,
+
+                correctAnswerText:
                   null,
 
                 isCorrect: true,
@@ -858,10 +1465,83 @@ function Homework({
               };
             }
 
-            const selectedOption =
+            const savedAnswer =
               answers[
                 question.id
               ];
+
+            /* =========================
+               مقالي
+            ========================= */
+
+            if (
+              isEssayQuestion(
+                question
+              )
+            ) {
+              const studentAnswer =
+                typeof savedAnswer ===
+                "string"
+                  ? savedAnswer.trim()
+                  : "";
+
+              const isCorrect =
+                isEssayAnswerCorrect(
+                  studentAnswer,
+                  question
+                );
+
+              if (isCorrect) {
+                score += 1;
+              }
+
+              return {
+                questionId:
+                  question.id,
+
+                questionNumber,
+
+                answerType:
+                  "essay",
+
+                selectedOption:
+                  null,
+
+                selectedAnswer:
+                  studentAnswer ||
+                  null,
+
+                correctOption:
+                  null,
+
+                /*
+                  الإجابة الصحيحة محفوظة
+                  للمدرس / الداشبورد،
+                  لكن لن نعرضها للطالب.
+                */
+                correctAnswerText:
+                  Array.isArray(
+                    question.acceptedAnswers
+                  ) &&
+                  question
+                    .acceptedAnswers
+                    .length > 0
+                    ? question
+                        .acceptedAnswers[0]
+                    : null,
+
+                isCorrect,
+
+                cancelled: false,
+              };
+            }
+
+            /* =========================
+               اختياري
+            ========================= */
+
+            const selectedOption =
+              savedAnswer;
 
             const isCorrect =
               selectedOption ===
@@ -875,15 +1555,34 @@ function Homework({
               questionId:
                 question.id,
 
-              questionNumber:
-                index + 1,
+              questionNumber,
+
+              answerType:
+                "choice",
 
               selectedOption:
                 selectedOption ??
                 null,
 
+              selectedAnswer:
+                null,
+
               correctOption:
                 question.correctAnswer,
+
+              correctAnswerText:
+                Array.isArray(
+                  question.options
+                ) &&
+                question.options[
+                  question
+                    .correctAnswer
+                ] !== undefined
+                  ? question.options[
+                      question
+                        .correctAnswer
+                    ]
+                  : null,
 
               isCorrect,
 
@@ -892,15 +1591,21 @@ function Homework({
           }
         );
 
+      /*
+        نحافظ على النظام القديم:
+        السؤال الملغي يدخل كصحيح.
+      */
+
       const totalQuestions =
         questions.length;
 
       const percentage =
         totalQuestions > 0
           ? Math.round(
-              (score /
-                totalQuestions) *
-                100
+              (
+                score /
+                totalQuestions
+              ) * 100
             )
           : 0;
 
@@ -910,6 +1615,18 @@ function Homework({
 
         homeworkTitle:
           activeHomework.title,
+
+        courseId:
+          activeHomework.courseId ||
+          "",
+
+        lessonId:
+          activeHomework.lessonId ||
+          "",
+
+        grade:
+          activeHomework.grade ||
+          "",
 
         score,
 
@@ -921,6 +1638,8 @@ function Homework({
           reviewedAnswers,
 
         completed: true,
+
+        submitted: true,
 
         videoUnlocked: true,
 
@@ -934,15 +1653,18 @@ function Homework({
         );
       }
 
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
-        async (transaction) => {
+        async (
+          transaction
+        ) => {
           const studentSnapshot =
             await transaction.get(
               studentReference
@@ -959,15 +1681,12 @@ function Homework({
           const studentData =
             studentSnapshot.data();
 
-          const studentIsAllowed =
-            studentData.studentType ===
-              "center" &&
-            (studentData.grade ===
-              "الثالث الثانوي" ||
-              studentData.grade ===
-                "الصف الثالث الثانوي");
-
-          if (!studentIsAllowed) {
+          if (
+            !canStudentAccessHomework(
+              studentData,
+              activeHomework
+            )
+          ) {
             throw new Error(
               "HOMEWORK_NOT_ALLOWED"
             );
@@ -1036,9 +1755,23 @@ function Homework({
             title:
               activeHomework.title,
 
+            courseId:
+              activeHomework.courseId ||
+              "",
+
+            lessonId:
+              activeHomework.lessonId ||
+              "",
+
+            grade:
+              activeHomework.grade ||
+              "",
+
             started: true,
 
             completed: true,
+
+            submitted: true,
 
             answers,
 
@@ -1047,6 +1780,9 @@ function Homework({
             videoUnlocked: true,
 
             completedAt:
+              Timestamp.now(),
+
+            submittedAt:
               Timestamp.now(),
 
             updatedAt:
@@ -1080,7 +1816,9 @@ function Homework({
         homeworkResult
       );
 
-      setSubmitted(true);
+      setSubmitted(
+        true
+      );
 
       setHomeworkStatuses(
         (previous) => ({
@@ -1103,7 +1841,10 @@ function Homework({
         "homework"
       );
 
-      window.scrollTo(0, 0);
+      window.scrollTo(
+        0,
+        0
+      );
     } catch (error) {
       console.error(
         "Error submitting homework:",
@@ -1130,13 +1871,15 @@ function Homework({
         );
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(
+        false
+      );
     }
   }
 
-  /* =========================
+  /* =========================================================
      غير مسموح
-  ========================= */
+  ========================================================= */
 
   if (!isAllowedStudent) {
     return (
@@ -1149,26 +1892,46 @@ function Homework({
           </h2>
 
           <p>
-            هذا الواجب متاح لطلاب
-            السنتر بالصف الثالث
-            الثانوي فقط.
+            تسليم الواجب متاح
+            لطلاب السنتر فقط.
           </p>
         </div>
       </section>
     );
   }
 
-  /* =========================
+  /* =========================================================
      الصفحة الرئيسية للواجبات
-  ========================= */
+  ========================================================= */
 
-  if (openedSection === null) {
-    if (isLoadingDashboard) {
+  if (
+    openedSection === null
+  ) {
+    if (
+      isLoadingDashboard
+    ) {
       return (
         <section className="homework-page">
           <div className="homework-empty">
             <h2>
-              جاري تحميل الواجبات...
+              جاري تحميل
+              الواجبات...
+            </h2>
+          </div>
+        </section>
+      );
+    }
+
+    if (
+      studentHomeworks.length ===
+      0
+    ) {
+      return (
+        <section className="homework-page">
+          <div className="homework-empty">
+            <h2>
+              لا توجد واجبات
+              متاحة حاليًا.
             </h2>
           </div>
         </section>
@@ -1183,8 +1946,9 @@ function Homework({
           </h1>
 
           <p>
-            اختر الواجب لبدء الحل أو
-            مشاهدة النتيجة بعد التسليم.
+            اختر الواجب لبدء الحل
+            أو مشاهدة النتيجة بعد
+            التسليم.
           </p>
         </div>
 
@@ -1194,7 +1958,7 @@ function Homework({
             gap: "20px",
           }}
         >
-          {HOMEWORKS.map(
+          {studentHomeworks.map(
             (homework) => {
               const status =
                 homeworkStatuses[
@@ -1213,11 +1977,12 @@ function Homework({
                 homework.questions
                   .length > 0
                   ? Math.round(
-                      (answeredCount /
+                      (
+                        answeredCount /
                         homework
                           .questions
-                          .length) *
-                        100
+                          .length
+                      ) * 100
                     )
                   : 0;
 
@@ -1336,11 +2101,13 @@ function Homework({
     );
   }
 
-  /* =========================
+  /* =========================================================
      تحميل الواجب
-  ========================= */
+  ========================================================= */
 
-  if (isLoadingAttempt) {
+  if (
+    isLoadingAttempt
+  ) {
     return (
       <section className="homework-page">
         <div className="homework-empty">
@@ -1352,12 +2119,13 @@ function Homework({
     );
   }
 
-  /* =========================
+  /* =========================================================
      الفيديو
-  ========================= */
+  ========================================================= */
 
   if (
-    openedSection === "video"
+    openedSection ===
+    "video"
   ) {
     if (
       !activeHomework ||
@@ -1419,7 +2187,8 @@ function Homework({
 
               <p>
                 الواجب تم تسليمه،
-                والفيديو متاح للمشاهدة.
+                والفيديو متاح
+                للمشاهدة.
               </p>
             </div>
           </div>
@@ -1452,9 +2221,9 @@ function Homework({
     );
   }
 
-  /* =========================
+  /* =========================================================
      النتيجة
-  ========================= */
+  ========================================================= */
 
   if (
     openedSection ===
@@ -1491,11 +2260,16 @@ function Homework({
 
           <strong>
             {result.score} من{" "}
-            {result.totalQuestions}
+            {
+              result.totalQuestions
+            }
           </strong>
 
           <span>
-            {result.percentage}%
+            {
+              result.percentage
+            }
+            %
           </span>
         </div>
 
@@ -1544,6 +2318,13 @@ function Homework({
                           ? "إجابتك صحيحة"
                           : "إجابتك غير صحيحة"}
                     </p>
+
+                    {/*
+                      مهم:
+                      لا نعرض هنا
+                      الإجابة الصحيحة
+                      للطالب نهائيًا.
+                    */}
                   </div>
                 </article>
               )
@@ -1553,9 +2334,9 @@ function Homework({
     );
   }
 
-  /* =========================
+  /* =========================================================
      حل الواجب
-  ========================= */
+  ========================================================= */
 
   if (!activeHomework) {
     return null;
@@ -1585,9 +2366,8 @@ function Homework({
           </h1>
 
           <p>
-            افتح السؤال من الكتاب
-            واختر الإجابة الصحيحة.
-            بعد تسليم الواجب سيتم
+            أجب عن الأسئلة ثم سلم
+            الواجب. بعد التسليم سيتم
             فتح فيديو الشرح.
           </p>
         </div>
@@ -1628,16 +2408,21 @@ function Homework({
 
       <div className="homework-question-numbers">
         {questions.map(
-          (question, index) => {
+          (
+            question,
+            index
+          ) => {
             const isCurrent =
               index ===
               currentQuestionIndex;
 
             const isAnswered =
-              question.cancelled ||
-              answers[
-                question.id
-              ] !== undefined;
+              isQuestionAnswered(
+                question,
+                answers[
+                  question.id
+                ]
+              );
 
             return (
               <button
@@ -1664,7 +2449,10 @@ function Homework({
                   )
                 }
               >
-                {index + 1}
+                {getQuestionDisplayNumber(
+                  question,
+                  index
+                )}
               </button>
             );
           }
@@ -1674,15 +2462,47 @@ function Homework({
       {currentQuestion && (
         <article className="homework-question-card">
           <div className="homework-question-number">
-            {currentQuestionIndex +
-              1}
+            {getQuestionDisplayNumber(
+              currentQuestion,
+              currentQuestionIndex
+            )}
           </div>
 
           <h2>
             السؤال{" "}
-            {currentQuestionIndex +
-              1}
+            {getQuestionDisplayNumber(
+              currentQuestion,
+              currentQuestionIndex
+            )}
           </h2>
+
+          {/*
+            نص السؤال يظهر لو موجود.
+            الواجبات القديمة فيها
+            "السؤال 1" فقط،
+            والجديد فيه السؤال كامل.
+          */}
+
+          {currentQuestion.question &&
+            currentQuestion.question !==
+              `السؤال ${
+                currentQuestionIndex +
+                1
+              }` && (
+              <p
+                style={{
+                  margin:
+                    "15px 0 22px",
+                  lineHeight: "2",
+                  fontSize: "18px",
+                  fontWeight: "700",
+                }}
+              >
+                {
+                  currentQuestion.question
+                }
+              </p>
+            )}
 
           {currentQuestion.cancelled ? (
             <div className="homework-cancelled-question">
@@ -1693,13 +2513,85 @@ function Homework({
               </h3>
 
               <p>
-                لا تحتاج للإجابة
-                على هذا السؤال،
-                وسيتم احتسابه
-                صحيحًا تلقائيًا.
+                لا تحتاج للإجابة على
+                هذا السؤال، وسيتم
+                احتسابه صحيحًا
+                تلقائيًا.
+              </p>
+            </div>
+          ) : isEssayQuestion(
+              currentQuestion
+            ) ? (
+            /* =================================================
+               سؤال مقالي
+            ================================================= */
+
+            <div
+              style={{
+                marginTop: "20px",
+              }}
+            >
+              <textarea
+                value={
+                  answers[
+                    currentQuestion.id
+                  ] || ""
+                }
+                onChange={(event) =>
+                  writeEssayAnswer(
+                    currentQuestion.id,
+                    event.target.value
+                  )
+                }
+                onBlur={() =>
+                  saveEssayAnswer(
+                    currentQuestion.id
+                  )
+                }
+                placeholder="اكتب إجابتك هنا..."
+                rows={6}
+                style={{
+                  width: "100%",
+                  minHeight: "150px",
+                  resize: "vertical",
+                  border:
+                    "2px solid #eadfce",
+                  borderRadius:
+                    "16px",
+                  padding:
+                    "16px 18px",
+                  fontFamily:
+                    "inherit",
+                  fontSize: "17px",
+                  lineHeight: "1.9",
+                  outline: "none",
+                  background:
+                    "#fffdf9",
+                  color:
+                    "#4a2f1f",
+                  boxSizing:
+                    "border-box",
+                }}
+              />
+
+              <p
+                style={{
+                  marginTop: "10px",
+                  opacity: "0.7",
+                  fontSize: "14px",
+                }}
+              >
+                اكتب الإجابة
+                بطريقتك، وسيتم
+                تصحيحها عند تسليم
+                الواجب.
               </p>
             </div>
           ) : (
+            /* =================================================
+               سؤال اختياري
+            ================================================= */
+
             <div className="homework-options-list">
               {currentQuestion.options.map(
                 (
@@ -1711,6 +2603,13 @@ function Homework({
                       currentQuestion.id
                     ] ===
                     optionIndex;
+
+                  const letters = [
+                    "أ",
+                    "ب",
+                    "ج",
+                    "د",
+                  ];
 
                   return (
                     <button
@@ -1729,11 +2628,14 @@ function Homework({
                       }
                     >
                       <span className="homework-option-letter">
-                        {option}
+                        {letters[
+                          optionIndex
+                        ] ||
+                          optionIndex +
+                            1}
                       </span>
 
                       <span>
-                        الاختيار{" "}
                         {option}
                       </span>
                     </button>

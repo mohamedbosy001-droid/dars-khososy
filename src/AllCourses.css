@@ -988,11 +988,11 @@
 
 .youtube-link-blocker {
   position: absolute;
-  left: 6px;
-  bottom: 42px;
-  width: 105px;
-  height: 34px;
-  z-index: 50;
-  background: transparent;
+  left: 0;
+  bottom: 28px;
+  width: 150px;
+  height: 58px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.01);
   cursor: default;
 }

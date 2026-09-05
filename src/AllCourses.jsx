@@ -961,6 +961,10 @@ function AllCourses({
   /*
     ============================
     صلاحية الاشتراك الأساسية
+
+    الشهر = أول 4 محاضرات
+    الترم = كل المحاضرات
+    كود الحصة = المحاضرة المحددة
     ============================
   */
 
@@ -975,6 +979,9 @@ function AllCourses({
       return false;
     }
 
+    /*
+      الكورس المجاني
+    */
     if (
       !isPaidCourse(
         course
@@ -988,17 +995,22 @@ function AllCourses({
         course
       );
 
+    /*
+      مفيش اشتراك فعال
+    */
     if (
       !access?.active
     ) {
       return false;
     }
 
+    /*
+      اشتراك الترم أو الكورس الكامل
+      يفتح كل المحاضرات
+    */
     if (
       access.accessType ===
         "term" ||
-      access.accessType ===
-        "month" ||
       access.accessType ===
         "fullCourse" ||
       !access.accessType
@@ -1006,6 +1018,39 @@ function AllCourses({
       return true;
     }
 
+    /*
+      اشتراك الشهر
+      يفتح أول 4 محاضرات فقط
+    */
+    if (
+      access.accessType ===
+      "month"
+    ) {
+      const lessons =
+        Array.isArray(
+          course.lessons
+        )
+          ? course.lessons
+          : [];
+
+      const lessonIndex =
+        lessons.findIndex(
+          (
+            courseLesson
+          ) =>
+            courseLesson?.id ===
+            lesson.id
+        );
+
+      return (
+        lessonIndex >= 0 &&
+        lessonIndex < 4
+      );
+    }
+
+    /*
+      كود محاضرة منفردة
+    */
     if (
       access.accessType ===
       "lesson"
@@ -1036,11 +1081,11 @@ function AllCourses({
     ============================
     صلاحية المحاضرة النهائية
 
-    المحاضرة الثانية لتالتة:
-    تفتح بإحدى طريقتين:
+    لو المحاضرة داخلة في الاشتراك
+    تفتح تلقائيًا.
 
-    1- تسليم امتحان المحاضرة الأولى
-    2- أو تفعيل المحاضرة الثانية بكود محاضرة
+    ولو مش داخلة في الاشتراك
+    ممكن تتفتح بكود حصة.
     ============================
   */
 
@@ -1068,31 +1113,18 @@ function AllCourses({
       );
 
     if (
-      THIRD_SECONDARY_COURSE_IDS.has(
-        course.id
-      ) &&
-      lesson.id ===
-        "lesson-2"
+      basicAccess
     ) {
-      if (
-        manuallyUnlocked
-      ) {
-        return true;
-      }
-
-      if (!basicAccess) {
-        return false;
-      }
-
-      return isExamCompleted(
-        THIRD_LECTURE_1_EXAM_ID
-      );
+      return true;
     }
 
-    return (
-      basicAccess ||
+    if (
       manuallyUnlocked
-    );
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   function isLessonWatched(
@@ -1760,11 +1792,6 @@ function AllCourses({
   /*
     ============================
     تفعيل كود محاضرة
-
-    مهم:
-    الكود يقدر يفتح المحاضرة الثانية
-    حتى لو امتحان المحاضرة الأولى
-    لم يتم تسليمه بعد.
     ============================
   */
 
@@ -2498,7 +2525,6 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة. اكتب كود المحاضرة أولًا."
       );
-
       return;
     }
 
