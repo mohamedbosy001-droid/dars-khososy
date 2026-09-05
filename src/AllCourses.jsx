@@ -3801,6 +3801,7 @@ function AllCourses({
             }
           >
             {videoId ? (
+              <>
               <YouTube
                 videoId={
                   videoId
@@ -3859,8 +3860,14 @@ function AllCourses({
                   }
                 }}
               />
+<div
+  className="youtube-link-blocker"
+  aria-hidden="true"
+/>
+</>
             ) : (
               <div>
+
                 لم تتم إضافة رابط فيديو صحيح.
               </div>
             )}
