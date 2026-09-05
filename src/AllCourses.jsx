@@ -1904,11 +1904,6 @@ function AllCourses({
             );
           }
 
-          /*
-            الكود ممكن يكون مربوط
-            بمحاضرة محددة أو مرن.
-          */
-
           const allowedCodeLessons =
             [];
 
@@ -1947,13 +1942,6 @@ function AllCourses({
 
           const now =
             Timestamp.now();
-
-          /*
-            ============================
-            حفظ فتح المحاضرة بالكود
-            في courseProgress
-            ============================
-          */
 
           const courseProgress = {
             ...(savedStudent.courseProgress ||
@@ -2032,12 +2020,6 @@ function AllCourses({
             updatedAt: now,
           };
 
-          /*
-            ============================
-            صلاحية الكورس / المحاضرة
-            ============================
-          */
-
           const oldCourseAccess = {
             ...(savedStudent.courseAccess ||
               {}),
@@ -2060,14 +2042,6 @@ function AllCourses({
                 "fullCourse" ||
               !oldAccess.accessType
             );
-
-          /*
-            لو الطالب عنده شهر أو ترم بالفعل
-            لا نغيّر نوع اشتراكه.
-
-            بنسجل فقط إن المحاضرة اتفتحت
-            بالكود في courseProgress.
-          */
 
           if (
             !hasWholeCourseAccess
@@ -2501,13 +2475,6 @@ function AllCourses({
   /*
     ============================
     فتح فيديو المحاضرة
-
-    مفيش هنا شرط امتحان منفصل.
-    hasLessonAccess هي اللي بتحدد
-    هل المحاضرة مفتوحة أم لا.
-
-    لو التانية اتفتحت بالكود
-    هتفتح عادي.
     ============================
   */
 
@@ -2611,11 +2578,6 @@ function AllCourses({
       return;
     }
 
-    /*
-      فيديو الحل لا يفتح
-      إلا بعد تسليم الواجب.
-    */
-
     if (
       !isHomeworkSubmitted(
         course,
@@ -2689,9 +2651,6 @@ function AllCourses({
   /*
     ============================
     حفظ مشاهدة 30%
-
-    الـ 30% هنا تظل مطلوبة
-    للواجب داخل المحاضرة الثانية.
     ============================
   */
 
@@ -3087,8 +3046,6 @@ function AllCourses({
   /*
     ============================
     فتح الواجب المكتوب
-
-    شرط الـ 30% يظل موجود.
     ============================
   */
 
@@ -3612,16 +3569,6 @@ function AllCourses({
   /*
     ============================
     الامتحان
-
-    امتحان المحاضرة الأولى
-    الموجود داخل المحاضرة الثانية:
-
-    - لا يحتاج مشاهدة 30%
-    - يحتاج فقط أن المحاضرة الثانية
-      تكون مفتوحة / متفعلة.
-
-    باقي الامتحانات القديمة
-    تظل كما هي وتحتاج 30%.
     ============================
   */
 
@@ -3662,11 +3609,6 @@ function AllCourses({
       }
     }
 
-    /*
-      هل ده امتحان المحاضرة الأولى
-      لتالتة ثانوي؟
-    */
-
     const isThirdLectureOneExam =
       THIRD_SECONDARY_COURSE_IDS.has(
         course.id
@@ -3681,12 +3623,6 @@ function AllCourses({
     if (
       isThirdLectureOneExam
     ) {
-      /*
-        الامتحان ظاهر داخل المحاضرة الثانية،
-        لذلك بنفحص فتح المحاضرة الثانية نفسها
-        مش مشاهدة المحاضرة الأولى.
-      */
-
       const secondLesson =
         Array.isArray(
           course.lessons
@@ -3713,18 +3649,7 @@ function AllCourses({
 
         return;
       }
-
-      /*
-        مهم:
-        لا يوجد شرط مشاهدة 30%
-        لهذا الامتحان.
-      */
     } else {
-      /*
-        باقي الامتحانات القديمة
-        تظل بنفس النظام القديم.
-      */
-
       if (
         !hasLessonAccess(
           course,
@@ -3867,12 +3792,20 @@ function AllCourses({
             </p>
           )}
 
-          <div className="course-youtube-wrapper">
+          <div
+            className="course-youtube-wrapper"
+            onContextMenu={(
+              event
+            ) =>
+              event.preventDefault()
+            }
+          >
             {videoId ? (
               <YouTube
                 videoId={
                   videoId
                 }
+                host="https://www.youtube-nocookie.com"
                 opts={{
                   width:
                     "100%",
@@ -3882,10 +3815,21 @@ function AllCourses({
 
                   playerVars: {
                     autoplay: 1,
+
                     controls: 1,
+
                     rel: 0,
-                    modestbranding: 1,
+
                     playsinline: 1,
+
+                    disablekb: 1,
+
+                    fs: 0,
+
+                    iv_load_policy: 3,
+
+                    origin:
+                      window.location.origin,
                   },
                 }}
                 style={{
@@ -4366,8 +4310,8 @@ function AllCourses({
             selectedCourse
           }
           isThirdLecture1ExamCompleted={isExamCompleted(
-  THIRD_LECTURE_1_EXAM_ID
-)}
+            THIRD_LECTURE_1_EXAM_ID
+          )}
           onBack={
             closeCourseContent
           }
