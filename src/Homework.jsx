@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -89,7 +90,7 @@ function normalizeArabicText(value) {
       " "
     )
 
-    /* مسافات */
+    /* المسافات */
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -271,13 +272,7 @@ function isEssayAnswerCorrect(
 
     /*
       الإجابات القصيرة جدًا
-      مثل:
-      خبري
-      إنشائي
-      تعليل
-
-      لازم تكون مطابقة مباشرة،
-      حتى لا نقبل إجابة عكسية.
+      يجب أن تكون مطابقة مباشرة.
     */
 
     if (
@@ -293,12 +288,6 @@ function isEssayAnswerCorrect(
         normalizedAccepted
       );
 
-    /*
-      قبول الصياغة المختلفة
-      لو المعنى والكلمات الأساسية
-      متقاربين جدًا.
-    */
-
     if (similarity >= 0.7) {
       return true;
     }
@@ -308,7 +297,7 @@ function isEssayAnswerCorrect(
 }
 
 /* =========================================================
-   الواجب الأول - كما هو
+   الواجب الأول - تالتة ثانوي
 ========================================================= */
 
 const FIRST_HOMEWORK_CANCELLED_QUESTIONS = [
@@ -552,7 +541,7 @@ const HOMEWORKS = [
 ];
 
 /* =========================================================
-   هل الطالب مسموح له بالواجب؟
+   هل الطالب مسموح له؟
 ========================================================= */
 
 function canStudentAccessHomework(
@@ -592,6 +581,100 @@ function canStudentAccessHomework(
   }
 
   return true;
+}
+
+/* =========================================================
+   تنظيف محاولات الواجبات القديمة
+
+   مهم:
+   لو الواجب مكتمل، لا نحتاج الاحتفاظ
+   بنسخة كاملة من النتيجة والإجابات
+   داخل homeworkAttempts لأن النتيجة
+   الأصلية موجودة في homeworkResults.
+========================================================= */
+
+function cleanCompletedHomeworkAttempts(
+  attempts
+) {
+  const cleanedAttempts = {};
+
+  Object.entries(
+    attempts || {}
+  ).forEach(
+    ([homeworkId, attempt]) => {
+      if (
+        !attempt ||
+        typeof attempt !==
+          "object"
+      ) {
+        cleanedAttempts[
+          homeworkId
+        ] = attempt;
+
+        return;
+      }
+
+      if (
+        attempt.completed ===
+        true
+      ) {
+        const oldResult =
+          attempt.result &&
+          typeof attempt.result ===
+            "object"
+            ? attempt.result
+            : {};
+
+        cleanedAttempts[
+          homeworkId
+        ] = {
+          ...attempt,
+
+          /*
+            بعد التسليم لا نحتاج
+            نسخة أخرى من كل الإجابات.
+          */
+          answers: {},
+
+          /*
+            نخزن ملخص النتيجة فقط.
+          */
+          result: {
+            homeworkId:
+              oldResult.homeworkId ||
+              attempt.homeworkId ||
+              homeworkId,
+
+            score:
+              oldResult.score ??
+              0,
+
+            totalQuestions:
+              oldResult.totalQuestions ??
+              0,
+
+            percentage:
+              oldResult.percentage ??
+              0,
+
+            completed: true,
+
+            submitted: true,
+
+            videoUnlocked: true,
+          },
+        };
+
+        return;
+      }
+
+      cleanedAttempts[
+        homeworkId
+      ] = attempt;
+    }
+  );
+
+  return cleanedAttempts;
 }
 
 /* =========================================================
@@ -650,6 +733,14 @@ function Homework({
     homeworkStatuses,
     setHomeworkStatuses,
   ] = useState({});
+
+  /*
+    Lock فوري.
+    useState وحده يحتاج Render جديد،
+    لكن useRef يتغير فورًا.
+  */
+  const submittingRef =
+    useRef(false);
 
   const studentUid =
     currentStudent?.uid ||
@@ -743,6 +834,7 @@ function Homework({
         setIsLoadingDashboard(
           false
         );
+
         return;
       }
 
@@ -843,7 +935,14 @@ function Homework({
                 homework.questions
                   .length,
 
-              answeredCount,
+              answeredCount:
+                attempt?.completed ===
+                  true ||
+                savedResult?.completed ===
+                  true
+                  ? homework.questions
+                      .length
+                  : answeredCount,
             };
           }
         );
@@ -1074,11 +1173,16 @@ function Homework({
       } catch (error) {
         console.error(
           "Error loading homework:",
-          error
+          {
+            code: error?.code,
+            message:
+              error?.message,
+            error,
+          }
         );
 
         if (
-          error.message !==
+          error?.message !==
           "HOMEWORK_NOT_ALLOWED"
         ) {
           window.alert(
@@ -1108,7 +1212,14 @@ function Homework({
     nextAnswers,
     nextQuestionIndex
   ) {
+    /*
+      أثناء التسليم نوقف أي Autosave
+      حتى لا يدخل تحديث مع Transaction.
+    */
+
     if (
+      submittingRef.current ||
+      isSubmitting ||
       !studentUid ||
       !activeHomework ||
       submitted ||
@@ -1144,8 +1255,20 @@ function Homework({
     } catch (error) {
       console.error(
         "Error saving homework progress:",
-        error
+        {
+          code: error?.code,
+          message:
+            error?.message,
+          error,
+        }
       );
+
+      /*
+        لا نظهر Alert أثناء الحل
+        حتى لا نزعج الطالب.
+        الإجابات تظل موجودة في React
+        ويمكن المحاولة مجددًا.
+      */
     }
   }
 
@@ -1157,7 +1280,10 @@ function Homework({
     questionId,
     optionIndex
   ) {
-    if (submitted) {
+    if (
+      submitted ||
+      submittingRef.current
+    ) {
       return;
     }
 
@@ -1202,7 +1328,10 @@ function Homework({
     questionId,
     value
   ) {
-    if (submitted) {
+    if (
+      submitted ||
+      submittingRef.current
+    ) {
       return;
     }
 
@@ -1235,10 +1364,11 @@ function Homework({
     );
   }
 
-  function saveEssayAnswer(
-    questionId
-  ) {
-    if (submitted) {
+  function saveEssayAnswer() {
+    if (
+      submitted ||
+      submittingRef.current
+    ) {
       return;
     }
 
@@ -1260,6 +1390,7 @@ function Homework({
     questionIndex
   ) {
     if (
+      submittingRef.current ||
       questionIndex < 0 ||
       questionIndex >=
         questions.length
@@ -1299,6 +1430,12 @@ function Homework({
   function openHomework(
     homeworkId
   ) {
+    if (
+      submittingRef.current
+    ) {
+      return;
+    }
+
     setActiveHomeworkId(
       homeworkId
     );
@@ -1342,6 +1479,12 @@ function Homework({
   }
 
   function goBackToHomeworkHome() {
+    if (
+      submittingRef.current
+    ) {
+      return;
+    }
+
     setOpenedSection(null);
 
     setActiveHomeworkId(
@@ -1369,6 +1512,16 @@ function Homework({
   ========================================================= */
 
   async function submitHomework() {
+    /*
+      يمنع الضغط مرتين بسرعة
+    */
+    if (
+      submittingRef.current ||
+      isSubmitting
+    ) {
+      return;
+    }
+
     if (!activeHomework) {
       return;
     }
@@ -1414,6 +1567,12 @@ function Homework({
       }
     }
 
+    /*
+      Lock فوري قبل أي await
+    */
+    submittingRef.current =
+      true;
+
     setIsSubmitting(
       true
     );
@@ -1432,6 +1591,10 @@ function Homework({
                 question,
                 index
               );
+
+            /* =========================
+               السؤال الملغي
+            ========================= */
 
             if (
               question.cancelled
@@ -1515,9 +1678,8 @@ function Homework({
                   null,
 
                 /*
-                  الإجابة الصحيحة محفوظة
-                  للمدرس / الداشبورد،
-                  لكن لن نعرضها للطالب.
+                  محفوظة للإدارة فقط.
+                  لا يتم عرضها للطالب.
                 */
                 correctAnswerText:
                   Array.isArray(
@@ -1575,12 +1737,10 @@ function Homework({
                   question.options
                 ) &&
                 question.options[
-                  question
-                    .correctAnswer
+                  question.correctAnswer
                 ] !== undefined
                   ? question.options[
-                      question
-                        .correctAnswer
+                      question.correctAnswer
                     ]
                   : null,
 
@@ -1592,8 +1752,8 @@ function Homework({
         );
 
       /*
-        نحافظ على النظام القديم:
-        السؤال الملغي يدخل كصحيح.
+        نفس النظام القديم:
+        السؤال الملغي محسوب صحيحًا.
       */
 
       const totalQuestions =
@@ -1634,6 +1794,10 @@ function Homework({
 
         percentage,
 
+        /*
+          هنا فقط نحفظ مراجعة
+          الإجابات كاملة.
+        */
         answers:
           reviewedAnswers,
 
@@ -1692,7 +1856,12 @@ function Homework({
             );
           }
 
-          const homeworkAttempts =
+          /*
+            ننظف أي نتائج كبيرة قديمة
+            موجودة داخل attempts.
+          */
+
+          const originalAttempts =
             studentData.homeworkAttempts &&
             typeof studentData.homeworkAttempts ===
               "object"
@@ -1700,6 +1869,11 @@ function Homework({
                   ...studentData.homeworkAttempts,
                 }
               : {};
+
+          const homeworkAttempts =
+            cleanCompletedHomeworkAttempts(
+              originalAttempts
+            );
 
           const existingAttempt =
             homeworkAttempts[
@@ -1739,9 +1913,19 @@ function Homework({
             );
           }
 
+          /*
+            النتيجة الكاملة هنا مرة واحدة فقط.
+          */
+
           homeworkResults.push(
             homeworkResult
           );
+
+          /*
+            داخل attempt نخزن ملخص فقط.
+            لا نكرر reviewedAnswers.
+            وبعد التسليم لا نحتاج raw answers.
+          */
 
           homeworkAttempts[
             activeHomework.id
@@ -1773,7 +1957,11 @@ function Homework({
 
             submitted: true,
 
-            answers,
+            /*
+              تفريغ الإجابات هنا يوفر
+              مساحة كبيرة في Document.
+            */
+            answers: {},
 
             currentQuestionIndex,
 
@@ -1788,8 +1976,25 @@ function Homework({
             updatedAt:
               Timestamp.now(),
 
-            result:
-              homeworkResult,
+            /*
+              ملخص صغير فقط.
+            */
+            result: {
+              homeworkId:
+                activeHomework.id,
+
+              score,
+
+              totalQuestions,
+
+              percentage,
+
+              completed: true,
+
+              submitted: true,
+
+              videoUnlocked: true,
+            },
           };
 
           transaction.update(
@@ -1811,6 +2016,10 @@ function Homework({
           );
         }
       );
+
+      /*
+        Firebase أكد أن التسليم تم.
+      */
 
       setResult(
         homeworkResult
@@ -1846,31 +2055,97 @@ function Homework({
         0
       );
     } catch (error) {
+      /*
+        مهم جدًا:
+        أي مشكلة جديدة سنعرف
+        Code الحقيقي في Console.
+      */
+
       console.error(
         "Error submitting homework:",
-        error
+        {
+          message:
+            error?.message,
+
+          code:
+            error?.code,
+
+          name:
+            error?.name,
+
+          studentUid,
+
+          homeworkId:
+            activeHomework?.id,
+
+          fullError:
+            error,
+        }
       );
 
       if (
-        error.message ===
+        error?.message ===
         "HOMEWORK_ALREADY_COMPLETED"
       ) {
+        /*
+          لو Firebase قال إن الواجب
+          مسلّم بالفعل، نعتبره محميًا
+          من التسليم المكرر.
+        */
+
         window.alert(
           "لقد سلمت هذا الواجب من قبل."
         );
       } else if (
-        error.message ===
+        error?.message ===
         "HOMEWORK_NOT_ALLOWED"
       ) {
         window.alert(
           "هذا الواجب غير متاح لهذا الحساب."
         );
+      } else if (
+        error?.code ===
+        "permission-denied"
+      ) {
+        window.alert(
+          "تعذر حفظ الواجب بسبب صلاحيات الحساب. برجاء التواصل مع إدارة المنصة."
+        );
+      } else if (
+        error?.code ===
+          "unavailable" ||
+        error?.code ===
+          "deadline-exceeded" ||
+        error?.code ===
+          "network-request-failed"
+      ) {
+        window.alert(
+          "الاتصال بالإنترنت غير مستقر. إجاباتك ما زالت موجودة، حاول تسليم الواجب مرة أخرى."
+        );
+      } else if (
+        error?.code ===
+          "resource-exhausted" ||
+        error?.code ===
+          "failed-precondition"
+      ) {
+        window.alert(
+          "تعذر حفظ الواجب حاليًا. برجاء المحاولة مرة أخرى، وإذا استمرت المشكلة تواصل مع إدارة المنصة."
+        );
+      } else if (
+        error?.code ===
+        "aborted"
+      ) {
+        window.alert(
+          "حدث تعارض بسيط أثناء حفظ الواجب. حاول الضغط على تسليم الواجب مرة أخرى."
+        );
       } else {
         window.alert(
-          "حدث خطأ أثناء تسليم الواجب."
+          "حدث خطأ أثناء تسليم الواجب. حاول مرة أخرى، وإذا استمرت المشكلة تواصل مع إدارة المنصة."
         );
       }
     } finally {
+      submittingRef.current =
+        false;
+
       setIsSubmitting(
         false
       );
@@ -2318,13 +2593,6 @@ function Homework({
                           ? "إجابتك صحيحة"
                           : "إجابتك غير صحيحة"}
                     </p>
-
-                    {/*
-                      مهم:
-                      لا نعرض هنا
-                      الإجابة الصحيحة
-                      للطالب نهائيًا.
-                    */}
                   </div>
                 </article>
               )
@@ -2349,6 +2617,9 @@ function Homework({
         className="homework-back-dashboard-btn"
         onClick={
           goBackToHomeworkHome
+        }
+        disabled={
+          isSubmitting
         }
       >
         <FaArrowRight />
@@ -2430,6 +2701,9 @@ function Homework({
                 key={
                   question.id
                 }
+                disabled={
+                  isSubmitting
+                }
                 className={`homework-number-btn ${
                   isCurrent
                     ? "current"
@@ -2476,13 +2750,6 @@ function Homework({
             )}
           </h2>
 
-          {/*
-            نص السؤال يظهر لو موجود.
-            الواجبات القديمة فيها
-            "السؤال 1" فقط،
-            والجديد فيه السؤال كامل.
-          */}
-
           {currentQuestion.question &&
             currentQuestion.question !==
               `السؤال ${
@@ -2522,10 +2789,6 @@ function Homework({
           ) : isEssayQuestion(
               currentQuestion
             ) ? (
-            /* =================================================
-               سؤال مقالي
-            ================================================= */
-
             <div
               style={{
                 marginTop: "20px",
@@ -2537,16 +2800,17 @@ function Homework({
                     currentQuestion.id
                   ] || ""
                 }
+                disabled={
+                  isSubmitting
+                }
                 onChange={(event) =>
                   writeEssayAnswer(
                     currentQuestion.id,
                     event.target.value
                   )
                 }
-                onBlur={() =>
-                  saveEssayAnswer(
-                    currentQuestion.id
-                  )
+                onBlur={
+                  saveEssayAnswer
                 }
                 placeholder="اكتب إجابتك هنا..."
                 rows={6}
@@ -2588,10 +2852,6 @@ function Homework({
               </p>
             </div>
           ) : (
-            /* =================================================
-               سؤال اختياري
-            ================================================= */
-
             <div className="homework-options-list">
               {currentQuestion.options.map(
                 (
@@ -2614,6 +2874,9 @@ function Homework({
                   return (
                     <button
                       type="button"
+                      disabled={
+                        isSubmitting
+                      }
                       className={`homework-option-btn ${
                         selected
                           ? "selected"
@@ -2653,7 +2916,8 @@ function Homework({
           className="homework-navigation-btn previous"
           disabled={
             currentQuestionIndex ===
-            0
+              0 ||
+            isSubmitting
           }
           onClick={
             goToPreviousQuestion
@@ -2668,6 +2932,9 @@ function Homework({
           <button
             type="button"
             className="homework-navigation-btn next"
+            disabled={
+              isSubmitting
+            }
             onClick={
               goToNextQuestion
             }

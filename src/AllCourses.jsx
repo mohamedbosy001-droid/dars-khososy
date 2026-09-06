@@ -26,6 +26,7 @@ import {
   FaArrowRight,
   FaClipboardCheck,
   FaCheckCircle,
+  FaTimesCircle,
 } from "react-icons/fa";
 
 import CourseContent from "./CourseContent";
@@ -52,6 +53,7 @@ import thirdMonthCourse from "./assets/third-month.jpeg";
 import thirdTermCourse from "./assets/third-term.jpeg";
 
 import "./AllCourses.css";
+import "./Exam.css";
 
 const REQUIRED_WATCH_PERCENT = 30;
 
@@ -225,6 +227,11 @@ function AllCourses({
     homeworkResult,
     setHomeworkResult,
   ] = useState(null);
+
+  const [
+    currentHomeworkQuestionIndex,
+    setCurrentHomeworkQuestionIndex,
+  ] = useState(0);
 
   const [
     isSubmittingHomework,
@@ -979,9 +986,6 @@ function AllCourses({
       return false;
     }
 
-    /*
-      الكورس المجاني
-    */
     if (
       !isPaidCourse(
         course
@@ -995,19 +999,12 @@ function AllCourses({
         course
       );
 
-    /*
-      مفيش اشتراك فعال
-    */
     if (
       !access?.active
     ) {
       return false;
     }
 
-    /*
-      اشتراك الترم أو الكورس الكامل
-      يفتح كل المحاضرات
-    */
     if (
       access.accessType ===
         "term" ||
@@ -1018,10 +1015,6 @@ function AllCourses({
       return true;
     }
 
-    /*
-      اشتراك الشهر
-      يفتح أول 4 محاضرات فقط
-    */
     if (
       access.accessType ===
       "month"
@@ -1048,9 +1041,6 @@ function AllCourses({
       );
     }
 
-    /*
-      كود محاضرة منفردة
-    */
     if (
       access.accessType ===
       "lesson"
@@ -1080,12 +1070,6 @@ function AllCourses({
   /*
     ============================
     صلاحية المحاضرة النهائية
-
-    لو المحاضرة داخلة في الاشتراك
-    تفتح تلقائيًا.
-
-    ولو مش داخلة في الاشتراك
-    ممكن تتفتح بكود حصة.
     ============================
   */
 
@@ -3075,87 +3059,160 @@ function AllCourses({
     ============================
   */
 
-  function openHomework(
-    lesson
+ function openHomework(
+  lesson
+) {
+  if (
+    !selectedCourse ||
+    !lesson
   ) {
-    if (
-      !selectedCourse ||
-      !lesson
-    ) {
-      return;
-    }
+    return;
+  }
 
-    if (
-      !hasLessonAccess(
-        selectedCourse,
-        lesson
-      )
-    ) {
-      window.alert(
-        "المحاضرة مقفولة."
-      );
-
-      return;
-    }
-
-    if (
-      !isLessonWatched(
-        selectedCourse.id,
-        lesson.id
-      )
-    ) {
-      window.alert(
-        "شاهد 30% من فيديو الشرح أولًا."
-      );
-
-      return;
-    }
-
-    const homeworkKey =
-      lesson.homeworkKey;
-
-    if (
-      !hasValue(
-        homeworkKey
-      )
-    ) {
-      window.alert(
-        "لم يتم ربط واجب بهذه المحاضرة."
-      );
-
-      return;
-    }
-
-    const selectedData =
-      courseHomeworkData[
-        homeworkKey
-      ] ||
-      homeworkData[
-        homeworkKey
-      ];
-
-    if (
-      !selectedData
-    ) {
-      window.alert(
-        "تعذر تحميل بيانات الواجب."
-      );
-
-      console.error(
-        "Homework key not found:",
-        homeworkKey
-      );
-
-      return;
-    }
-
-    setSelectedHomework(
-      selectedData
-    );
-
-    setSelectedHomeworkLesson(
+  if (
+    !hasLessonAccess(
+      selectedCourse,
       lesson
+    )
+  ) {
+    window.alert(
+      "المحاضرة مقفولة."
     );
+
+    return;
+  }
+
+  if (
+    !isLessonWatched(
+      selectedCourse.id,
+      lesson.id
+    )
+  ) {
+    window.alert(
+      "شاهد 30% من فيديو الشرح أولًا."
+    );
+
+    return;
+  }
+
+  const homeworkKey =
+    lesson.homeworkKey;
+
+  if (
+    !hasValue(
+      homeworkKey
+    )
+  ) {
+    window.alert(
+      "لم يتم ربط واجب بهذه المحاضرة."
+    );
+
+    return;
+  }
+
+  const selectedData =
+    courseHomeworkData[
+      homeworkKey
+    ] ||
+    homeworkData[
+      homeworkKey
+    ];
+
+  if (
+    !selectedData
+  ) {
+    window.alert(
+      "تعذر تحميل بيانات الواجب."
+    );
+
+    console.error(
+      "Homework key not found:",
+      homeworkKey
+    );
+
+    return;
+  }
+
+  /*
+    ============================
+    البحث عن نتيجة قديمة محفوظة
+    ============================
+  */
+
+  const savedHomeworkResults =
+    Array.isArray(
+      studentData?.homeworkResults
+    )
+      ? studentData.homeworkResults
+      : [];
+
+  const savedResult =
+    savedHomeworkResults.find(
+      (
+        result
+      ) =>
+        result?.courseId ===
+          selectedCourse.id &&
+        result?.lessonId ===
+          lesson.id &&
+        result?.homeworkId ===
+          selectedData.id &&
+        (
+          result?.completed ===
+            true ||
+          result?.submitted ===
+            true ||
+          result?.homeworkSubmitted ===
+            true
+        )
+    );
+
+  setSelectedHomework(
+    selectedData
+  );
+
+  setSelectedHomeworkLesson(
+    lesson
+  );
+
+  setCurrentHomeworkQuestionIndex(
+    0
+  );
+
+  /*
+    لو الواجب متسلم قبل كده
+    رجع الدرجة والإجابات
+  */
+
+  if (savedResult) {
+    setHomeworkAnswers(
+      savedResult.answers &&
+        typeof savedResult.answers ===
+          "object"
+        ? savedResult.answers
+        : {}
+    );
+
+    setHomeworkResult({
+      score:
+        Number(
+          savedResult.score
+        ) || 0,
+
+      total:
+        Number(
+          savedResult.total
+        ) || 0,
+
+      percentage:
+        Number(
+          savedResult.percentage
+        ) || 0,
+    });
+  } else {
+    /*
+      واجب جديد لسه متسلمش
+    */
 
     setHomeworkAnswers(
       {}
@@ -3164,17 +3221,17 @@ function AllCourses({
     setHomeworkResult(
       null
     );
-
-    setActiveLesson(
-      null
-    );
-
-    window.scrollTo(
-      0,
-      0
-    );
   }
 
+  setActiveLesson(
+    null
+  );
+
+  window.scrollTo(
+    0,
+    0
+  );
+}
   function handleHomeworkAnswer(
     questionId,
     optionIndex
@@ -3586,6 +3643,10 @@ function AllCourses({
       null
     );
 
+    setCurrentHomeworkQuestionIndex(
+      0
+    );
+
     window.scrollTo(
       0,
       0
@@ -3828,72 +3889,72 @@ function AllCourses({
           >
             {videoId ? (
               <>
-              <YouTube
-                videoId={
-                  videoId
-                }
-                host="https://www.youtube-nocookie.com"
-                opts={{
-                  width:
-                    "100%",
-
-                  height:
-                    "100%",
-
-                  playerVars: {
-                    autoplay: 1,
-
-                    controls: 1,
-
-                    rel: 0,
-
-                    playsinline: 1,
-
-                    disablekb: 1,
-
-                    fs: 0,
-
-                    iv_load_policy: 3,
-
-                    origin:
-                      window.location.origin,
-                  },
-                }}
-                style={{
-                  width:
-                    "100%",
-                  height:
-                    "100%",
-                }}
-                iframeClassName="youtube-course-player"
-                onReady={(
-                  event
-                ) =>
-                  setYoutubePlayer(
-                    event.target
-                  )
-                }
-                onStateChange={(
-                  event
-                ) => {
-                  if (
-                    isMainLesson
-                  ) {
-                    setVideoIsPlaying(
-                      event.data ===
-                        1
-                    );
+                <YouTube
+                  videoId={
+                    videoId
                   }
-                }}
-              />
-<div
-  className="youtube-link-blocker"
-  aria-hidden="true"
-/>
-</>
+                  host="https://www.youtube-nocookie.com"
+                  opts={{
+                    width:
+                      "100%",
+
+                    height:
+                      "100%",
+
+                    playerVars: {
+                      autoplay: 1,
+
+                      controls: 1,
+
+                      rel: 0,
+
+                      playsinline: 1,
+
+                      disablekb: 1,
+
+                      fs: 0,
+
+                      iv_load_policy: 3,
+
+                      origin:
+                        window.location.origin,
+                    },
+                  }}
+                  style={{
+                    width:
+                      "100%",
+                    height:
+                      "100%",
+                  }}
+                  iframeClassName="youtube-course-player"
+                  onReady={(
+                    event
+                  ) =>
+                    setYoutubePlayer(
+                      event.target
+                    )
+                  }
+                  onStateChange={(
+                    event
+                  ) => {
+                    if (
+                      isMainLesson
+                    ) {
+                      setVideoIsPlaying(
+                        event.data ===
+                          1
+                      );
+                    }
+                  }}
+                />
+
+                <div
+                  className="youtube-link-blocker"
+                  aria-hidden="true"
+                />
+              </>
             ) : (
               <div>
-
                 لم تتم إضافة رابط فيديو صحيح.
               </div>
             )}
@@ -3969,328 +4030,410 @@ function AllCourses({
           )
         : [];
 
+    const currentQuestion =
+      questions[
+        currentHomeworkQuestionIndex
+      ] || null;
+
+    const answeredCount =
+      questions.filter(
+        (
+          question
+        ) =>
+          homeworkAnswers[
+            question.id
+          ] !== undefined
+      ).length;
+
+    const progressPercentage =
+      questions.length > 0
+        ? Math.round(
+            (
+              answeredCount /
+              questions.length
+            ) *
+              100
+          )
+        : 0;
+
+    if (homeworkResult) {
+      return (
+        <section className="exam-page">
+          <button
+            type="button"
+            className="exam-back-btn"
+            onClick={
+              closeHomework
+            }
+          >
+            <FaArrowRight />
+
+            الرجوع إلى المحاضرة
+          </button>
+
+          <div className="exam-result-card">
+            <FaClipboardCheck />
+
+            <h1>
+              نتيجة الواجب
+            </h1>
+
+            <h2>
+              {selectedHomework.title ||
+                "واجب المحاضرة"}
+            </h2>
+
+            <strong>
+              {
+                homeworkResult.score
+              }{" "}
+              من{" "}
+              {
+                homeworkResult.total
+              }
+            </strong>
+
+            <span>
+              {
+                homeworkResult.percentage
+              }
+              %
+            </span>
+
+            <p>
+              تم تسليم الواجب وفتح
+              فيديو الحل.
+            </p>
+          </div>
+
+          <div className="exam-review-list">
+            <h2>
+              مراجعة إجاباتك
+            </h2>
+
+            {questions.map(
+              (
+                question,
+                questionIndex
+              ) => {
+                const selectedAnswer =
+                  homeworkAnswers[
+                    question.id
+                  ];
+
+                const isCorrect =
+                  selectedAnswer ===
+                  question.correctAnswer;
+
+                return (
+                  <article
+                    key={
+                      question.id
+                    }
+                    className={`exam-review-item ${
+                      isCorrect
+                        ? "correct"
+                        : "wrong"
+                    }`}
+                  >
+                    {isCorrect ? (
+                      <FaCheckCircle />
+                    ) : (
+                      <FaTimesCircle />
+                    )}
+
+                    <div
+                      style={{
+                        width:
+                          "100%",
+                      }}
+                    >
+                      <h3>
+                        السؤال{" "}
+                        {questionIndex +
+                          1}
+                      </h3>
+
+                      <p
+                        style={{
+                          fontWeight:
+                            "700",
+                          marginBottom:
+                            "10px",
+                          whiteSpace:
+                            "pre-line",
+                          lineHeight:
+                            "1.9",
+                        }}
+                      >
+                        {
+                          question.question
+                        }
+                      </p>
+
+                      <p>
+                        {isCorrect
+                          ? "إجابتك صحيحة"
+                          : "إجابتك غير صحيحة"}
+                      </p>
+                    </div>
+                  </article>
+                );
+              }
+            )}
+          </div>
+        </section>
+      );
+    }
+
     return (
-      <section
-        style={{
-          width: "100%",
-          minHeight:
-            "100vh",
-          padding:
-            "25px",
-          direction:
-            "rtl",
-          boxSizing:
-            "border-box",
-        }}
-      >
+      <section className="exam-page">
         <button
           type="button"
+          className="exam-back-btn"
           onClick={
             closeHomework
           }
-          style={{
-            marginBottom:
-              "25px",
-            padding:
-              "12px 18px",
-            border:
-              "1px solid #8b6546",
-            borderRadius:
-              "12px",
-            background:
-              "#fffaf3",
-            color:
-              "#6b472f",
-            fontWeight:
-              "800",
-            cursor:
-              "pointer",
-            display:
-              "inline-flex",
-            alignItems:
-              "center",
-            gap:
-              "8px",
-          }}
         >
           <FaArrowRight />
+
           الرجوع إلى المحاضرة
         </button>
 
-        <div
-          style={{
-            maxWidth:
-              "900px",
-            margin:
-              "0 auto",
-          }}
-        >
-          <div
-            style={{
-              padding:
-                "25px",
-              marginBottom:
-                "25px",
-              borderRadius:
-                "20px",
-              background:
-                "linear-gradient(135deg,#3d281c,#67472f)",
-              color:
-                "#fff",
-              textAlign:
-                "center",
-            }}
-          >
-            <FaClipboardCheck
-              style={{
-                fontSize:
-                  "38px",
-                marginBottom:
-                  "10px",
-              }}
-            />
+        <div className="exam-header">
+          <FaClipboardCheck />
 
-            <h1
-              style={{
-                margin:
-                  "0 0 8px",
-              }}
-            >
+          <div>
+            <span>
+              واجب المحاضرة
+            </span>
+
+            <h1>
               {selectedHomework.title ||
                 "واجب المحاضرة"}
             </h1>
 
-            <p
-              style={{
-                margin: 0,
-              }}
-            >
+            <p>
               {
                 selectedHomeworkLesson.title
               }
             </p>
+          </div>
+        </div>
 
-            <p>
-              عدد الأسئلة:{" "}
-              {
-                questions.length
-              }
-            </p>
+        <div className="exam-progress-card">
+          <div className="exam-progress-info">
+            <span>
+              السؤال{" "}
+              {currentHomeworkQuestionIndex +
+                1}{" "}
+              من{" "}
+              {questions.length}
+            </span>
+
+            <strong>
+              {answeredCount} من{" "}
+              {questions.length} تم
+              الإجابة
+            </strong>
           </div>
 
-          {homeworkResult && (
+          <div className="exam-progress-bar">
             <div
+              className="exam-progress-fill"
               style={{
-                marginBottom:
-                  "25px",
-                padding:
-                  "22px",
-                borderRadius:
-                  "16px",
-                textAlign:
-                  "center",
-                background:
-                  "#e8f7ee",
-                color:
-                  "#176b43",
-                fontWeight:
-                  "bold",
+                width: `${progressPercentage}%`,
               }}
-            >
-              <FaCheckCircle
-                style={{
-                  fontSize:
-                    "30px",
-                  marginBottom:
-                    "8px",
-                }}
-              />
+            />
+          </div>
 
-              <h2>
-                تم تسليم الواجب ✅
-              </h2>
+          <p>
+            نسبة الإنجاز:{" "}
+            {progressPercentage}%
+          </p>
+        </div>
 
-              <p
-                style={{
-                  fontSize:
-                    "20px",
-                }}
-              >
-                درجتك:{" "}
-                {
-                  homeworkResult.score
-                }{" "}
-                من{" "}
-                {
-                  homeworkResult.total
-                }
-              </p>
-
-              <p>
-                النسبة:{" "}
-                {
-                  homeworkResult.percentage
-                }
-                %
-              </p>
-
-              <p>
-                تم فتح فيديو حل الواجب.
-              </p>
-            </div>
-          )}
-
+        <div className="exam-question-numbers">
           {questions.map(
             (
               question,
-              questionIndex
+              index
             ) => {
-              const selectedAnswer =
+              const answered =
                 homeworkAnswers[
                   question.id
-                ];
+                ] !== undefined;
 
               return (
-                <div
+                <button
                   key={
                     question.id
                   }
-                  style={{
-                    marginBottom:
-                      "18px",
-                    padding:
-                      "22px",
-                    borderRadius:
-                      "16px",
-                    border:
-                      "1px solid #d9c1aa",
-                    background:
-                      "#fffaf3",
-                    boxShadow:
-                      "0 7px 18px rgba(0,0,0,0.07)",
-                  }}
+                  type="button"
+                  className={`exam-number-btn ${
+                    currentHomeworkQuestionIndex ===
+                    index
+                      ? "current"
+                      : ""
+                  } ${
+                    answered
+                      ? "answered"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setCurrentHomeworkQuestionIndex(
+                      index
+                    )
+                  }
                 >
-                  <h3
-                    style={{
-                      margin:
-                        "0 0 18px",
-                      lineHeight:
-                        "1.9",
-                      color:
-                        "#4a2f1f",
-                    }}
-                  >
-                    {questionIndex +
-                      1}
-                    .{" "}
-                    {
-                      question.question
-                    }
-                  </h3>
-
-                  <div
-                    style={{
-                      display:
-                        "grid",
-                      gap:
-                        "10px",
-                    }}
-                  >
-                    {question.options.map(
-                      (
-                        option,
-                        optionIndex
-                      ) => {
-                        const checked =
-                          selectedAnswer ===
-                          optionIndex;
-
-                        return (
-                          <button
-                            key={
-                              optionIndex
-                            }
-                            type="button"
-                            disabled={
-                              !!homeworkResult
-                            }
-                            onClick={() =>
-                              handleHomeworkAnswer(
-                                question.id,
-                                optionIndex
-                              )
-                            }
-                            style={{
-                              width:
-                                "100%",
-                              padding:
-                                "14px 16px",
-                              borderRadius:
-                                "12px",
-                              border:
-                                checked
-                                  ? "2px solid #8b6546"
-                                  : "1px solid #d9c1aa",
-                              background:
-                                checked
-                                  ? "#f3e5d5"
-                                  : "#fff",
-                              color:
-                                "#3d281c",
-                              textAlign:
-                                "right",
-                              fontWeight:
-                                "700",
-                              cursor:
-                                homeworkResult
-                                  ? "default"
-                                  : "pointer",
-                            }}
-                          >
-                            {
-                              option
-                            }
-                          </button>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
+                  {index + 1}
+                </button>
               );
             }
           )}
+        </div>
 
-          {!homeworkResult && (
+        {currentQuestion && (
+          <article className="exam-question-card">
+            <div className="exam-question-number">
+              السؤال{" "}
+              {currentHomeworkQuestionIndex +
+                1}
+            </div>
+
+            <h2
+              style={{
+                whiteSpace:
+                  "pre-line",
+              }}
+            >
+              {
+                currentQuestion.question
+              }
+            </h2>
+
+            <div className="exam-options-list">
+              {Array.isArray(
+                currentQuestion.options
+              ) &&
+                currentQuestion.options.map(
+                  (
+                    option,
+                    optionIndex
+                  ) => {
+                    const selected =
+                      homeworkAnswers[
+                        currentQuestion.id
+                      ] ===
+                      optionIndex;
+
+                    return (
+                      <button
+                        key={
+                          optionIndex
+                        }
+                        type="button"
+                        className={`exam-option-btn ${
+                          selected
+                            ? "selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          handleHomeworkAnswer(
+                            currentQuestion.id,
+                            optionIndex
+                          )
+                        }
+                      >
+                        <span className="exam-option-letter">
+                          {
+                            [
+                              "أ",
+                              "ب",
+                              "ج",
+                              "د",
+                            ][
+                              optionIndex
+                            ]
+                          }
+                        </span>
+
+                        <span>
+                          {option}
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+            </div>
+          </article>
+        )}
+
+        <div className="exam-navigation-buttons">
+          <button
+            type="button"
+            className="exam-navigation-btn previous"
+            disabled={
+              currentHomeworkQuestionIndex ===
+              0
+            }
+            onClick={() =>
+              setCurrentHomeworkQuestionIndex(
+                (
+                  previous
+                ) =>
+                  Math.max(
+                    previous -
+                      1,
+                    0
+                  )
+              )
+            }
+          >
+            <FaArrowRight />
+
+            السابق
+          </button>
+
+          {currentHomeworkQuestionIndex <
+          questions.length -
+            1 ? (
             <button
               type="button"
+              className="exam-navigation-btn next"
+              onClick={() =>
+                setCurrentHomeworkQuestionIndex(
+                  (
+                    previous
+                  ) =>
+                    Math.min(
+                      previous +
+                        1,
+                      questions.length -
+                        1
+                    )
+                )
+              }
+            >
+              التالي
+
+              <FaArrowRight
+                style={{
+                  transform:
+                    "rotate(180deg)",
+                }}
+              />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="exam-submit-btn"
               disabled={
                 isSubmittingHomework
               }
               onClick={
                 submitHomework
               }
-              style={{
-                width:
-                  "100%",
-                padding:
-                  "16px",
-                border:
-                  "none",
-                borderRadius:
-                  "14px",
-                background:
-                  "#6b472f",
-                color:
-                  "#fff",
-                fontSize:
-                  "18px",
-                fontWeight:
-                  "900",
-                cursor:
-                  "pointer",
-                marginBottom:
-                  "30px",
-              }}
             >
               {isSubmittingHomework
                 ? "جاري تسليم الواجب..."
