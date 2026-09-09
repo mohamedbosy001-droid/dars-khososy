@@ -31,6 +31,8 @@ import {
 } from "react-icons/fa";
 
 import "./Homework.css";
+const AI_GRADER_URL =
+  "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
 
 /* =========================================================
    Helpers عامة
@@ -40,6 +42,15 @@ function normalizeGrade(value) {
   const text = String(value || "")
     .trim()
     .replace(/^الصف\s+/u, "");
+
+  if (
+    text.includes("الأول") ||
+    text.includes("الاول") ||
+    text.includes("أولى") ||
+    text.includes("اولى")
+  ) {
+    return "الأول الثانوي";
+  }
 
   if (
     text.includes("الثاني") ||
@@ -137,6 +148,93 @@ function getQuestionDisplayNumber(
 /* =========================================================
    تصحيح المقالي
 ========================================================= */
+async function gradeEssayWithAI(
+  studentAnswer,
+  question
+) {
+  const cleanStudentAnswer =
+    String(studentAnswer || "").trim();
+
+  const acceptedAnswers =
+    Array.isArray(question?.acceptedAnswers)
+      ? question.acceptedAnswers
+          .map((answer) =>
+            String(answer || "").trim()
+          )
+          .filter(Boolean)
+      : [];
+
+  if (
+    !cleanStudentAnswer ||
+    acceptedAnswers.length === 0
+  ) {
+    return false;
+  }
+
+  /*
+    لو الإجابة مطابقة مباشرة،
+    لا نحتاج استدعاء الـ AI.
+  */
+  const normalizedStudent =
+    normalizeArabicText(
+      cleanStudentAnswer
+    );
+
+  const hasExactMatch =
+    acceptedAnswers.some(
+      (acceptedAnswer) =>
+        normalizeArabicText(
+          acceptedAnswer
+        ) === normalizedStudent
+    );
+
+  if (hasExactMatch) {
+    return true;
+  }
+
+  const response = await fetch(
+    AI_GRADER_URL,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        question:
+          question?.question || "",
+
+        acceptedAnswers,
+
+        studentAnswer:
+          cleanStudentAnswer,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "AI_GRADING_FAILED"
+    );
+  }
+
+  const data =
+    await response.json();
+
+  if (
+    data?.success !== true ||
+    typeof data?.isCorrect !==
+      "boolean"
+  ) {
+    throw new Error(
+      "AI_GRADING_FAILED"
+    );
+  }
+
+  return data.isCorrect;
+}
 
 function getImportantWords(text) {
   const ignoredWords = new Set([
@@ -1579,7 +1677,30 @@ function Homework({
 
     try {
       let score = 0;
+const essayGrades = {};
 
+for (const question of questions) {
+  if (
+    question.cancelled ||
+    !isEssayQuestion(question)
+  ) {
+    continue;
+  }
+
+  const savedAnswer =
+    answers[question.id];
+
+  const studentAnswer =
+    typeof savedAnswer === "string"
+      ? savedAnswer.trim()
+      : "";
+
+  essayGrades[question.id] =
+    await gradeEssayWithAI(
+      studentAnswer,
+      question
+    );
+}
       const reviewedAnswers =
         questions.map(
           (
@@ -1649,10 +1770,7 @@ function Homework({
                   : "";
 
               const isCorrect =
-                isEssayAnswerCorrect(
-                  studentAnswer,
-                  question
-                );
+  essayGrades[question.id] === true;
 
               if (isCorrect) {
                 score += 1;
