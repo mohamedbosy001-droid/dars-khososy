@@ -68,6 +68,12 @@ const THIRD_LECTURE_1_EXAM_KEY =
 const THIRD_LECTURE_1_EXAM_ID =
   "third-lecture-1-exam";
 
+const THIRD_LECTURE_2_EXAM_KEY =
+  "thirdLecture2Exam";
+
+const THIRD_LECTURE_2_EXAM_ID =
+  "third-lecture-2-exam";
+
 /*
   الكورسات المجانية القديمة تظل موجودة في الكود/Firestore
   ولكن لا تظهر للطلاب على المنصة.
@@ -174,6 +180,33 @@ const THIRD_SECOND_LECTURE = {
 
   requiredExamId:
     THIRD_LECTURE_1_EXAM_ID,
+};
+
+/*
+  المحاضرة الثالثة لتالتة ثانوي.
+*/
+const THIRD_THIRD_LECTURE = {
+  id: "lesson-3",
+
+  title:
+    "المحاضرة الثالثة",
+
+  description:
+    "سلّم امتحان المحاضرة الثانية أولًا لفتح فيديو المحاضرة.",
+
+  youtubeUrl:
+    "https://www.youtube.com/watch?v=XxJ-MBH9SLU",
+
+  videoUrl:
+    "https://www.youtube.com/watch?v=XxJ-MBH9SLU",
+
+  videoTitle:
+    "فيديو المحاضرة الثالثة",
+
+  requiresPreviousExam: true,
+
+  requiredExamId:
+    THIRD_LECTURE_2_EXAM_ID,
 };
 
 function AllCourses({
@@ -385,6 +418,10 @@ function AllCourses({
         ? [...course.lessons]
         : [];
 
+    /*
+      المحاضرة الأولى
+      وربط امتحانها
+    */
     if (lessons.length > 0) {
       lessons[0] = {
         ...lessons[0],
@@ -402,6 +439,12 @@ function AllCourses({
           "امتحان المحاضرة الأولى",
       };
     }
+
+    /*
+      ============================
+      المحاضرة الثانية
+      ============================
+    */
 
     const secondLessonIndex =
       lessons.findIndex(
@@ -426,6 +469,14 @@ function AllCourses({
 
         courseLectureKey:
           "third-lecture-2",
+
+        exam1: true,
+
+        exam1Key:
+          THIRD_LECTURE_2_EXAM_KEY,
+
+        exam1Title:
+          "امتحان المحاضرة الثانية",
       };
     } else {
       lessons.push({
@@ -433,6 +484,53 @@ function AllCourses({
 
         courseLectureKey:
           "third-lecture-2",
+
+        exam1: true,
+
+        exam1Key:
+          THIRD_LECTURE_2_EXAM_KEY,
+
+        exam1Title:
+          "امتحان المحاضرة الثانية",
+      });
+    }
+
+    /*
+      ============================
+      المحاضرة الثالثة
+      ============================
+    */
+
+    const thirdLessonIndex =
+      lessons.findIndex(
+        (lesson) =>
+          lesson?.id ===
+            "lesson-3" ||
+          lesson?.courseLectureKey ===
+            "third-lecture-3"
+      );
+
+    if (
+      thirdLessonIndex >= 0
+    ) {
+      lessons[
+        thirdLessonIndex
+      ] = {
+        ...lessons[
+          thirdLessonIndex
+        ],
+
+        ...THIRD_THIRD_LECTURE,
+
+        courseLectureKey:
+          "third-lecture-3",
+      };
+    } else {
+      lessons.push({
+        ...THIRD_THIRD_LECTURE,
+
+        courseLectureKey:
+          "third-lecture-3",
       });
     }
 
@@ -2488,8 +2586,7 @@ function AllCourses({
     فتح فيديو المحاضرة
     ============================
   */
-
-  function openLesson(
+ function openLesson(
     course,
     lesson
   ) {
@@ -2509,6 +2606,46 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة. اكتب كود المحاضرة أولًا."
       );
+      return;
+    }
+
+    /*
+      =====================================
+      منع فتح فيديو المحاضرة
+      قبل تسليم الامتحان السابق
+      =====================================
+    */
+
+    if (
+      lesson.requiresPreviousExam ===
+        true &&
+      hasValue(
+        lesson.requiredExamId
+      ) &&
+      !isExamCompleted(
+        lesson.requiredExamId
+      )
+    ) {
+      if (
+        lesson.id ===
+        "lesson-2"
+      ) {
+        window.alert(
+          "سلّم امتحان المحاضرة الأولى أولًا لفتح فيديو المحاضرة الثانية."
+        );
+      } else if (
+        lesson.id ===
+        "lesson-3"
+      ) {
+        window.alert(
+          "سلّم امتحان المحاضرة الثانية أولًا لفتح فيديو المحاضرة الثالثة."
+        );
+      } else {
+        window.alert(
+          "سلّم الامتحان السابق أولًا لفتح فيديو المحاضرة."
+        );
+      }
+
       return;
     }
 
@@ -3059,179 +3196,176 @@ function AllCourses({
     ============================
   */
 
- function openHomework(
-  lesson
-) {
-  if (
-    !selectedCourse ||
-    !lesson
-  ) {
-    return;
-  }
-
-  if (
-    !hasLessonAccess(
-      selectedCourse,
-      lesson
-    )
-  ) {
-    window.alert(
-      "المحاضرة مقفولة."
-    );
-
-    return;
-  }
-
-  if (
-    !isLessonWatched(
-      selectedCourse.id,
-      lesson.id
-    )
-  ) {
-    window.alert(
-      "شاهد 30% من فيديو الشرح أولًا."
-    );
-
-    return;
-  }
-
-  const homeworkKey =
-    lesson.homeworkKey;
-
-  if (
-    !hasValue(
-      homeworkKey
-    )
-  ) {
-    window.alert(
-      "لم يتم ربط واجب بهذه المحاضرة."
-    );
-
-    return;
-  }
-
-  const selectedData =
-    courseHomeworkData[
-      homeworkKey
-    ] ||
-    homeworkData[
-      homeworkKey
-    ];
-
-  if (
-    !selectedData
-  ) {
-    window.alert(
-      "تعذر تحميل بيانات الواجب."
-    );
-
-    console.error(
-      "Homework key not found:",
-      homeworkKey
-    );
-
-    return;
-  }
-
-  /*
-    ============================
-    البحث عن نتيجة قديمة محفوظة
-    ============================
-  */
-
-  const savedHomeworkResults =
-    Array.isArray(
-      studentData?.homeworkResults
-    )
-      ? studentData.homeworkResults
-      : [];
-
-  const savedResult =
-    savedHomeworkResults.find(
-      (
-        result
-      ) =>
-        result?.courseId ===
-          selectedCourse.id &&
-        result?.lessonId ===
-          lesson.id &&
-        result?.homeworkId ===
-          selectedData.id &&
-        (
-          result?.completed ===
-            true ||
-          result?.submitted ===
-            true ||
-          result?.homeworkSubmitted ===
-            true
-        )
-    );
-
-  setSelectedHomework(
-    selectedData
-  );
-
-  setSelectedHomeworkLesson(
+  function openHomework(
     lesson
-  );
+  ) {
+    if (
+      !selectedCourse ||
+      !lesson
+    ) {
+      return;
+    }
 
-  setCurrentHomeworkQuestionIndex(
-    0
-  );
+    if (
+      !hasLessonAccess(
+        selectedCourse,
+        lesson
+      )
+    ) {
+      window.alert(
+        "المحاضرة مقفولة."
+      );
 
-  /*
-    لو الواجب متسلم قبل كده
-    رجع الدرجة والإجابات
-  */
+      return;
+    }
 
-  if (savedResult) {
-    setHomeworkAnswers(
-      savedResult.answers &&
-        typeof savedResult.answers ===
-          "object"
-        ? savedResult.answers
-        : {}
-    );
+    if (
+      !isLessonWatched(
+        selectedCourse.id,
+        lesson.id
+      )
+    ) {
+      window.alert(
+        "شاهد 30% من فيديو الشرح أولًا."
+      );
 
-    setHomeworkResult({
-      score:
-        Number(
-          savedResult.score
-        ) || 0,
+      return;
+    }
 
-      total:
-        Number(
-          savedResult.total
-        ) || 0,
+    const homeworkKey =
+      lesson.homeworkKey;
 
-      percentage:
-        Number(
-          savedResult.percentage
-        ) || 0,
-    });
-  } else {
+    if (
+      !hasValue(
+        homeworkKey
+      )
+    ) {
+      window.alert(
+        "لم يتم ربط واجب بهذه المحاضرة."
+      );
+
+      return;
+    }
+
+    const selectedData =
+      courseHomeworkData[
+        homeworkKey
+      ] ||
+      homeworkData[
+        homeworkKey
+      ];
+
+    if (
+      !selectedData
+    ) {
+      window.alert(
+        "تعذر تحميل بيانات الواجب."
+      );
+
+      console.error(
+        "Homework key not found:",
+        homeworkKey
+      );
+
+      return;
+    }
+
     /*
-      واجب جديد لسه متسلمش
+      ============================
+      البحث عن نتيجة قديمة محفوظة
+      ============================
     */
 
-    setHomeworkAnswers(
-      {}
+    const savedHomeworkResults =
+      Array.isArray(
+        studentData?.homeworkResults
+      )
+        ? studentData.homeworkResults
+        : [];
+
+    const savedResult =
+      savedHomeworkResults.find(
+        (
+          result
+        ) =>
+          result?.courseId ===
+            selectedCourse.id &&
+          result?.lessonId ===
+            lesson.id &&
+          result?.homeworkId ===
+            selectedData.id &&
+          (
+            result?.completed ===
+              true ||
+            result?.submitted ===
+              true ||
+            result?.homeworkSubmitted ===
+              true
+          )
+      );
+
+    setSelectedHomework(
+      selectedData
     );
 
-    setHomeworkResult(
+    setSelectedHomeworkLesson(
+      lesson
+    );
+
+    setCurrentHomeworkQuestionIndex(
+      0
+    );
+
+    /*
+      لو الواجب متسلم قبل كده
+      رجع الدرجة والإجابات
+    */
+
+    if (savedResult) {
+      setHomeworkAnswers(
+        savedResult.answers &&
+          typeof savedResult.answers ===
+            "object"
+          ? savedResult.answers
+          : {}
+      );
+
+      setHomeworkResult({
+        score:
+          Number(
+            savedResult.score
+          ) || 0,
+
+        total:
+          Number(
+            savedResult.total
+          ) || 0,
+
+        percentage:
+          Number(
+            savedResult.percentage
+          ) || 0,
+      });
+    } else {
+      setHomeworkAnswers(
+        {}
+      );
+
+      setHomeworkResult(
+        null
+      );
+    }
+
+    setActiveLesson(
       null
+    );
+
+    window.scrollTo(
+      0,
+      0
     );
   }
 
-  setActiveLesson(
-    null
-  );
-
-  window.scrollTo(
-    0,
-    0
-  );
-}
   function handleHomeworkAnswer(
     questionId,
     optionIndex
@@ -3707,6 +3841,25 @@ function AllCourses({
           THIRD_LECTURE_1_EXAM_KEY
       );
 
+    const isThirdLectureTwoExam =
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey ===
+          THIRD_LECTURE_2_EXAM_KEY ||
+        examKey ===
+          THIRD_LECTURE_2_EXAM_KEY
+      );
+
+    /*
+      =====================================
+      امتحان المحاضرة الأولى
+
+      يفتح بعد تفعيل المحاضرة الثانية
+      =====================================
+    */
+
     if (
       isThirdLectureOneExam
     ) {
@@ -3736,7 +3889,54 @@ function AllCourses({
 
         return;
       }
-    } else {
+    }
+
+    /*
+      =====================================
+      امتحان المحاضرة الثانية
+
+      يفتح بعد تفعيل المحاضرة الثالثة
+      =====================================
+    */
+
+    else if (
+      isThirdLectureTwoExam
+    ) {
+      const thirdLesson =
+        Array.isArray(
+          course.lessons
+        )
+          ? course.lessons.find(
+              (
+                courseLesson
+              ) =>
+                courseLesson?.id ===
+                "lesson-3"
+            )
+          : null;
+
+      if (
+        !thirdLesson ||
+        !hasLessonAccess(
+          course,
+          thirdLesson
+        )
+      ) {
+        window.alert(
+          "فعّل المحاضرة الثالثة أولًا لفتح الامتحان."
+        );
+
+        return;
+      }
+    }
+
+    /*
+      =====================================
+      باقي الامتحانات القديمة
+      =====================================
+    */
+
+    else {
       if (
         !hasLessonAccess(
           course,
@@ -4487,6 +4687,9 @@ function AllCourses({
           }
           isThirdLecture1ExamCompleted={isExamCompleted(
             THIRD_LECTURE_1_EXAM_ID
+          )}
+          isThirdLecture2ExamCompleted={isExamCompleted(
+            THIRD_LECTURE_2_EXAM_ID
           )}
           onBack={
             closeCourseContent
