@@ -343,425 +343,191 @@ function App() {
   }
 
   async function handleRegisterSubmit(event) {
-
-    event.preventDefault();
-
-    const {
-
-      fullName,
-
-      studentPhone,
-
-      parentPhone,
-
-      governorate,
-
-      grade,
-
-      educationType,
-
-      studentType,
-
-      password,
-
-      confirmPassword,
-
-    } = registerData;
-
-    if (
-
-      !fullName.trim() ||
-
-      !studentPhone.trim() ||
-
-      !parentPhone.trim() ||
-
-      !governorate ||
-
-      !grade ||
-
-      !educationType ||
-
-      !studentType ||
-
-      !password ||
-
-      !confirmPassword
-
-    ) {
-
-      setRegisterMessage(
-
-        "من فضلك املأ جميع البيانات المطلوبة."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    if (fullName.trim().length < 6) {
-
-      setRegisterMessage(
-
-        "من فضلك اكتب الاسم بالكامل باللغة العربية."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    const phoneRegex = /^01[0125][0-9]{8}$/;
-
-    const cleanStudentPhone =
-
-      studentPhone.trim();
-
-    const cleanParentPhone =
-
-      parentPhone.trim();
-
-    if (!phoneRegex.test(cleanStudentPhone)) {
-
-      setRegisterMessage(
-
-        "من فضلك اكتب رقم هاتف الطالب بشكل صحيح."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    if (!phoneRegex.test(cleanParentPhone)) {
-
-      setRegisterMessage(
-
-        "من فضلك اكتب رقم هاتف ولي الأمر بشكل صحيح."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    if (password.length < 6) {
-
-      setRegisterMessage(
-
-        "كلمة السر يجب ألا تقل عن 6 أحرف أو أرقام."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    if (password !== confirmPassword) {
-
-      setRegisterMessage(
-
-        "كلمة السر وتأكيد كلمة السر غير متطابقين."
-
-      );
-
-      setRegisterMessageType("error");
-
-      return;
-
-    }
-
-    setRegisterMessage("جاري إنشاء الحساب...");
-
-    setRegisterMessageType("pending");
-
-    let firebaseUser = null;
-
-    try {
-
-      const firebaseEmail =
-
-        `${cleanStudentPhone}@dars-khososy.com`;
-
-      const userCredential =
-
-        await createUserWithEmailAndPassword(
-
-          auth,
-
-          firebaseEmail,
-
-          password
-
-        );
-
-      firebaseUser = userCredential.user;
-
-      const studentStatus =
-
-        studentType === "center"
-
-          ? "active"
-
-          : "pending";
-
-      const newStudent = {
-
-        uid: firebaseUser.uid,
-
-        fullName: fullName.trim(),
-
-        studentPhone: cleanStudentPhone,
-
-        parentPhone: cleanParentPhone,
-
-        governorate,
-
-        grade,
-
-        educationType,
-
-        studentType,
-
-        status: studentStatus,
-
-        watchedVideos: 0,
-
-        completedExams: 0,
-
-        completedHomeworks: 0,
-
-        obtainedGrades: 0,
-
-        totalGrades: 0,
-
-        points: 0,
-
-        subscribedCourses: [],
-
-        activatedLessons: [],
-
-        examResults: [],
-
-        homeworkResults: [],
-
-        watchHistory: [],
-
-        role: "student",
-
-        createdAt: serverTimestamp(),
-
-        updatedAt: serverTimestamp(),
-
-      };
-
-      try {
-
-        await setDoc(
-
-          doc(
-
-            db,
-
-            "students",
-
-            firebaseUser.uid
-
-          ),
-
-          newStudent
-
-        );
-
-      } catch (firestoreError) {
-
-        console.error(
-
-          "Firestore student creation error:",
-
-          firestoreError
-
-        );
-
-        try {
-
-          if (firebaseUser) {
-
-            await deleteUser(firebaseUser);
-
-            console.log(
-
-              "Incomplete Firebase Auth account deleted."
-
-            );
-
-          }
-
-        } catch (deleteError) {
-
-          console.error(
-
-            "Failed to delete incomplete Auth account:",
-
-            deleteError
-
-          );
-
-        }
-
-        throw firestoreError;
-
-      }
-
-      await signOut(auth);
-
-      setRegisterData(
-
-        initialRegisterData
-
-      );
-
-      if (studentType === "center") {
-
-        setRegisterMessage(
-
-          "تم إنشاء حساب طالب السنتر وتفعيله بنجاح. يمكنك الآن تسجيل الدخول."
-
-        );
-
-        setRegisterMessageType(
-
-          "success"
-
-        );
-
-      } else {
-
-        setRegisterMessage(
-
-          "تم إرسال طلب إنشاء الحساب. حساب طالب الأونلاين قيد مراجعة المدرس."
-
-        );
-
-        setRegisterMessageType(
-
-          "pending"
-
-        );
-
-      }
-
-    } catch (error) {
-
-      console.error(
-
-        "Registration error:",
-
-        error
-
-      );
-
-      if (
-
-        error.code ===
-
-        "auth/email-already-in-use"
-
-      ) {
-
-        setRegisterMessage(
-
-          "يوجد حساب مسجل بالفعل برقم الهاتف ده."
-
-        );
-
-      } else if (
-
-        error.code ===
-
-        "auth/weak-password"
-
-      ) {
-
-        setRegisterMessage(
-
-          "كلمة السر ضعيفة."
-
-        );
-
-      } else if (
-
-        error.code ===
-
-        "auth/network-request-failed"
-
-      ) {
-
-        setRegisterMessage(
-
-          "تحقق من اتصال الإنترنت."
-
-        );
-
-      } else if (
-
-        error.code ===
-
-          "permission-denied" ||
-
-        error.code ===
-
-          "firestore/permission-denied"
-
-      ) {
-
-        setRegisterMessage(
-
-          "حدث خطأ أثناء حفظ بيانات الحساب. حاول مرة أخرى."
-
-        );
-
-      } else {
-
-        setRegisterMessage(
-
-          "حدث خطأ أثناء إنشاء الحساب."
-
-        );
-
-      }
-
-      setRegisterMessageType(
-
-        "error"
-
-      );
-
-      try {
-
-        await signOut(auth);
-
-      } catch {
-
-        // تجاهل خطأ تسجيل الخروج
-
-      }
-
-    }
-
+  event.preventDefault();
+
+  const {
+    fullName,
+    studentPhone,
+    parentPhone,
+    governorate,
+    grade,
+    educationType,
+    studentType,
+    password,
+    confirmPassword,
+  } = registerData;
+
+  if (
+    !fullName.trim() ||
+    !studentPhone.trim() ||
+    !parentPhone.trim() ||
+    !governorate ||
+    !grade ||
+    !educationType ||
+    !studentType ||
+    !password ||
+    !confirmPassword
+  ) {
+    setRegisterMessage(
+      "من فضلك املأ جميع البيانات المطلوبة."
+    );
+    setRegisterMessageType("error");
+    return;
   }
 
+  if (fullName.trim().length < 6) {
+    setRegisterMessage(
+      "من فضلك اكتب الاسم بالكامل باللغة العربية."
+    );
+    setRegisterMessageType("error");
+    return;
+  }
+
+  const phoneRegex = /^01[0125][0-9]{8}$/;
+
+  const cleanStudentPhone =
+    studentPhone.trim();
+
+  const cleanParentPhone =
+    parentPhone.trim();
+
+  if (
+    !phoneRegex.test(
+      cleanStudentPhone
+    )
+  ) {
+    setRegisterMessage(
+      "من فضلك اكتب رقم هاتف الطالب بشكل صحيح."
+    );
+    setRegisterMessageType("error");
+    return;
+  }
+
+  if (
+    !phoneRegex.test(
+      cleanParentPhone
+    )
+  ) {
+    setRegisterMessage(
+      "من فضلك اكتب رقم هاتف ولي الأمر بشكل صحيح."
+    );
+    setRegisterMessageType("error");
+    return;
+  }
+
+  if (password.length < 6) {
+    setRegisterMessage(
+      "كلمة السر يجب ألا تقل عن 6 أحرف أو أرقام."
+    );
+    setRegisterMessageType("error");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setRegisterMessage(
+      "كلمة السر وتأكيد كلمة السر غير متطابقين."
+    );
+    setRegisterMessageType("error");
+    return;
+  }
+
+  setRegisterMessage(
+    "جاري إنشاء الحساب..."
+  );
+
+  setRegisterMessageType(
+    "pending"
+  );
+
+  try {
+    const response =
+      await fetch(
+        "https://dars-khososy-password.mohamedbosy001.workers.dev/",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            action:
+              "registerStudent",
+
+            fullName:
+              fullName.trim(),
+
+            studentPhone:
+              cleanStudentPhone,
+
+            parentPhone:
+              cleanParentPhone,
+
+            governorate,
+
+            grade,
+
+            educationType,
+
+            studentType,
+
+            password,
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      setRegisterMessage(
+        data?.message ||
+          "حدث خطأ أثناء إنشاء الحساب."
+      );
+
+      setRegisterMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+    setRegisterData(
+      initialRegisterData
+    );
+
+    setRegisterMessage(
+      data?.message ||
+        (
+          studentType ===
+          "center"
+            ? "تم إنشاء حساب طالب السنتر وتفعيله بنجاح. يمكنك الآن تسجيل الدخول."
+            : "تم إرسال طلب إنشاء الحساب. حساب طالب الأونلاين قيد مراجعة المدرس."
+        )
+    );
+
+    setRegisterMessageType(
+      studentType ===
+        "center"
+        ? "success"
+        : "pending"
+    );
+  } catch (error) {
+    console.error(
+      "Registration error:",
+      error
+    );
+
+    setRegisterMessage(
+      "تعذر الاتصال بالسيرفر. حاول مرة أخرى."
+    );
+
+    setRegisterMessageType(
+      "error"
+    );
+  }
+}
   async function handleLoginSubmit(event) {
 
     event.preventDefault();
