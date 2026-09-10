@@ -23,30 +23,160 @@ import {
 
 import "./Exam.css";
 
-function renderQuestionText(text = "") {
-  const parts = text.split(/(\[\[.*?\]\])/g);
+const AI_GRADER_URL =
+  "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
 
-  return parts.map((part, index) => {
-    if (
-      part.startsWith("[[") &&
-      part.endsWith("]]")
-    ) {
+/*
+  ============================
+  عرض نص السؤال
+  ============================
+*/
+
+function renderQuestionText(text = "") {
+  const parts = text.split(
+    /(\[\[.*?\]\])/g
+  );
+
+  return parts.map(
+    (part, index) => {
+      if (
+        part.startsWith("[[") &&
+        part.endsWith("]]")
+      ) {
+        return (
+          <span
+            key={index}
+            className="exam-underlined-word"
+          >
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+
       return (
-        <span
-          key={index}
-          className="exam-underlined-word"
-        >
-          {part.slice(2, -2)}
+        <span key={index}>
+          {part}
         </span>
       );
     }
+  );
+}
 
+/*
+  ============================
+  هل السؤال مقالي؟
+  ============================
+*/
+
+function isEssayQuestion(question) {
+  return (
+    question?.type === "essay" ||
+    !Array.isArray(question?.options)
+  );
+}
+
+/*
+  ============================
+  هل السؤال تمت إجابته؟
+  ============================
+*/
+
+function isQuestionAnswered(
+  question,
+  answer
+) {
+  if (isEssayQuestion(question)) {
     return (
-      <span key={index}>
-        {part}
-      </span>
+      typeof answer === "string" &&
+      answer.trim().length > 0
     );
-  });
+  }
+
+  return (
+    answer !== undefined &&
+    answer !== null
+  );
+}
+
+/*
+  ============================
+  تصحيح المقالي بالـ AI
+  ============================
+*/
+
+async function gradeEssayWithAI(
+  studentAnswer,
+  question
+) {
+  const cleanStudentAnswer =
+    String(
+      studentAnswer || ""
+    ).trim();
+
+  const acceptedAnswers =
+    Array.isArray(
+      question?.acceptedAnswers
+    )
+      ? question.acceptedAnswers
+          .map((answer) =>
+            String(
+              answer || ""
+            ).trim()
+          )
+          .filter(Boolean)
+      : [];
+
+  if (
+    !cleanStudentAnswer ||
+    acceptedAnswers.length === 0
+  ) {
+    return false;
+  }
+
+  const response = await fetch(
+    AI_GRADER_URL,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        question:
+          String(
+            question?.question || ""
+          ).trim(),
+
+        acceptedAnswers,
+
+        studentAnswer:
+          cleanStudentAnswer,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "AI_GRADING_FAILED"
+    );
+  }
+
+  const data =
+    await response.json();
+
+  if (
+    data?.success !== true ||
+    typeof data?.isCorrect !==
+      "boolean"
+  ) {
+    throw new Error(
+      "AI_GRADING_FAILED"
+    );
+  }
+
+  return data.isCorrect;
 }
 
 function Exam({
@@ -82,18 +212,25 @@ function Exam({
     "";
 
   const questions = useMemo(() => {
-    return Array.isArray(exam?.questions)
+    return Array.isArray(
+      exam?.questions
+    )
       ? exam.questions
       : [];
   }, [exam]);
 
   const currentQuestion =
-    questions[currentQuestionIndex];
+    questions[
+      currentQuestionIndex
+    ];
 
   const answeredQuestionsCount =
     questions.filter(
       (question) =>
-        answers[question.id] !== undefined
+        isQuestionAnswered(
+          question,
+          answers[question.id]
+        )
     ).length;
 
   const progressPercentage =
@@ -104,6 +241,12 @@ function Exam({
             100
         )
       : 0;
+
+  /*
+    ============================
+    تحميل / إنشاء محاولة الامتحان
+    ============================
+  */
 
   useEffect(() => {
     async function loadExamAttempt() {
@@ -116,11 +259,12 @@ function Exam({
       }
 
       try {
-        const studentReference = doc(
-          db,
-          "students",
-          studentUid
-        );
+        const studentReference =
+          doc(
+            db,
+            "students",
+            studentUid
+          );
 
         await runTransaction(
           db,
@@ -162,7 +306,9 @@ function Exam({
 
             const savedResult =
               examResults.find(
-                (savedExamResult) =>
+                (
+                  savedExamResult
+                ) =>
                   savedExamResult?.examId ===
                   exam.id
               );
@@ -214,9 +360,12 @@ function Exam({
               return;
             }
 
-            examAttempts[exam.id] = {
+            examAttempts[
+              exam.id
+            ] = {
               examId: exam.id,
-              examTitle: exam.title,
+              examTitle:
+                exam.title,
 
               started: true,
               completed: false,
@@ -252,7 +401,9 @@ function Exam({
           "حدث خطأ أثناء تحميل الامتحان."
         );
       } finally {
-        setIsLoadingAttempt(false);
+        setIsLoadingAttempt(
+          false
+        );
       }
     }
 
@@ -263,6 +414,12 @@ function Exam({
     exam?.title,
     questions.length,
   ]);
+
+  /*
+    ============================
+    حفظ التقدم
+    ============================
+  */
 
   async function saveAttemptProgress(
     nextAnswers,
@@ -277,11 +434,12 @@ function Exam({
     }
 
     try {
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await updateDoc(
         studentReference,
@@ -307,6 +465,12 @@ function Exam({
     }
   }
 
+  /*
+    ============================
+    اختيار إجابة MCQ
+    ============================
+  */
+
   function chooseAnswer(
     questionId,
     optionIndex
@@ -317,7 +481,8 @@ function Exam({
 
     const nextAnswers = {
       ...answers,
-      [questionId]: optionIndex,
+      [questionId]:
+        optionIndex,
     };
 
     setAnswers(nextAnswers);
@@ -328,12 +493,74 @@ function Exam({
     );
   }
 
+  /*
+    ============================
+    كتابة إجابة مقالية
+    ============================
+  */
+
+  function writeEssayAnswer(
+    questionId,
+    value
+  ) {
+    if (submitted) {
+      return;
+    }
+
+    setAnswers(
+      (previousAnswers) => ({
+        ...previousAnswers,
+        [questionId]: value,
+      })
+    );
+  }
+
+  /*
+    ============================
+    حفظ إجابة مقالية
+    ============================
+  */
+
+  function saveEssayAnswer(
+    questionId
+  ) {
+    if (submitted) {
+      return;
+    }
+
+    const nextAnswers = {
+      ...answers,
+      [questionId]:
+        typeof answers[
+          questionId
+        ] === "string"
+          ? answers[
+              questionId
+            ].trim()
+          : "",
+    };
+
+    setAnswers(nextAnswers);
+
+    saveAttemptProgress(
+      nextAnswers,
+      currentQuestionIndex
+    );
+  }
+
+  /*
+    ============================
+    التنقل
+    ============================
+  */
+
   function goToQuestion(
     questionIndex
   ) {
     if (
       questionIndex < 0 ||
-      questionIndex >= questions.length
+      questionIndex >=
+        questions.length
     ) {
       return;
     }
@@ -365,6 +592,12 @@ function Exam({
     );
   }
 
+  /*
+    ============================
+    تسليم الامتحان
+    ============================
+  */
+
   async function submitExam() {
     if (
       !exam ||
@@ -395,11 +628,119 @@ function Exam({
     try {
       let score = 0;
 
+      /*
+        نصحح الأسئلة المقالية
+        بالـ AI قبل إنشاء النتيجة
+      */
+
+      const essayGrades = {};
+
+      for (
+        const question of questions
+      ) {
+        if (
+          !isEssayQuestion(
+            question
+          )
+        ) {
+          continue;
+        }
+
+        const savedAnswer =
+          answers[question.id];
+
+        const studentAnswer =
+          typeof savedAnswer ===
+          "string"
+            ? savedAnswer.trim()
+            : "";
+
+        essayGrades[
+          question.id
+        ] =
+          await gradeEssayWithAI(
+            studentAnswer,
+            question
+          );
+      }
+
+      /*
+        إنشاء مراجعة الإجابات
+      */
+
       const reviewedAnswers =
         questions.map(
-          (question, index) => {
+          (
+            question,
+            index
+          ) => {
+            /*
+              ==================
+              سؤال مقالي
+              ==================
+            */
+
+            if (
+              isEssayQuestion(
+                question
+              )
+            ) {
+              const savedAnswer =
+                answers[
+                  question.id
+                ];
+
+              const studentAnswer =
+                typeof savedAnswer ===
+                "string"
+                  ? savedAnswer.trim()
+                  : "";
+
+              const isCorrect =
+                essayGrades[
+                  question.id
+                ] === true;
+
+              if (isCorrect) {
+                score += 1;
+              }
+
+              return {
+                questionId:
+                  question.id,
+
+                questionNumber:
+                  index + 1,
+
+                type: "essay",
+
+                studentAnswer,
+
+                selectedOption:
+                  null,
+
+                correctOption:
+                  null,
+
+                question:
+                  question.question,
+
+                options: [],
+
+                isCorrect,
+              };
+            }
+
+            /*
+              ==================
+              سؤال اختياري
+              ==================
+            */
+
             const selectedOption =
-              answers[question.id];
+              answers[
+                question.id
+              ];
 
             const isCorrect =
               selectedOption ===
@@ -415,6 +756,8 @@ function Exam({
 
               questionNumber:
                 index + 1,
+
+              type: "mcq",
 
               selectedOption:
                 selectedOption ??
@@ -452,7 +795,8 @@ function Exam({
 
       const examResult = {
         examId: exam.id,
-        examTitle: exam.title,
+        examTitle:
+          exam.title,
 
         score,
         totalQuestions,
@@ -473,11 +817,12 @@ function Exam({
         );
       }
 
-      const studentReference = doc(
-        db,
-        "students",
-        studentUid
-      );
+      const studentReference =
+        doc(
+          db,
+          "students",
+          studentUid
+        );
 
       await runTransaction(
         db,
@@ -508,7 +853,9 @@ function Exam({
               : {};
 
           const existingAttempt =
-            examAttempts[exam.id];
+            examAttempts[
+              exam.id
+            ];
 
           if (
             existingAttempt?.completed ===
@@ -531,13 +878,16 @@ function Exam({
 
           const existingResultIndex =
             examResults.findIndex(
-              (savedResult) =>
+              (
+                savedResult
+              ) =>
                 savedResult?.examId ===
                 exam.id
             );
 
           if (
-            existingResultIndex >= 0
+            existingResultIndex >=
+            0
           ) {
             throw new Error(
               "EXAM_ALREADY_COMPLETED"
@@ -548,11 +898,15 @@ function Exam({
             examResult
           );
 
-          examAttempts[exam.id] = {
-            ...(existingAttempt || {}),
+          examAttempts[
+            exam.id
+          ] = {
+            ...(existingAttempt ||
+              {}),
 
             examId: exam.id,
-            examTitle: exam.title,
+            examTitle:
+              exam.title,
 
             started: true,
             completed: true,
@@ -567,7 +921,8 @@ function Exam({
             updatedAt:
               Timestamp.now(),
 
-            result: examResult,
+            result:
+              examResult,
           };
 
           transaction.update(
@@ -592,7 +947,10 @@ function Exam({
       setResult(examResult);
       setSubmitted(true);
 
-      window.scrollTo(0, 0);
+      window.scrollTo(
+        0,
+        0
+      );
     } catch (error) {
       console.error(
         "Error submitting exam:",
@@ -600,7 +958,14 @@ function Exam({
       );
 
       if (
-        error.message ===
+        error?.message ===
+        "AI_GRADING_FAILED"
+      ) {
+        window.alert(
+          "تعذر تصحيح الإجابة المقالية حاليًا. إجاباتك ما زالت محفوظة، حاول تسليم الامتحان مرة أخرى."
+        );
+      } else if (
+        error?.message ===
         "EXAM_ALREADY_COMPLETED"
       ) {
         window.alert(
@@ -612,9 +977,17 @@ function Exam({
         );
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(
+        false
+      );
     }
   }
+
+  /*
+    ============================
+    تحميل
+    ============================
+  */
 
   if (isLoadingAttempt) {
     return (
@@ -627,6 +1000,12 @@ function Exam({
       </section>
     );
   }
+
+  /*
+    ============================
+    لا يوجد امتحان
+    ============================
+  */
 
   if (!exam) {
     return (
@@ -647,7 +1026,16 @@ function Exam({
     );
   }
 
-  if (submitted && result) {
+  /*
+    ============================
+    صفحة النتيجة
+    ============================
+  */
+
+  if (
+    submitted &&
+    result
+  ) {
     return (
       <section className="exam-page">
         <button
@@ -662,13 +1050,19 @@ function Exam({
         <div className="exam-result-card">
           <FaClipboardCheck />
 
-          <h1>نتيجة الامتحان</h1>
+          <h1>
+            نتيجة الامتحان
+          </h1>
 
-          <h2>{exam.title}</h2>
+          <h2>
+            {exam.title}
+          </h2>
 
           <strong>
             {result.score} من{" "}
-            {result.totalQuestions}
+            {
+              result.totalQuestions
+            }
           </strong>
 
           <span>
@@ -695,6 +1089,13 @@ function Exam({
                 questionData?.question ||
                 "";
 
+              const answerIsEssay =
+                answer.type ===
+                  "essay" ||
+                isEssayQuestion(
+                  questionData
+                );
+
               const questionOptions =
                 Array.isArray(
                   answer.options
@@ -711,26 +1112,32 @@ function Exam({
                 questionData?.correctAnswer;
 
               const selectedAnswerText =
-                answer.selectedOption !==
-                  null &&
-                answer.selectedOption !==
-                  undefined
-                  ? questionOptions[
-                      answer.selectedOption
-                    ] ||
-                    "إجابة غير متاحة"
-                  : "لم يتم اختيار إجابة";
+                answerIsEssay
+                  ? answer.studentAnswer ||
+                    "لم تتم كتابة إجابة"
+                  : answer.selectedOption !==
+                        null &&
+                      answer.selectedOption !==
+                        undefined
+                    ? questionOptions[
+                        answer
+                          .selectedOption
+                      ] ||
+                      "إجابة غير متاحة"
+                    : "لم يتم اختيار إجابة";
 
               const correctAnswerText =
-                correctOption !==
-                  null &&
-                correctOption !==
-                  undefined
-                  ? questionOptions[
-                      correctOption
-                    ] ||
-                    "الإجابة غير متاحة"
-                  : "الإجابة غير متاحة";
+                answerIsEssay
+                  ? ""
+                  : correctOption !==
+                        null &&
+                      correctOption !==
+                        undefined
+                    ? questionOptions[
+                        correctOption
+                      ] ||
+                      "الإجابة غير متاحة"
+                    : "الإجابة غير متاحة";
 
               return (
                 <article
@@ -753,7 +1160,8 @@ function Exam({
 
                   <div
                     style={{
-                      width: "100%",
+                      width:
+                        "100%",
                     }}
                   >
                     <h3>
@@ -765,7 +1173,8 @@ function Exam({
 
                     <p
                       style={{
-                        fontWeight: "700",
+                        fontWeight:
+                          "700",
                         marginBottom:
                           "10px",
                       }}
@@ -797,7 +1206,9 @@ function Exam({
                         <p
                           style={{
                             margin:
-                              "0 0 8px",
+                              answerIsEssay
+                                ? 0
+                                : "0 0 8px",
                           }}
                         >
                           <strong>
@@ -808,18 +1219,21 @@ function Exam({
                           }
                         </p>
 
-                        <p
-                          style={{
-                            margin: 0,
-                          }}
-                        >
-                          <strong>
-                            الإجابة الصحيحة:
-                          </strong>{" "}
-                          {
-                            correctAnswerText
-                          }
-                        </p>
+                        {!answerIsEssay && (
+                          <p
+                            style={{
+                              margin:
+                                0,
+                            }}
+                          >
+                            <strong>
+                              الإجابة الصحيحة:
+                            </strong>{" "}
+                            {
+                              correctAnswerText
+                            }
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -831,6 +1245,12 @@ function Exam({
       </section>
     );
   }
+
+  /*
+    ============================
+    صفحة الامتحان
+    ============================
+  */
 
   return (
     <section className="exam-page">
@@ -847,11 +1267,14 @@ function Exam({
         <FaClipboardCheck />
 
         <div>
-          <h1>{exam.title}</h1>
+          <h1>
+            {exam.title}
+          </h1>
 
           <p>
-            اختر إجابة واحدة لكل سؤال.
-            الامتحان متاح لمحاولة واحدة فقط.
+            أجب عن جميع الأسئلة.
+            الامتحان متاح لمحاولة
+            واحدة فقط.
           </p>
         </div>
       </div>
@@ -860,14 +1283,17 @@ function Exam({
         <div className="exam-progress-info">
           <strong>
             السؤال{" "}
-            {currentQuestionIndex + 1} من{" "}
-            {questions.length}
+            {currentQuestionIndex +
+              1}{" "}
+            من {questions.length}
           </strong>
 
           <span>
             تم حل{" "}
-            {answeredQuestionsCount} من{" "}
-            {questions.length}
+            {
+              answeredQuestionsCount
+            }{" "}
+            من {questions.length}
           </span>
         </div>
 
@@ -888,19 +1314,28 @@ function Exam({
 
       <div className="exam-question-numbers">
         {questions.map(
-          (question, index) => {
+          (
+            question,
+            index
+          ) => {
             const isCurrent =
               index ===
               currentQuestionIndex;
 
             const isAnswered =
-              answers[question.id] !==
-              undefined;
+              isQuestionAnswered(
+                question,
+                answers[
+                  question.id
+                ]
+              );
 
             return (
               <button
                 type="button"
-                key={question.id}
+                key={
+                  question.id
+                }
                 className={`exam-number-btn ${
                   isCurrent
                     ? "current"
@@ -911,7 +1346,9 @@ function Exam({
                     : ""
                 }`}
                 onClick={() =>
-                  goToQuestion(index)
+                  goToQuestion(
+                    index
+                  )
                 }
               >
                 {index + 1}
@@ -924,7 +1361,8 @@ function Exam({
       {currentQuestion && (
         <article className="exam-question-card">
           <div className="exam-question-number">
-            {currentQuestionIndex + 1}
+            {currentQuestionIndex +
+              1}
           </div>
 
           <h2>
@@ -933,52 +1371,172 @@ function Exam({
             )}
           </h2>
 
-          <div className="exam-options-list">
-            {currentQuestion.options.map(
-              (
-                option,
-                optionIndex
-              ) => {
-                const selected =
-                  answers[
+          {isEssayQuestion(
+            currentQuestion
+          ) ? (
+            /*
+              ==================
+              واجهة المقالي
+              ==================
+            */
+
+            <div
+              style={{
+                marginTop:
+                  "24px",
+              }}
+            >
+              <textarea
+                value={
+                  typeof answers[
+                    currentQuestion
+                      .id
+                  ] === "string"
+                    ? answers[
+                        currentQuestion
+                          .id
+                      ]
+                    : ""
+                }
+                onChange={(event) =>
+                  writeEssayAnswer(
+                    currentQuestion.id,
+                    event.target
+                      .value
+                  )
+                }
+                onBlur={() =>
+                  saveEssayAnswer(
                     currentQuestion.id
-                  ] === optionIndex;
+                  )
+                }
+                placeholder="اكتب إجابتك هنا..."
+                disabled={
+                  submitted
+                }
+                style={{
+                  width: "100%",
+                  minHeight:
+                    "180px",
+                  padding:
+                    "18px",
+                  borderRadius:
+                    "16px",
+                  border:
+                    "1px solid #d8c2aa",
+                  resize:
+                    "vertical",
+                  fontFamily:
+                    "inherit",
+                  fontSize:
+                    "17px",
+                  lineHeight:
+                    "1.8",
+                  direction:
+                    "rtl",
+                  boxSizing:
+                    "border-box",
+                }}
+              />
 
-                return (
-                  <button
-                    type="button"
-                    className={`exam-option-btn ${
-                      selected
-                        ? "selected"
-                        : ""
-                    }`}
-                    key={`${currentQuestion.id}-${optionIndex}`}
-                    onClick={() =>
-                      chooseAnswer(
-                        currentQuestion.id,
-                        optionIndex
-                      )
-                    }
-                  >
-                    <span className="exam-option-letter">
-                      {
-                        [
-                          "أ",
-                          "ب",
-                          "ج",
-                          "د",
-                        ][optionIndex]
+              <button
+                type="button"
+                onClick={() =>
+                  saveEssayAnswer(
+                    currentQuestion.id
+                  )
+                }
+                style={{
+                  marginTop:
+                    "12px",
+                  padding:
+                    "12px 20px",
+                  border:
+                    "none",
+                  borderRadius:
+                    "12px",
+                  cursor:
+                    "pointer",
+                  fontFamily:
+                    "inherit",
+                  fontWeight:
+                    "700",
+                }}
+              >
+                حفظ الإجابة
+              </button>
+
+              <p
+                style={{
+                  marginTop:
+                    "10px",
+                  opacity: 0.75,
+                }}
+              >
+                اكتب الإجابة
+                بطريقتك، وسيتم
+                تصحيحها عند تسليم
+                الامتحان.
+              </p>
+            </div>
+          ) : (
+            /*
+              ==================
+              واجهة الاختياري
+              ==================
+            */
+
+            <div className="exam-options-list">
+              {currentQuestion.options.map(
+                (
+                  option,
+                  optionIndex
+                ) => {
+                  const selected =
+                    answers[
+                      currentQuestion
+                        .id
+                    ] ===
+                    optionIndex;
+
+                  return (
+                    <button
+                      type="button"
+                      className={`exam-option-btn ${
+                        selected
+                          ? "selected"
+                          : ""
+                      }`}
+                      key={`${currentQuestion.id}-${optionIndex}`}
+                      onClick={() =>
+                        chooseAnswer(
+                          currentQuestion.id,
+                          optionIndex
+                        )
                       }
-                    </span>
+                    >
+                      <span className="exam-option-letter">
+                        {
+                          [
+                            "أ",
+                            "ب",
+                            "ج",
+                            "د",
+                          ][
+                            optionIndex
+                          ]
+                        }
+                      </span>
 
-                    <span>
-                      {option}
-                    </span>
-                  </button>
-                );
-              }
-            )}
-          </div>
+                      <span>
+                        {option}
+                      </span>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+          )}
         </article>
       )}
 
@@ -987,7 +1545,8 @@ function Exam({
           type="button"
           className="exam-navigation-btn previous"
           disabled={
-            currentQuestionIndex === 0
+            currentQuestionIndex ===
+            0
           }
           onClick={
             goToPreviousQuestion
@@ -1013,11 +1572,15 @@ function Exam({
           <button
             type="button"
             className="exam-submit-btn"
-            disabled={isSubmitting}
-            onClick={submitExam}
+            disabled={
+              isSubmitting
+            }
+            onClick={
+              submitExam
+            }
           >
             {isSubmitting
-              ? "جاري تسليم الامتحان..."
+              ? "جاري تصحيح وتسليم الامتحان..."
               : "تسليم الامتحان"}
           </button>
         )}

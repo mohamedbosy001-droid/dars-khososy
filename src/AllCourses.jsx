@@ -57,6 +57,17 @@ import "./Exam.css";
 
 const REQUIRED_WATCH_PERCENT = 30;
 
+/*
+  ============================
+  AI GRADER
+  أي سؤال مقالي في واجبات الكورسات
+  يتم تصحيحه من خلال الـ AI
+  ============================
+*/
+
+const AI_GRADER_URL =
+  "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
+
 const THIRD_SECONDARY_COURSE_IDS = new Set([
   "third-month-course",
   "third-term-course",
@@ -390,6 +401,249 @@ function AllCourses({
       typeof value ===
         "string" &&
       value.trim() !== ""
+    );
+  }
+
+  /*
+    ============================
+    هل السؤال مقالي؟
+    ============================
+
+    يدعم:
+    type: "essay"
+
+    ويدعم كذلك السؤال الذي يحتوي
+    acceptedAnswers ولا يحتوي options
+  */
+
+  function isEssayQuestion(
+    question
+  ) {
+    if (!question) {
+      return false;
+    }
+
+    if (
+      question.type ===
+      "essay"
+    ) {
+      return true;
+    }
+
+    if (
+      Array.isArray(
+        question.acceptedAnswers
+      ) &&
+      question.acceptedAnswers.length >
+        0 &&
+      !Array.isArray(
+        question.options
+      )
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /*
+    ============================
+    تجهيز الإجابات النموذجية للمقالي
+    ============================
+  */
+
+  function getEssayAcceptedAnswers(
+    question
+  ) {
+    if (!question) {
+      return [];
+    }
+
+    if (
+      Array.isArray(
+        question.acceptedAnswers
+      )
+    ) {
+      return question.acceptedAnswers
+        .map((answer) =>
+          String(
+            answer || ""
+          ).trim()
+        )
+        .filter(Boolean);
+    }
+
+    if (
+      Array.isArray(
+        question.correctAnswers
+      )
+    ) {
+      return question.correctAnswers
+        .map((answer) =>
+          String(
+            answer || ""
+          ).trim()
+        )
+        .filter(Boolean);
+    }
+
+    if (
+      typeof question.correctAnswer ===
+      "string"
+    ) {
+      const value =
+        question.correctAnswer.trim();
+
+      return value
+        ? [value]
+        : [];
+    }
+
+    if (
+      typeof question.modelAnswer ===
+      "string"
+    ) {
+      const value =
+        question.modelAnswer.trim();
+
+      return value
+        ? [value]
+        : [];
+    }
+
+    if (
+      typeof question.answer ===
+      "string"
+    ) {
+      const value =
+        question.answer.trim();
+
+      return value
+        ? [value]
+        : [];
+    }
+
+    return [];
+  }
+
+  /*
+    ============================
+    هل السؤال تمت إجابته؟
+    ============================
+  */
+
+  function isHomeworkQuestionAnswered(
+    question,
+    answer
+  ) {
+    if (
+      isEssayQuestion(
+        question
+      )
+    ) {
+      return (
+        typeof answer ===
+          "string" &&
+        answer.trim().length >
+          0
+      );
+    }
+
+    return (
+      answer !== undefined &&
+      answer !== null
+    );
+  }
+
+  /*
+    ============================
+    تصحيح السؤال المقالي بالـ AI
+    ============================
+  */
+
+  async function gradeEssayWithAI(
+    studentAnswer,
+    question
+  ) {
+    const cleanStudentAnswer =
+      String(
+        studentAnswer || ""
+      ).trim();
+
+    const acceptedAnswers =
+      getEssayAcceptedAnswers(
+        question
+      );
+
+    if (
+      !cleanStudentAnswer
+    ) {
+      return false;
+    }
+
+    if (
+      acceptedAnswers.length ===
+      0
+    ) {
+      console.error(
+        "Essay question has no accepted answers:",
+        question
+      );
+
+      throw new Error(
+        "ESSAY_REFERENCE_MISSING"
+      );
+    }
+
+    const response =
+      await fetch(
+        AI_GRADER_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            question:
+              String(
+                question?.question ||
+                  ""
+              ).trim(),
+
+            acceptedAnswers,
+
+            studentAnswer:
+              cleanStudentAnswer,
+          }),
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "AI_GRADING_FAILED"
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (
+      data?.success !==
+        true ||
+      typeof data?.isCorrect !==
+        "boolean"
+    ) {
+      throw new Error(
+        "AI_GRADING_FAILED"
+      );
+    }
+
+    return (
+      data.isCorrect ===
+      true
     );
   }
 
@@ -2586,7 +2840,8 @@ function AllCourses({
     فتح فيديو المحاضرة
     ============================
   */
- function openLesson(
+
+  function openLesson(
     course,
     lesson
   ) {
@@ -3270,12 +3525,6 @@ function AllCourses({
       return;
     }
 
-    /*
-      ============================
-      البحث عن نتيجة قديمة محفوظة
-      ============================
-    */
-
     const savedHomeworkResults =
       Array.isArray(
         studentData?.homeworkResults
@@ -3316,11 +3565,6 @@ function AllCourses({
       0
     );
 
-    /*
-      لو الواجب متسلم قبل كده
-      رجع الدرجة والإجابات
-    */
-
     if (savedResult) {
       setHomeworkAnswers(
         savedResult.answers &&
@@ -3345,6 +3589,13 @@ function AllCourses({
           Number(
             savedResult.percentage
           ) || 0,
+
+        reviewedAnswers:
+          Array.isArray(
+            savedResult.reviewedAnswers
+          )
+            ? savedResult.reviewedAnswers
+            : [],
       });
     } else {
       setHomeworkAnswers(
@@ -3366,6 +3617,12 @@ function AllCourses({
     );
   }
 
+  /*
+    ============================
+    إجابة سؤال اختياري
+    ============================
+  */
+
   function handleHomeworkAnswer(
     questionId,
     optionIndex
@@ -3384,6 +3641,34 @@ function AllCourses({
 
         [questionId]:
           optionIndex,
+      })
+    );
+  }
+
+  /*
+    ============================
+    إجابة سؤال مقالي
+    ============================
+  */
+
+  function handleHomeworkEssayAnswer(
+    questionId,
+    value
+  ) {
+    if (
+      homeworkResult
+    ) {
+      return;
+    }
+
+    setHomeworkAnswers(
+      (
+        previousAnswers
+      ) => ({
+        ...previousAnswers,
+
+        [questionId]:
+          value,
       })
     );
   }
@@ -3440,9 +3725,12 @@ function AllCourses({
         (
           question
         ) =>
-          homeworkAnswers[
-            question.id
-          ] === undefined
+          !isHomeworkQuestionAnswered(
+            question,
+            homeworkAnswers[
+              question.id
+            ]
+          )
       );
 
     if (
@@ -3456,44 +3744,162 @@ function AllCourses({
       return;
     }
 
-    let correctAnswers =
-      0;
-
-    activeQuestions.forEach(
-      (
-        question
-      ) => {
-        if (
-          homeworkAnswers[
-            question.id
-          ] ===
-          question.correctAnswer
-        ) {
-          correctAnswers +=
-            1;
-        }
-      }
-    );
-
-    const totalQuestions =
-      activeQuestions.length;
-
-    const percentage =
-      totalQuestions > 0
-        ? Math.round(
-            (
-              correctAnswers /
-              totalQuestions
-            ) *
-              100
-          )
-        : 0;
-
     setIsSubmittingHomework(
       true
     );
 
     try {
+      const essayGrades =
+        {};
+
+      for (
+        const question of
+          activeQuestions
+      ) {
+        if (
+          !isEssayQuestion(
+            question
+          )
+        ) {
+          continue;
+        }
+
+        const savedAnswer =
+          homeworkAnswers[
+            question.id
+          ];
+
+        const studentAnswer =
+          typeof savedAnswer ===
+          "string"
+            ? savedAnswer.trim()
+            : "";
+
+        essayGrades[
+          question.id
+        ] =
+          await gradeEssayWithAI(
+            studentAnswer,
+            question
+          );
+      }
+
+      let correctAnswers =
+        0;
+
+      const reviewedAnswers =
+        activeQuestions.map(
+          (
+            question,
+            index
+          ) => {
+            const savedAnswer =
+              homeworkAnswers[
+                question.id
+              ];
+
+            if (
+              isEssayQuestion(
+                question
+              )
+            ) {
+              const studentAnswer =
+                typeof savedAnswer ===
+                "string"
+                  ? savedAnswer.trim()
+                  : "";
+
+              const isCorrect =
+                essayGrades[
+                  question.id
+                ] === true;
+
+              if (isCorrect) {
+                correctAnswers +=
+                  1;
+              }
+
+              return {
+                questionId:
+                  question.id,
+
+                questionNumber:
+                  index + 1,
+
+                type:
+                  "essay",
+
+                question:
+                  question.question,
+
+                studentAnswer,
+
+                selectedOption:
+                  null,
+
+                correctOption:
+                  null,
+
+                isCorrect,
+              };
+            }
+
+            const selectedOption =
+              savedAnswer;
+
+            const isCorrect =
+              selectedOption ===
+              question.correctAnswer;
+
+            if (isCorrect) {
+              correctAnswers +=
+                1;
+            }
+
+            return {
+              questionId:
+                question.id,
+
+              questionNumber:
+                index + 1,
+
+              type:
+                "choice",
+
+              question:
+                question.question,
+
+              selectedOption,
+
+              correctOption:
+                question.correctAnswer,
+
+              options:
+                Array.isArray(
+                  question.options
+                )
+                  ? question.options
+                  : [],
+
+              isCorrect,
+            };
+          }
+        );
+
+      const totalQuestions =
+        activeQuestions.length;
+
+      const percentage =
+        totalQuestions > 0
+          ? Math.round(
+              (
+                correctAnswers /
+                totalQuestions
+              ) *
+                100
+            )
+          : 0;
+
       const studentReference =
         doc(
           db,
@@ -3672,6 +4078,8 @@ function AllCourses({
             answers:
               homeworkAnswers,
 
+            reviewedAnswers,
+
             submitted:
               true,
 
@@ -3738,6 +4146,8 @@ function AllCourses({
           totalQuestions,
 
         percentage,
+
+        reviewedAnswers,
       });
 
       window.scrollTo(
@@ -3750,9 +4160,25 @@ function AllCourses({
         error
       );
 
-      window.alert(
-        "حدث خطأ أثناء تسليم الواجب."
-      );
+      if (
+        error?.message ===
+        "AI_GRADING_FAILED"
+      ) {
+        window.alert(
+          "تعذر تصحيح الإجابة المقالية حاليًا. إجاباتك ما زالت موجودة، حاول تسليم الواجب مرة أخرى."
+        );
+      } else if (
+        error?.message ===
+        "ESSAY_REFERENCE_MISSING"
+      ) {
+        window.alert(
+          "يوجد سؤال مقالي بدون إجابة نموذجية للتصحيح. برجاء التواصل مع إدارة المنصة."
+        );
+      } else {
+        window.alert(
+          "حدث خطأ أثناء تسليم الواجب."
+        );
+      }
     } finally {
       setIsSubmittingHomework(
         false
@@ -3855,7 +4281,6 @@ function AllCourses({
     /*
       =====================================
       امتحان المحاضرة الأولى
-
       يفتح بعد تفعيل المحاضرة الثانية
       =====================================
     */
@@ -3894,7 +4319,6 @@ function AllCourses({
     /*
       =====================================
       امتحان المحاضرة الثانية
-
       يفتح بعد تفعيل المحاضرة الثالثة
       =====================================
     */
@@ -4240,9 +4664,12 @@ function AllCourses({
         (
           question
         ) =>
-          homeworkAnswers[
-            question.id
-          ] !== undefined
+          isHomeworkQuestionAnswered(
+            question,
+            homeworkAnswers[
+              question.id
+            ]
+          )
       ).length;
 
     const progressPercentage =
@@ -4321,9 +4748,35 @@ function AllCourses({
                     question.id
                   ];
 
+                const savedReview =
+                  Array.isArray(
+                    homeworkResult.reviewedAnswers
+                  )
+                    ? homeworkResult.reviewedAnswers.find(
+                        (
+                          item
+                        ) =>
+                          String(
+                            item?.questionId
+                          ) ===
+                          String(
+                            question.id
+                          )
+                      )
+                    : null;
+
+                const essay =
+                  isEssayQuestion(
+                    question
+                  );
+
                 const isCorrect =
-                  selectedAnswer ===
-                  question.correctAnswer;
+                  typeof savedReview?.isCorrect ===
+                  "boolean"
+                    ? savedReview.isCorrect
+                    : !essay &&
+                        selectedAnswer ===
+                          question.correctAnswer;
 
                 return (
                   <article
@@ -4376,6 +4829,68 @@ function AllCourses({
                           ? "إجابتك صحيحة"
                           : "إجابتك غير صحيحة"}
                       </p>
+
+                      {essay && (
+                        <div
+                          style={{
+                            marginTop:
+                              "12px",
+                            padding:
+                              "12px 14px",
+                            borderRadius:
+                              "12px",
+                            background:
+                              "#f8f4ef",
+                            lineHeight:
+                              "1.8",
+                          }}
+                        >
+                          <strong>
+                            إجابتك:
+                          </strong>
+
+                          <p
+                            style={{
+                              margin:
+                                "6px 0 0",
+                              whiteSpace:
+                                "pre-line",
+                            }}
+                          >
+                            {typeof selectedAnswer ===
+                            "string"
+                              ? selectedAnswer
+                              : "لم يتم تسجيل إجابة"}
+                          </p>
+                        </div>
+                      )}
+
+                      {!essay &&
+                        !isCorrect &&
+                        Array.isArray(
+                          question.options
+                        ) &&
+                        question.options[
+                          question.correctAnswer
+                        ] !==
+                          undefined && (
+                          <div
+                            style={{
+                              marginTop:
+                                "10px",
+                            }}
+                          >
+                            <strong>
+                              الإجابة الصحيحة:{" "}
+                            </strong>
+
+                            {
+                              question.options[
+                                question.correctAnswer
+                              ]
+                            }
+                          </div>
+                        )}
                     </div>
                   </article>
                 );
@@ -4460,9 +4975,12 @@ function AllCourses({
               index
             ) => {
               const answered =
-                homeworkAnswers[
-                  question.id
-                ] !== undefined;
+                isHomeworkQuestionAnswered(
+                  question,
+                  homeworkAnswers[
+                    question.id
+                  ]
+                );
 
               return (
                 <button
@@ -4512,60 +5030,149 @@ function AllCourses({
               }
             </h2>
 
-            <div className="exam-options-list">
-              {Array.isArray(
-                currentQuestion.options
-              ) &&
-                currentQuestion.options.map(
-                  (
-                    option,
-                    optionIndex
-                  ) => {
-                    const selected =
-                      homeworkAnswers[
-                        currentQuestion.id
-                      ] ===
-                      optionIndex;
-
-                    return (
-                      <button
-                        key={
-                          optionIndex
-                        }
-                        type="button"
-                        className={`exam-option-btn ${
-                          selected
-                            ? "selected"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          handleHomeworkAnswer(
-                            currentQuestion.id,
-                            optionIndex
-                          )
-                        }
-                      >
-                        <span className="exam-option-letter">
-                          {
-                            [
-                              "أ",
-                              "ب",
-                              "ج",
-                              "د",
-                            ][
-                              optionIndex
-                            ]
-                          }
-                        </span>
-
-                        <span>
-                          {option}
-                        </span>
-                      </button>
-                    );
+            {isEssayQuestion(
+              currentQuestion
+            ) ? (
+              <div
+                style={{
+                  marginTop:
+                    "20px",
+                }}
+              >
+                <textarea
+                  value={
+                    typeof homeworkAnswers[
+                      currentQuestion.id
+                    ] === "string"
+                      ? homeworkAnswers[
+                          currentQuestion.id
+                        ]
+                      : ""
                   }
-                )}
-            </div>
+                  onChange={(
+                    event
+                  ) =>
+                    handleHomeworkEssayAnswer(
+                      currentQuestion.id,
+                      event.target.value
+                    )
+                  }
+                  placeholder="اكتب إجابتك هنا..."
+                  disabled={
+                    isSubmittingHomework
+                  }
+                  rows={7}
+                  style={{
+                    width:
+                      "100%",
+                    boxSizing:
+                      "border-box",
+                    minHeight:
+                      "160px",
+                    padding:
+                      "16px",
+                    border:
+                      "2px solid #d7c2ae",
+                    borderRadius:
+                      "14px",
+                    fontSize:
+                      "17px",
+                    fontFamily:
+                      "inherit",
+                    lineHeight:
+                      "1.9",
+                    resize:
+                      "vertical",
+                    direction:
+                      "rtl",
+                    textAlign:
+                      "right",
+                    outline:
+                      "none",
+                    color:
+                      "#3e2a1d",
+                    background:
+                      "#fff",
+                  }}
+                />
+
+                <p
+                  style={{
+                    margin:
+                      "10px 0 0",
+                    fontSize:
+                      "14px",
+                    lineHeight:
+                      "1.8",
+                    color:
+                      "#6f6258",
+                  }}
+                >
+                  اكتب إجابتك بطريقتك،
+                  وسيتم تصحيح السؤال
+                  المقالي بالذكاء
+                  الاصطناعي حسب المعنى.
+                </p>
+              </div>
+            ) : (
+              <div className="exam-options-list">
+                {Array.isArray(
+                  currentQuestion.options
+                ) &&
+                  currentQuestion.options.map(
+                    (
+                      option,
+                      optionIndex
+                    ) => {
+                      const selected =
+                        homeworkAnswers[
+                          currentQuestion.id
+                        ] ===
+                        optionIndex;
+
+                      return (
+                        <button
+                          key={
+                            optionIndex
+                          }
+                          type="button"
+                          className={`exam-option-btn ${
+                            selected
+                              ? "selected"
+                              : ""
+                          }`}
+                          disabled={
+                            isSubmittingHomework
+                          }
+                          onClick={() =>
+                            handleHomeworkAnswer(
+                              currentQuestion.id,
+                              optionIndex
+                            )
+                          }
+                        >
+                          <span className="exam-option-letter">
+                            {
+                              [
+                                "أ",
+                                "ب",
+                                "ج",
+                                "د",
+                              ][
+                                optionIndex
+                              ]
+                            }
+                          </span>
+
+                          <span>
+                            {option}
+                          </span>
+                        </button>
+                      );
+                    }
+                  )}
+              </div>
+            )}
           </article>
         )}
 
@@ -4575,7 +5182,8 @@ function AllCourses({
             className="exam-navigation-btn previous"
             disabled={
               currentHomeworkQuestionIndex ===
-              0
+                0 ||
+              isSubmittingHomework
             }
             onClick={() =>
               setCurrentHomeworkQuestionIndex(
@@ -4601,6 +5209,9 @@ function AllCourses({
             <button
               type="button"
               className="exam-navigation-btn next"
+              disabled={
+                isSubmittingHomework
+              }
               onClick={() =>
                 setCurrentHomeworkQuestionIndex(
                   (
@@ -4636,7 +5247,7 @@ function AllCourses({
               }
             >
               {isSubmittingHomework
-                ? "جاري تسليم الواجب..."
+                ? "جاري تصحيح وتسليم الواجب..."
                 : "تسليم الواجب"}
             </button>
           )}
