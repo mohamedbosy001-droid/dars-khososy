@@ -31,6 +31,7 @@ import {
 } from "react-icons/fa";
 
 import "./Homework.css";
+
 const AI_GRADER_URL =
   "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
 
@@ -148,6 +149,7 @@ function getQuestionDisplayNumber(
 /* =========================================================
    تصحيح المقالي
 ========================================================= */
+
 async function gradeEssayWithAI(
   studentAnswer,
   question
@@ -175,6 +177,7 @@ async function gradeEssayWithAI(
     لو الإجابة مطابقة مباشرة،
     لا نحتاج استدعاء الـ AI.
   */
+
   const normalizedStudent =
     normalizeArabicText(
       cleanStudentAnswer
@@ -591,6 +594,49 @@ const SECOND_CENTER_HOMEWORK =
     : null;
 
 /* =========================================================
+   واجب المحاضرة الثالثة - تالتة ثانوي سنتر
+========================================================= */
+
+const THIRD_CENTER_HOMEWORK_SOURCE =
+  homeworkData?.[
+    "third-center-homework-3"
+  ] || null;
+
+const THIRD_CENTER_HOMEWORK =
+  THIRD_CENTER_HOMEWORK_SOURCE
+    ? {
+        ...THIRD_CENTER_HOMEWORK_SOURCE,
+
+        id:
+          THIRD_CENTER_HOMEWORK_SOURCE.id ||
+          "third-center-homework-3",
+
+        title:
+          THIRD_CENTER_HOMEWORK_SOURCE.title ||
+          "واجب المحاضرة الثالثة",
+
+        grade:
+          THIRD_CENTER_HOMEWORK_SOURCE.grade ||
+          "الثالث الثانوي",
+
+        studentType: "center",
+
+        centerOnly: true,
+
+        videoId:
+          THIRD_CENTER_HOMEWORK_SOURCE.videoId ||
+          "jC7MQZ58tjQ",
+
+        questions:
+          Array.isArray(
+            THIRD_CENTER_HOMEWORK_SOURCE.questions
+          )
+            ? THIRD_CENTER_HOMEWORK_SOURCE.questions
+            : [],
+      }
+    : null;
+
+/* =========================================================
    بيانات الواجبات
 ========================================================= */
 
@@ -630,6 +676,12 @@ const HOMEWORKS = [
     questions:
       SECOND_HOMEWORK_QUESTIONS,
   },
+
+  ...(THIRD_CENTER_HOMEWORK
+    ? [
+        THIRD_CENTER_HOMEWORK,
+      ]
+    : []),
 
   ...(SECOND_CENTER_HOMEWORK
     ? [
@@ -837,6 +889,7 @@ function Homework({
     useState وحده يحتاج Render جديد،
     لكن useRef يتغير فورًا.
   */
+
   const submittingRef =
     useRef(false);
 
@@ -1360,13 +1413,6 @@ function Homework({
           error,
         }
       );
-
-      /*
-        لا نظهر Alert أثناء الحل
-        حتى لا نزعج الطالب.
-        الإجابات تظل موجودة في React
-        ويمكن المحاولة مجددًا.
-      */
     }
   }
 
@@ -1613,6 +1659,7 @@ function Homework({
     /*
       يمنع الضغط مرتين بسرعة
     */
+
     if (
       submittingRef.current ||
       isSubmitting
@@ -1668,6 +1715,7 @@ function Homework({
     /*
       Lock فوري قبل أي await
     */
+
     submittingRef.current =
       true;
 
@@ -1677,30 +1725,32 @@ function Homework({
 
     try {
       let score = 0;
-const essayGrades = {};
 
-for (const question of questions) {
-  if (
-    question.cancelled ||
-    !isEssayQuestion(question)
-  ) {
-    continue;
-  }
+      const essayGrades = {};
 
-  const savedAnswer =
-    answers[question.id];
+      for (const question of questions) {
+        if (
+          question.cancelled ||
+          !isEssayQuestion(question)
+        ) {
+          continue;
+        }
 
-  const studentAnswer =
-    typeof savedAnswer === "string"
-      ? savedAnswer.trim()
-      : "";
+        const savedAnswer =
+          answers[question.id];
 
-  essayGrades[question.id] =
-    await gradeEssayWithAI(
-      studentAnswer,
-      question
-    );
-}
+        const studentAnswer =
+          typeof savedAnswer === "string"
+            ? savedAnswer.trim()
+            : "";
+
+        essayGrades[question.id] =
+          await gradeEssayWithAI(
+            studentAnswer,
+            question
+          );
+      }
+
       const reviewedAnswers =
         questions.map(
           (
@@ -1770,7 +1820,9 @@ for (const question of questions) {
                   : "";
 
               const isCorrect =
-  essayGrades[question.id] === true;
+                essayGrades[
+                  question.id
+                ] === true;
 
               if (isCorrect) {
                 score += 1;
@@ -1799,6 +1851,7 @@ for (const question of questions) {
                   محفوظة للإدارة فقط.
                   لا يتم عرضها للطالب.
                 */
+
                 correctAnswerText:
                   Array.isArray(
                     question.acceptedAnswers
@@ -1916,6 +1969,7 @@ for (const question of questions) {
           هنا فقط نحفظ مراجعة
           الإجابات كاملة.
         */
+
         answers:
           reviewedAnswers,
 
@@ -2079,6 +2133,7 @@ for (const question of questions) {
               تفريغ الإجابات هنا يوفر
               مساحة كبيرة في Document.
             */
+
             answers: {},
 
             currentQuestionIndex,
@@ -2097,6 +2152,7 @@ for (const question of questions) {
             /*
               ملخص صغير فقط.
             */
+
             result: {
               homeworkId:
                 activeHomework.id,
@@ -2173,12 +2229,6 @@ for (const question of questions) {
         0
       );
     } catch (error) {
-      /*
-        مهم جدًا:
-        أي مشكلة جديدة سنعرف
-        Code الحقيقي في Console.
-      */
-
       console.error(
         "Error submitting homework:",
         {
@@ -2205,12 +2255,6 @@ for (const question of questions) {
         error?.message ===
         "HOMEWORK_ALREADY_COMPLETED"
       ) {
-        /*
-          لو Firebase قال إن الواجب
-          مسلّم بالفعل، نعتبره محميًا
-          من التسليم المكرر.
-        */
-
         window.alert(
           "لقد سلمت هذا الواجب من قبل."
         );

@@ -203,7 +203,7 @@ const THIRD_THIRD_LECTURE = {
     "المحاضرة الثالثة",
 
   description:
-    "سلّم امتحان المحاضرة الثانية أولًا لفتح فيديو المحاضرة.",
+    "سلّم امتحان المحاضرة الثانية أولًا لفتح فيديو المحاضرة، وشاهد 30% من المحاضرة لفتح الواجب، وبعد تسليم الواجب يفتح فيديو الحل.",
 
   youtubeUrl:
     "https://www.youtube.com/watch?v=XxJ-MBH9SLU",
@@ -213,6 +213,23 @@ const THIRD_THIRD_LECTURE = {
 
   videoTitle:
     "فيديو المحاضرة الثالثة",
+
+  homeworkEnabled: true,
+
+  homeworkKey:
+    "thirdLecture3Homework",
+
+  homeworkTitle:
+    "واجب المحاضرة الثالثة",
+
+  homeworkSolutionUrl:
+    "https://www.youtube.com/watch?v=jC7MQZ58tjQ",
+
+  solutionVideoUrl:
+    "https://www.youtube.com/watch?v=jC7MQZ58tjQ",
+
+  homeworkSolutionTitle:
+    "حل واجب المحاضرة الثالثة",
 
   requiresPreviousExam: true,
 
