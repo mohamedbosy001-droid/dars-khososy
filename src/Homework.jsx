@@ -173,11 +173,6 @@ async function gradeEssayWithAI(
     return false;
   }
 
-  /*
-    لو الإجابة مطابقة مباشرة،
-    لا نحتاج استدعاء الـ AI.
-  */
-
   const normalizedStudent =
     normalizeArabicText(
       cleanStudentAnswer
@@ -370,11 +365,6 @@ function isEssayAnswerCorrect(
       getImportantWords(
         normalizedAccepted
       );
-
-    /*
-      الإجابات القصيرة جدًا
-      يجب أن تكون مطابقة مباشرة.
-    */
 
     if (
       studentWords.length <= 1 ||
@@ -637,6 +627,58 @@ const THIRD_CENTER_HOMEWORK =
     : null;
 
 /* =========================================================
+   استثناء فيديو فقط - أولى ثانوي
+========================================================= */
+
+const FIRST_CENTER_VIDEO_ONLY = {
+  id: "first-center-video-only-1",
+
+  title:
+    "فيديو واجب أولى ثانوي",
+
+  grade:
+    "الأول الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "6EIMOag2I_g",
+
+  questions: [],
+};
+
+/* =========================================================
+   استثناء فيديو فقط - تانية ثانوي
+========================================================= */
+
+const SECOND_CENTER_VIDEO_ONLY = {
+  id: "second-center-video-only-1",
+
+  title:
+    "فيديو واجب تانية ثانوي",
+
+  grade:
+    "الثاني الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "zZrN1lDZGJw",
+
+  questions: [],
+};
+
+/* =========================================================
    بيانات الواجبات
 ========================================================= */
 
@@ -688,6 +730,10 @@ const HOMEWORKS = [
         SECOND_CENTER_HOMEWORK,
       ]
     : []),
+
+  FIRST_CENTER_VIDEO_ONLY,
+
+  SECOND_CENTER_VIDEO_ONLY,
 ];
 
 /* =========================================================
@@ -735,12 +781,6 @@ function canStudentAccessHomework(
 
 /* =========================================================
    تنظيف محاولات الواجبات القديمة
-
-   مهم:
-   لو الواجب مكتمل، لا نحتاج الاحتفاظ
-   بنسخة كاملة من النتيجة والإجابات
-   داخل homeworkAttempts لأن النتيجة
-   الأصلية موجودة في homeworkResults.
 ========================================================= */
 
 function cleanCompletedHomeworkAttempts(
@@ -780,15 +820,8 @@ function cleanCompletedHomeworkAttempts(
         ] = {
           ...attempt,
 
-          /*
-            بعد التسليم لا نحتاج
-            نسخة أخرى من كل الإجابات.
-          */
           answers: {},
 
-          /*
-            نخزن ملخص النتيجة فقط.
-          */
           result: {
             homeworkId:
               oldResult.homeworkId ||
@@ -884,12 +917,6 @@ function Homework({
     setHomeworkStatuses,
   ] = useState({});
 
-  /*
-    Lock فوري.
-    useState وحده يحتاج Render جديد،
-    لكن useRef يتغير فورًا.
-  */
-
   const submittingRef =
     useRef(false);
 
@@ -908,9 +935,11 @@ function Homework({
       "center" &&
     (
       studentGrade ===
-        "الثالث الثانوي" ||
+        "الأول الثانوي" ||
       studentGrade ===
-        "الثاني الثانوي"
+        "الثاني الثانوي" ||
+      studentGrade ===
+        "الثالث الثانوي"
     );
 
   /* =========================================================
@@ -1034,6 +1063,33 @@ function Homework({
 
         studentHomeworks.forEach(
           (homework) => {
+            /*
+              الفيديوهين الاستثناء
+              مفتوحين مباشرة ولا يحتاجان
+              محاولة أو نتيجة واجب.
+            */
+
+            if (
+              homework.videoOnly ===
+              true
+            ) {
+              nextStatuses[
+                homework.id
+              ] = {
+                completed: true,
+
+                score: 0,
+
+                totalQuestions: 0,
+
+                answeredCount: 0,
+
+                videoOnly: true,
+              };
+
+              return;
+            }
+
             const attempt =
               attempts[
                 homework.id
@@ -1128,6 +1184,8 @@ function Homework({
     async function loadHomeworkAttempt() {
       if (
         !activeHomework ||
+        activeHomework.videoOnly ===
+          true ||
         !studentUid ||
         !isAllowedStudent
       ) {
@@ -1363,16 +1421,13 @@ function Homework({
     nextAnswers,
     nextQuestionIndex
   ) {
-    /*
-      أثناء التسليم نوقف أي Autosave
-      حتى لا يدخل تحديث مع Transaction.
-    */
-
     if (
       submittingRef.current ||
       isSubmitting ||
       !studentUid ||
       !activeHomework ||
+      activeHomework.videoOnly ===
+        true ||
       submitted ||
       !isAllowedStudent
     ) {
@@ -1580,6 +1635,24 @@ function Homework({
       return;
     }
 
+    const homework =
+      studentHomeworks.find(
+        (item) =>
+          item.id ===
+          homeworkId
+      );
+
+    if (
+      homework?.videoOnly ===
+      true
+    ) {
+      openVideo(
+        homeworkId
+      );
+
+      return;
+    }
+
     setActiveHomeworkId(
       homeworkId
     );
@@ -1597,12 +1670,25 @@ function Homework({
   function openVideo(
     homeworkId
   ) {
+    const homework =
+      studentHomeworks.find(
+        (item) =>
+          item.id ===
+          homeworkId
+      );
+
+    if (!homework) {
+      return;
+    }
+
     const status =
       homeworkStatuses[
         homeworkId
       ];
 
     if (
+      homework.videoOnly !==
+        true &&
       !status?.completed
     ) {
       return;
@@ -1656,10 +1742,6 @@ function Homework({
   ========================================================= */
 
   async function submitHomework() {
-    /*
-      يمنع الضغط مرتين بسرعة
-    */
-
     if (
       submittingRef.current ||
       isSubmitting
@@ -1667,7 +1749,11 @@ function Homework({
       return;
     }
 
-    if (!activeHomework) {
+    if (
+      !activeHomework ||
+      activeHomework.videoOnly ===
+        true
+    ) {
       return;
     }
 
@@ -1711,10 +1797,6 @@ function Homework({
         return;
       }
     }
-
-    /*
-      Lock فوري قبل أي await
-    */
 
     submittingRef.current =
       true;
@@ -1763,10 +1845,6 @@ function Homework({
                 index
               );
 
-            /* =========================
-               السؤال الملغي
-            ========================= */
-
             if (
               question.cancelled
             ) {
@@ -1803,10 +1881,6 @@ function Homework({
               answers[
                 question.id
               ];
-
-            /* =========================
-               مقالي
-            ========================= */
 
             if (
               isEssayQuestion(
@@ -1847,11 +1921,6 @@ function Homework({
                 correctOption:
                   null,
 
-                /*
-                  محفوظة للإدارة فقط.
-                  لا يتم عرضها للطالب.
-                */
-
                 correctAnswerText:
                   Array.isArray(
                     question.acceptedAnswers
@@ -1868,10 +1937,6 @@ function Homework({
                 cancelled: false,
               };
             }
-
-            /* =========================
-               اختياري
-            ========================= */
 
             const selectedOption =
               savedAnswer;
@@ -1922,11 +1987,6 @@ function Homework({
           }
         );
 
-      /*
-        نفس النظام القديم:
-        السؤال الملغي محسوب صحيحًا.
-      */
-
       const totalQuestions =
         questions.length;
 
@@ -1964,11 +2024,6 @@ function Homework({
         totalQuestions,
 
         percentage,
-
-        /*
-          هنا فقط نحفظ مراجعة
-          الإجابات كاملة.
-        */
 
         answers:
           reviewedAnswers,
@@ -2028,11 +2083,6 @@ function Homework({
             );
           }
 
-          /*
-            ننظف أي نتائج كبيرة قديمة
-            موجودة داخل attempts.
-          */
-
           const originalAttempts =
             studentData.homeworkAttempts &&
             typeof studentData.homeworkAttempts ===
@@ -2085,19 +2135,9 @@ function Homework({
             );
           }
 
-          /*
-            النتيجة الكاملة هنا مرة واحدة فقط.
-          */
-
           homeworkResults.push(
             homeworkResult
           );
-
-          /*
-            داخل attempt نخزن ملخص فقط.
-            لا نكرر reviewedAnswers.
-            وبعد التسليم لا نحتاج raw answers.
-          */
 
           homeworkAttempts[
             activeHomework.id
@@ -2129,11 +2169,6 @@ function Homework({
 
             submitted: true,
 
-            /*
-              تفريغ الإجابات هنا يوفر
-              مساحة كبيرة في Document.
-            */
-
             answers: {},
 
             currentQuestionIndex,
@@ -2148,10 +2183,6 @@ function Homework({
 
             updatedAt:
               Timestamp.now(),
-
-            /*
-              ملخص صغير فقط.
-            */
 
             result: {
               homeworkId:
@@ -2190,10 +2221,6 @@ function Homework({
           );
         }
       );
-
-      /*
-        Firebase أكد أن التسليم تم.
-      */
 
       setResult(
         homeworkResult
@@ -2383,9 +2410,8 @@ function Homework({
           </h1>
 
           <p>
-            اختر الواجب لبدء الحل
-            أو مشاهدة النتيجة بعد
-            التسليم.
+            اختر الواجب أو الفيديو
+            المتاح لك.
           </p>
         </div>
 
@@ -2397,6 +2423,57 @@ function Homework({
         >
           {studentHomeworks.map(
             (homework) => {
+              /*
+                الفيديو المباشر:
+                لا نعرض له كارت واجب
+                ولا نتيجة ولا قفل.
+              */
+
+              if (
+                homework.videoOnly ===
+                true
+              ) {
+                return (
+                  <div
+                    key={
+                      homework.id
+                    }
+                  >
+                    <button
+                      type="button"
+                      className="homework-video-card unlocked"
+                      onClick={() =>
+                        openVideo(
+                          homework.id
+                        )
+                      }
+                    >
+                      <div className="homework-video-card-icon">
+                        <FaPlay />
+                      </div>
+
+                      <div className="homework-video-card-content">
+                        <h3>
+                          {
+                            homework.title
+                          }
+                        </h3>
+
+                        <p>
+                          الفيديو متاح
+                          مباشرة — اضغط
+                          للمشاهدة
+                        </p>
+                      </div>
+
+                      <div className="homework-video-card-status">
+                        مشاهدة
+                      </div>
+                    </button>
+                  </div>
+                );
+              }
+
               const status =
                 homeworkStatuses[
                   homework.id
@@ -2566,7 +2643,11 @@ function Homework({
   ) {
     if (
       !activeHomework ||
-      !submitted
+      (
+        activeHomework.videoOnly !==
+          true &&
+        !submitted
+      )
     ) {
       return (
         <section className="homework-page">
@@ -2616,16 +2697,17 @@ function Homework({
 
             <div>
               <h2>
-                فيديو شرح{" "}
-                {
-                  activeHomework.title
-                }
+                {activeHomework.videoOnly ===
+                true
+                  ? activeHomework.title
+                  : `فيديو شرح ${activeHomework.title}`}
               </h2>
 
               <p>
-                الواجب تم تسليمه،
-                والفيديو متاح
-                للمشاهدة.
+                {activeHomework.videoOnly ===
+                true
+                  ? "الفيديو متاح للمشاهدة مباشرة."
+                  : "الواجب تم تسليمه، والفيديو متاح للمشاهدة."}
               </p>
             </div>
           </div>

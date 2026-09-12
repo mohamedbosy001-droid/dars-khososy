@@ -1512,6 +1512,41 @@ const homeworkData = {
       },
     ],
   },
+  "first-center-video-only-1": {
+    id: "first-center-video-only-1",
+
+    title: "فيديو الواجب",
+
+    grade: "الأول الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "6EIMOag2I_g",
+
+    questions: [],
+  },
+
+  "second-center-video-only-1": {
+    id: "second-center-video-only-1",
+
+    title: "فيديو الواجب",
+
+    grade: "الثاني الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "zZrN1lDZGJw",
+
+    questions: [],
+  },
 };
 
 export default homeworkData;
