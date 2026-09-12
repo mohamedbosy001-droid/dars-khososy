@@ -574,12 +574,9 @@ const SECOND_CENTER_HOMEWORK =
           SECOND_CENTER_HOMEWORK_SOURCE.videoId ||
           "LosP4RjBCfM",
 
-        questions:
-          Array.isArray(
-            SECOND_CENTER_HOMEWORK_SOURCE.questions
-          )
-            ? SECOND_CENTER_HOMEWORK_SOURCE.questions
-            : [],
+       videoOnly: true,
+
+questions: [],
       }
     : null;
 
