@@ -68,6 +68,16 @@ const REQUIRED_WATCH_PERCENT = 30;
 const AI_GRADER_URL =
   "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
 
+const FIRST_SECONDARY_COURSE_IDS = new Set([
+  "first-month-course",
+  "first-term-course",
+]);
+
+const SECOND_SECONDARY_COURSE_IDS = new Set([
+  "second-month-course",
+  "second-term-course",
+]);
+
 const THIRD_SECONDARY_COURSE_IDS = new Set([
   "third-month-course",
   "third-term-course",
@@ -147,6 +157,65 @@ const SECOND_FREE_INTRO_COURSE = {
         "امتحان المحاضرة التمهيدية",
     },
   ],
+};
+
+/*
+  المحاضرة الأولى لأولى ثانوي.
+  تظهر في كورس الشهر وكورس الترم.
+*/
+const FIRST_SECONDARY_FIRST_LECTURE = {
+  id: "lesson-1",
+
+  title:
+    "المحاضرة الأولى",
+
+  description:
+    "شاهد فيديو المحاضرة.",
+
+  youtubeUrl:
+    "https://www.youtube.com/watch?v=V8B2_89UNIU",
+
+  videoUrl:
+    "https://www.youtube.com/watch?v=V8B2_89UNIU",
+
+  videoTitle:
+    "المحاضرة الأولى",
+};
+
+/*
+  المحاضرة الأولى لتانية ثانوي.
+  تظهر في كورس الشهر وكورس الترم.
+
+  بعد مشاهدة 30% يفتح فيديو الواجب
+  مباشرة بدون أسئلة أو تسليم.
+*/
+const SECOND_SECONDARY_FIRST_LECTURE = {
+  id: "lesson-1",
+
+  title:
+    "الوحدة الأولى - الدرس الأول: العلم بين القانون والضمير",
+
+  description:
+    "شاهد 30% من المحاضرة لفتح فيديو الواجب.",
+
+  youtubeUrl:
+    "https://www.youtube.com/watch?v=X9IadknJZ_Y",
+
+  videoUrl:
+    "https://www.youtube.com/watch?v=X9IadknJZ_Y",
+
+  videoTitle:
+    "الوحدة الأولى - الدرس الأول: العلم بين القانون والضمير",
+
+  homeworkEnabled: true,
+
+  homeworkVideoOnly: true,
+
+  homeworkTitle:
+    "فيديو الواجب",
+
+  homeworkVideoUrl:
+    "https://www.youtube.com/watch?v=zZrN1lDZGJw",
 };
 
 /*
@@ -666,6 +735,134 @@ function AllCourses({
 
   /*
     ============================
+    تجهيز محتوى أولى وتانية ثانوي
+    ============================
+  */
+
+  function prepareFirstAndSecondSecondaryCourse(
+    course
+  ) {
+    if (!course) {
+      return course;
+    }
+
+    /*
+      ============================
+      أولى ثانوي
+      ============================
+    */
+
+    if (
+      FIRST_SECONDARY_COURSE_IDS.has(
+        course.id
+      )
+    ) {
+      const lessons =
+        Array.isArray(
+          course.lessons
+        )
+          ? [...course.lessons]
+          : [];
+
+      const firstLessonIndex =
+        lessons.findIndex(
+          (lesson) =>
+            lesson?.id ===
+            "lesson-1"
+        );
+
+      if (
+        firstLessonIndex >= 0
+      ) {
+        lessons[
+          firstLessonIndex
+        ] = {
+          ...lessons[
+            firstLessonIndex
+          ],
+
+          ...FIRST_SECONDARY_FIRST_LECTURE,
+
+          courseLectureKey:
+            "first-secondary-lecture-1",
+        };
+      } else {
+        lessons.unshift({
+          ...FIRST_SECONDARY_FIRST_LECTURE,
+
+          courseLectureKey:
+            "first-secondary-lecture-1",
+        });
+      }
+
+      return {
+        ...course,
+
+        lessons,
+      };
+    }
+
+    /*
+      ============================
+      تانية ثانوي
+      ============================
+    */
+
+    if (
+      SECOND_SECONDARY_COURSE_IDS.has(
+        course.id
+      )
+    ) {
+      const lessons =
+        Array.isArray(
+          course.lessons
+        )
+          ? [...course.lessons]
+          : [];
+
+      const firstLessonIndex =
+        lessons.findIndex(
+          (lesson) =>
+            lesson?.id ===
+            "lesson-1"
+        );
+
+      if (
+        firstLessonIndex >= 0
+      ) {
+        lessons[
+          firstLessonIndex
+        ] = {
+          ...lessons[
+            firstLessonIndex
+          ],
+
+          ...SECOND_SECONDARY_FIRST_LECTURE,
+
+          courseLectureKey:
+            "second-secondary-lecture-1",
+        };
+      } else {
+        lessons.unshift({
+          ...SECOND_SECONDARY_FIRST_LECTURE,
+
+          courseLectureKey:
+            "second-secondary-lecture-1",
+        });
+      }
+
+      return {
+        ...course,
+
+        lessons,
+      };
+    }
+
+    return course;
+  }
+
+  /*
+    ============================
     تجهيز محتوى تالتة ثانوي
     ============================
   */
@@ -1024,8 +1221,13 @@ function AllCourses({
                     normalizedLessons,
                 };
 
+                const courseWithFirstAndSecondContent =
+                  prepareFirstAndSecondSecondaryCourse(
+                    normalizedCourse
+                  );
+
                 return prepareThirdSecondaryCourse(
-                  normalizedCourse
+                  courseWithFirstAndSecondContent
                 );
               }
             );
@@ -3035,7 +3237,6 @@ function AllCourses({
       mode:
         "solution",
     });
-
     setYoutubePlayer(
       null
     );
@@ -3220,8 +3421,7 @@ function AllCourses({
             lessons:
               savedLessons,
 
-            updatedAt:
-              now,
+            updatedAt: now,
           };
 
           const watchHistory =
@@ -3464,7 +3664,7 @@ function AllCourses({
 
   /*
     ============================
-    فتح الواجب المكتوب
+    فتح الواجب
     ============================
   */
 
@@ -3503,6 +3703,73 @@ function AllCourses({
 
       return;
     }
+
+    /*
+      ============================
+      فيديو واجب فقط
+      تانية ثانوي
+      ============================
+    */
+
+    if (
+      lesson.homeworkVideoOnly ===
+      true
+    ) {
+      const homeworkVideo =
+        lesson.homeworkVideoUrl ||
+        "";
+
+      if (
+        !hasValue(
+          homeworkVideo
+        )
+      ) {
+        window.alert(
+          "لم يتم إضافة فيديو الواجب."
+        );
+
+        return;
+      }
+
+      setActiveLesson({
+        course:
+          selectedCourse,
+
+        lesson: {
+          ...lesson,
+
+          title:
+            lesson.homeworkTitle ||
+            "فيديو الواجب",
+
+          youtubeUrl:
+            homeworkVideo,
+        },
+
+        mode:
+          "homework-video",
+      });
+
+      setYoutubePlayer(
+        null
+      );
+
+      setVideoIsPlaying(
+        false
+      );
+
+      setWatchPercent(
+        0
+      );
+
+      return;
+    }
+
+    /*
+      ============================
+      الواجب المكتوب العادي
+      ============================
+    */
 
     const homeworkKey =
       lesson.homeworkKey;
@@ -4295,13 +4562,6 @@ function AllCourses({
           THIRD_LECTURE_2_EXAM_KEY
       );
 
-    /*
-      =====================================
-      امتحان المحاضرة الأولى
-      يفتح بعد تفعيل المحاضرة الثانية
-      =====================================
-    */
-
     if (
       isThirdLectureOneExam
     ) {
@@ -4331,16 +4591,7 @@ function AllCourses({
 
         return;
       }
-    }
-
-    /*
-      =====================================
-      امتحان المحاضرة الثانية
-      يفتح بعد تفعيل المحاضرة الثالثة
-      =====================================
-    */
-
-    else if (
+    } else if (
       isThirdLectureTwoExam
     ) {
       const thirdLesson =
@@ -4369,15 +4620,7 @@ function AllCourses({
 
         return;
       }
-    }
-
-    /*
-      =====================================
-      باقي الامتحانات القديمة
-      =====================================
-    */
-
-    else {
+    } else {
       if (
         !hasLessonAccess(
           course,
