@@ -545,7 +545,7 @@ const SECOND_HOMEWORK_QUESTIONS =
 ========================================================= */
 
 const FOURTH_HOMEWORK_CORRECT_ANSWERS = {
-  1: 3,
+  1: 2,
   2: 1,
   3: 0,
   4: 0,
@@ -559,7 +559,7 @@ const FOURTH_HOMEWORK_CORRECT_ANSWERS = {
   12: 2,
   13: 2,
   14: 3,
-  15: 3,
+  15: 2,
   16: 1,
   17: 3,
   18: 2,
