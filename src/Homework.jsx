@@ -541,6 +541,75 @@ const SECOND_HOMEWORK_QUESTIONS =
   );
 
 /* =========================================================
+   الواجب الرابع - تالتة ثانوي
+========================================================= */
+
+const FOURTH_HOMEWORK_CORRECT_ANSWERS = {
+  1: 3,
+  2: 1,
+  3: 0,
+  4: 0,
+  5: 3,
+  6: 3,
+  7: 3,
+  8: 3,
+  9: 0,
+  10: 1,
+  11: 1,
+  12: 2,
+  13: 2,
+  14: 3,
+  15: 3,
+  16: 1,
+  17: 3,
+  18: 2,
+  19: 2,
+  20: 3,
+  21: 3,
+  22: 1,
+  23: 2,
+  24: 2,
+  25: 1,
+  26: 2,
+  27: 2,
+  28: 2,
+  29: 3,
+};
+
+const FOURTH_HOMEWORK_QUESTIONS =
+  Array.from(
+    {
+      length: 29,
+    },
+    (_, index) => {
+      const questionNumber =
+        index + 1;
+
+      return {
+        id: `third-homework-4-q${questionNumber}`,
+
+        questionNumber,
+
+        question: `السؤال ${questionNumber}`,
+
+        options: [
+          "أ",
+          "ب",
+          "ج",
+          "د",
+        ],
+
+        cancelled: false,
+
+        correctAnswer:
+          FOURTH_HOMEWORK_CORRECT_ANSWERS[
+            questionNumber
+          ],
+      };
+    }
+  );
+
+/* =========================================================
    واجب تانية ثانوي من homeworkData
 ========================================================= */
 
@@ -574,9 +643,9 @@ const SECOND_CENTER_HOMEWORK =
           SECOND_CENTER_HOMEWORK_SOURCE.videoId ||
           "LosP4RjBCfM",
 
-       videoOnly: true,
+        videoOnly: true,
 
-questions: [],
+        questions: [],
       }
     : null;
 
@@ -721,6 +790,26 @@ const HOMEWORKS = [
         THIRD_CENTER_HOMEWORK,
       ]
     : []),
+
+  {
+    id: "third-homework-4",
+
+    title:
+      "واجب المحاضرة الرابعة",
+
+    grade:
+      "الثالث الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoId:
+      "JPlrVKb2WEY",
+
+    questions:
+      FOURTH_HOMEWORK_QUESTIONS,
+  },
 
   ...(SECOND_CENTER_HOMEWORK
     ? [
