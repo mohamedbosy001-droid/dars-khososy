@@ -805,7 +805,7 @@ const HOMEWORKS = [
     centerOnly: true,
 
     videoId:
-      "JPlrVKb2WEY",
+      "yaoRGDPmF50",
 
     questions:
       FOURTH_HOMEWORK_QUESTIONS,
@@ -1149,12 +1149,6 @@ function Homework({
 
         studentHomeworks.forEach(
           (homework) => {
-            /*
-              الفيديوهين الاستثناء
-              مفتوحين مباشرة ولا يحتاجان
-              محاولة أو نتيجة واجب.
-            */
-
             if (
               homework.videoOnly ===
               true
@@ -1498,7 +1492,6 @@ function Homework({
     isAllowedStudent,
     activeHomework,
   ]);
-
   /* =========================================================
      حفظ التقدم
   ========================================================= */
@@ -2509,12 +2502,6 @@ function Homework({
         >
           {studentHomeworks.map(
             (homework) => {
-              /*
-                الفيديو المباشر:
-                لا نعرض له كارت واجب
-                ولا نتيجة ولا قفل.
-              */
-
               if (
                 homework.videoOnly ===
                 true
