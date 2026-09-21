@@ -77,6 +77,27 @@ function isEssayQuestion(question) {
 
 /*
   ============================
+  درجة السؤال
+  ============================
+*/
+
+function getQuestionPoints(question) {
+  const points = Number(
+    question?.points
+  );
+
+  if (
+    Number.isFinite(points) &&
+    points > 0
+  ) {
+    return points;
+  }
+
+  return 1;
+}
+
+/*
+  ============================
   هل السؤال تمت إجابته؟
   ============================
 */
@@ -631,6 +652,10 @@ function Exam({
       /*
         نصحح الأسئلة المقالية
         بالـ AI قبل إنشاء النتيجة
+
+        alwaysCorrect:
+        أي إجابة مكتوبة تتحسب صحيحة
+        بدون إرسالها للـ AI
       */
 
       const essayGrades = {};
@@ -655,6 +680,18 @@ function Exam({
             ? savedAnswer.trim()
             : "";
 
+        if (
+          question.alwaysCorrect ===
+          true
+        ) {
+          essayGrades[
+            question.id
+          ] =
+            studentAnswer.length > 0;
+
+          continue;
+        }
+
         essayGrades[
           question.id
         ] =
@@ -674,6 +711,11 @@ function Exam({
             question,
             index
           ) => {
+            const questionPoints =
+              getQuestionPoints(
+                question
+              );
+
             /*
               ==================
               سؤال مقالي
@@ -702,7 +744,8 @@ function Exam({
                 ] === true;
 
               if (isCorrect) {
-                score += 1;
+                score +=
+                  questionPoints;
               }
 
               return {
@@ -728,6 +771,14 @@ function Exam({
                 options: [],
 
                 isCorrect,
+
+                points:
+                  questionPoints,
+
+                earnedPoints:
+                  isCorrect
+                    ? questionPoints
+                    : 0,
               };
             }
 
@@ -747,7 +798,8 @@ function Exam({
               question.correctAnswer;
 
             if (isCorrect) {
-              score += 1;
+              score +=
+                questionPoints;
             }
 
             return {
@@ -777,12 +829,37 @@ function Exam({
                   : [],
 
               isCorrect,
+
+              points:
+                questionPoints,
+
+              earnedPoints:
+                isCorrect
+                  ? questionPoints
+                  : 0,
             };
           }
         );
 
+      /*
+        مجموع درجات الامتحان
+
+        أي سؤال قديم بدون points
+        = درجة واحدة تلقائيًا
+      */
+
       const totalQuestions =
-        questions.length;
+        questions.reduce(
+          (
+            total,
+            question
+          ) =>
+            total +
+            getQuestionPoints(
+              question
+            ),
+          0
+        );
 
       const percentage =
         totalQuestions > 0
@@ -1473,10 +1550,11 @@ function Exam({
                   opacity: 0.75,
                 }}
               >
-                اكتب الإجابة
-                بطريقتك، وسيتم
-                تصحيحها عند تسليم
-                الامتحان.
+                {currentQuestion
+                  .alwaysCorrect ===
+                true
+                  ? "اكتب إجابتك ثم احفظها."
+                  : "اكتب الإجابة بطريقتك، وسيتم تصحيحها عند تسليم الامتحان."}
               </p>
             </div>
           ) : (

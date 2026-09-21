@@ -97,6 +97,18 @@ const FIRST_LECTURE_1_EXAM_ID =
 
 /*
   ============================
+  امتحانات تانية ثانوي
+  ============================
+*/
+
+const SECOND_LECTURE_1_EXAM_KEY =
+  "secondLecture1Exam";
+
+const SECOND_LECTURE_1_EXAM_ID =
+  "second-lecture-1-exam";
+
+/*
+  ============================
   امتحانات تالتة ثانوي
   ============================
 */
@@ -294,6 +306,54 @@ const SECOND_SECONDARY_FIRST_LECTURE = {
 
   homeworkVideoUrl:
     "https://www.youtube.com/watch?v=zZrN1lDZGJw",
+
+  exam1: true,
+
+  exam1Key:
+    SECOND_LECTURE_1_EXAM_KEY,
+
+  exam1Title:
+    "امتحان المحاضرة الأولى",
+};
+
+/*
+  المحاضرة الثانية لتانية ثانوي.
+  يظهر امتحان المحاضرة الأولى قبلها،
+  وبعد تسليم الامتحان يفتح الفيديو.
+  وبعد مشاهدة 30% يفتح فيديو الواجب مباشرة.
+*/
+const SECOND_SECONDARY_SECOND_LECTURE = {
+  id: "lesson-2",
+
+  title:
+    "المحاضرة الثانية",
+
+  description:
+    "سلّم امتحان المحاضرة الأولى أولًا لفتح فيديو المحاضرة الثانية، وبعد مشاهدة 30% يفتح فيديو الواجب.",
+
+  youtubeUrl:
+    "https://www.youtube.com/watch?v=hssp1dH9-B0",
+
+  videoUrl:
+    "https://www.youtube.com/watch?v=hssp1dH9-B0",
+
+  videoTitle:
+    "المحاضرة الثانية",
+
+  homeworkEnabled: true,
+
+  homeworkVideoOnly: true,
+
+  homeworkTitle:
+    "فيديو الواجب",
+
+  homeworkVideoUrl:
+    "https://www.youtube.com/watch?v=Fn33EArELH4",
+
+  requiresPreviousExam: true,
+
+  requiredExamId:
+    SECOND_LECTURE_1_EXAM_ID,
 };
 
 /*
@@ -993,7 +1053,7 @@ function AllCourses({
         course.id
       )
     ) {
-      const lessons =
+      let lessons =
         Array.isArray(
           course.lessons
         )
@@ -1004,7 +1064,9 @@ function AllCourses({
         lessons.findIndex(
           (lesson) =>
             lesson?.id ===
-            "lesson-1"
+              "lesson-1" ||
+            lesson?.courseLectureKey ===
+              "second-secondary-lecture-1"
         );
 
       if (
@@ -1028,6 +1090,39 @@ function AllCourses({
 
           courseLectureKey:
             "second-secondary-lecture-1",
+        });
+      }
+
+      const secondLessonIndex =
+        lessons.findIndex(
+          (lesson) =>
+            lesson?.id ===
+              "lesson-2" ||
+            lesson?.courseLectureKey ===
+              "second-secondary-lecture-2"
+        );
+
+      if (
+        secondLessonIndex >= 0
+      ) {
+        lessons[
+          secondLessonIndex
+        ] = {
+          ...lessons[
+            secondLessonIndex
+          ],
+
+          ...SECOND_SECONDARY_SECOND_LECTURE,
+
+          courseLectureKey:
+            "second-secondary-lecture-2",
+        };
+      } else {
+        lessons.push({
+          ...SECOND_SECONDARY_SECOND_LECTURE,
+
+          courseLectureKey:
+            "second-secondary-lecture-2",
         });
       }
 
@@ -3353,6 +3448,22 @@ function AllCourses({
       }
 
       /*
+        تانية ثانوي - المحاضرة الثانية
+      */
+
+      else if (
+        SECOND_SECONDARY_COURSE_IDS.has(
+          course.id
+        ) &&
+        lesson.id ===
+          "lesson-2"
+      ) {
+        window.alert(
+          "سلّم امتحان المحاضرة الأولى أولًا لفتح فيديو المحاضرة الثانية."
+        );
+      }
+
+      /*
         تالتة ثانوي - المحاضرة الثانية
       */
 
@@ -4825,6 +4936,17 @@ function AllCourses({
       }
     }
 
+    const isSecondLectureOneExam =
+      SECOND_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey ===
+          SECOND_LECTURE_1_EXAM_KEY ||
+        examKey ===
+          SECOND_LECTURE_1_EXAM_KEY
+      );
+
     const isThirdLectureOneExam =
       THIRD_SECONDARY_COURSE_IDS.has(
         course.id
@@ -4870,6 +4992,35 @@ function AllCourses({
       );
 
     if (
+      isSecondLectureOneExam
+    ) {
+      const secondLesson =
+        Array.isArray(
+          course.lessons
+        )
+          ? course.lessons.find(
+              (
+                courseLesson
+              ) =>
+                courseLesson?.id ===
+                "lesson-2"
+            )
+          : null;
+
+      if (
+        !secondLesson ||
+        !hasLessonAccess(
+          course,
+          secondLesson
+        )
+      ) {
+        window.alert(
+          "فعّل المحاضرة الثانية أولًا لفتح الامتحان."
+        );
+
+        return;
+      }
+    } else if (
       isThirdLectureOneExam
     ) {
       const secondLesson =
@@ -5932,6 +6083,9 @@ function AllCourses({
           )}
           isFirstLecture1ExamCompleted={isExamCompleted(
             FIRST_LECTURE_1_EXAM_ID
+          )}
+          isSecondLecture1ExamCompleted={isExamCompleted(
+            SECOND_LECTURE_1_EXAM_ID
           )}
           onBack={
             closeCourseContent

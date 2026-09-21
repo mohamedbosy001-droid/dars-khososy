@@ -48,6 +48,12 @@ function CourseContent({
   */
   isFirstLecture1ExamCompleted = false,
 
+  /*
+    هل امتحان المحاضرة الأولى
+    في تانية ثانوي تم تسليمه؟
+  */
+  isSecondLecture1ExamCompleted = false,
+
   lessonActivationCodes,
   onLessonCodeChange,
   onActivateLessonCode,
@@ -98,6 +104,18 @@ function CourseContent({
       "first-month-course" ||
     course.id ===
       "first-term-course";
+
+  /*
+    =====================================
+    كورسات تانية ثانوي الجديدة
+    =====================================
+  */
+
+  const isSecondSecondaryCourse =
+    course.id ===
+      "second-month-course" ||
+    course.id ===
+      "second-term-course";
 
   /*
     =====================================
@@ -283,6 +301,16 @@ function CourseContent({
 
               /*
                 =====================================
+                المحاضرة الثانية لتانية ثانوي
+                =====================================
+              */
+
+              const isSecondSecondLesson =
+                isSecondSecondaryCourse &&
+                lessonIndex === 1;
+
+              /*
+                =====================================
                 المحاضرة الثانية لتالتة
                 =====================================
               */
@@ -314,18 +342,6 @@ function CourseContent({
               /*
                 =====================================
                 فتح فيديو المحاضرة
-
-                أولى - المحاضرة الثانية:
-                امتحان المحاضرة الأولى.
-
-                تالتة - المحاضرة الثانية:
-                امتحان المحاضرة الأولى.
-
-                تالتة - المحاضرة الثالثة:
-                امتحان المحاضرة الثانية.
-
-                تالتة - المحاضرة الرابعة:
-                امتحان المحاضرة الثالثة.
                 =====================================
               */
 
@@ -334,6 +350,7 @@ function CourseContent({
                 (
                   (
                     !isFirstSecondLesson &&
+                    !isSecondSecondLesson &&
                     !isThirdSecondLesson &&
                     !isThirdThirdLesson &&
                     !isThirdFourthLesson
@@ -341,6 +358,10 @@ function CourseContent({
                   (
                     isFirstSecondLesson &&
                     isFirstLecture1ExamCompleted
+                  ) ||
+                  (
+                    isSecondSecondLesson &&
+                    isSecondLecture1ExamCompleted
                   ) ||
                   (
                     isThirdSecondLesson &&
@@ -386,6 +407,27 @@ function CourseContent({
                   true ||
                 hasValue(
                   lesson.homeworkKey
+                );
+
+              /*
+                =====================================
+                فيديو واجب مباشر
+
+                يستخدم في تانية ثانوي
+                بعد مشاهدة 30%
+                بدون تسليم واجب
+                =====================================
+              */
+
+              const directHomeworkVideoUrl =
+                lesson.homeworkVideoUrl ||
+                "";
+
+              const hasDirectHomeworkVideo =
+                lesson.homeworkVideoOnly ===
+                  true &&
+                hasValue(
+                  directHomeworkVideoUrl
                 );
 
               /*
@@ -438,6 +480,10 @@ function CourseContent({
                 امتحان المحاضرة الأولى يظهر
                 قبل المحاضرة الثانية.
 
+                تانية:
+                امتحان المحاضرة الأولى يظهر
+                قبل المحاضرة الثانية.
+
                 تالتة:
                 امتحانات 1 و2 و3 تظهر
                 قبل المحاضرات 2 و3 و4.
@@ -447,6 +493,10 @@ function CourseContent({
               const hideExam1InSourceLesson =
                 (
                   isFirstSecondaryCourse &&
+                  lessonIndex === 0
+                ) ||
+                (
+                  isSecondSecondaryCourse &&
                   lessonIndex === 0
                 ) ||
                 (
@@ -467,6 +517,25 @@ function CourseContent({
 
               const showFirstSecondaryExamBeforeSecondLesson =
                 isFirstSecondaryCourse &&
+                lessonIndex === 1 &&
+                firstLesson &&
+                (
+                  firstLesson.exam1 ===
+                    true ||
+                  hasValue(
+                    firstLesson.exam1Key
+                  )
+                );
+
+              /*
+                =====================================
+                امتحان المحاضرة الأولى لتانية ثانوي
+                يظهر قبل المحاضرة الثانية
+                =====================================
+              */
+
+              const showSecondSecondaryExamBeforeSecondLesson =
+                isSecondSecondaryCourse &&
                 lessonIndex === 1 &&
                 firstLesson &&
                 (
@@ -693,6 +762,7 @@ function CourseContent({
                           {!unlocked
                             ? (
                                 isFirstSecondLesson ||
+                                isSecondSecondLesson ||
                                 isThirdSecondLesson ||
                                 isThirdThirdLesson ||
                                 isThirdFourthLesson
@@ -702,16 +772,19 @@ function CourseContent({
                             : isFirstSecondLesson &&
                                 !isFirstLecture1ExamCompleted
                               ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
-                              : isThirdSecondLesson &&
-                                  !isThirdLecture1ExamCompleted
+                              : isSecondSecondLesson &&
+                                  !isSecondLecture1ExamCompleted
                                 ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
-                                : isThirdThirdLesson &&
-                                    !isThirdLecture2ExamCompleted
+                                : isThirdSecondLesson &&
+                                    !isThirdLecture1ExamCompleted
                                   ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
-                                  : isThirdFourthLesson &&
-                                      !isThirdLecture3ExamCompleted
+                                  : isThirdThirdLesson &&
+                                      !isThirdLecture2ExamCompleted
                                     ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
-                                    : "المحاضرة متاحة"}
+                                    : isThirdFourthLesson &&
+                                        !isThirdLecture3ExamCompleted
+                                      ? "تم التفعيل - سلّم الامتحان لفتح الفيديو"
+                                      : "المحاضرة متاحة"}
                         </span>
                       </div>
                     </div>
@@ -815,6 +888,70 @@ function CourseContent({
                           </div>
 
                           {isFirstLecture1ExamCompleted && (
+                            <FaCheckCircle className="course-content-completed-icon" />
+                          )}
+                        </button>
+                      )}
+
+                      {/* =====================================
+                          امتحان المحاضرة الأولى - تانية ثانوي
+                          قبل المحاضرة الثانية
+                      ===================================== */}
+
+                      {showSecondSecondaryExamBeforeSecondLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${
+                            unlocked
+                              ? "available"
+                              : "locked"
+                          }`}
+                          disabled={
+                            !unlocked
+                          }
+                          onClick={() =>
+                            onOpenExam?.(
+                              firstLesson,
+                              firstLesson.exam1Key ||
+                                "secondLecture1Exam"
+                            )
+                          }
+                          style={{
+                            width:
+                              "100%",
+
+                            marginBottom:
+                              "14px",
+                          }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (
+                              isSecondLecture1ExamCompleted ? (
+                                <FaCheckCircle />
+                              ) : (
+                                <FaClipboardCheck />
+                              )
+                            ) : (
+                              <FaLock />
+                            )}
+                          </div>
+
+                          <div className="course-content-card-info">
+                            <h3>
+                              {firstLesson.exam1Title ||
+                                "امتحان المحاضرة الأولى"}
+                            </h3>
+
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الثانية بالكود أولًا"
+                                : isSecondLecture1ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك فتحه لمراجعة النتيجة"
+                                  : "ابدأ الامتحان - بعد تسليمه يفتح فيديو المحاضرة الثانية"}
+                            </p>
+                          </div>
+
+                          {isSecondLecture1ExamCompleted && (
                             <FaCheckCircle className="course-content-completed-icon" />
                           )}
                         </button>
@@ -1011,6 +1148,7 @@ function CourseContent({
                           )}
                         </button>
                       )}
+
                       {/* =====================================
                           فيديو المحاضرة + كود التفعيل
                       ===================================== */}
@@ -1088,16 +1226,19 @@ function CourseContent({
                                     : isFirstSecondLesson &&
                                         !isFirstLecture1ExamCompleted
                                       ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
-                                      : isThirdSecondLesson &&
-                                          !isThirdLecture1ExamCompleted
+                                      : isSecondSecondLesson &&
+                                          !isSecondLecture1ExamCompleted
                                         ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
-                                        : isThirdThirdLesson &&
-                                            !isThirdLecture2ExamCompleted
-                                          ? "سلّم امتحان المحاضرة الثانية أولًا لفتح الفيديو"
-                                          : isThirdFourthLesson &&
-                                              !isThirdLecture3ExamCompleted
-                                            ? "سلّم امتحان المحاضرة الثالثة أولًا لفتح الفيديو"
-                                            : "اضغط لمشاهدة شرح المحاضرة"}
+                                        : isThirdSecondLesson &&
+                                            !isThirdLecture1ExamCompleted
+                                          ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
+                                          : isThirdThirdLesson &&
+                                              !isThirdLecture2ExamCompleted
+                                            ? "سلّم امتحان المحاضرة الثانية أولًا لفتح الفيديو"
+                                            : isThirdFourthLesson &&
+                                                !isThirdLecture3ExamCompleted
+                                              ? "سلّم امتحان المحاضرة الثالثة أولًا لفتح الفيديو"
+                                              : "اضغط لمشاهدة شرح المحاضرة"}
                                 </p>
 
                                 {lesson.duration && (
@@ -1336,11 +1477,68 @@ function CourseContent({
                         )}
 
                         {/* =====================================
+                            فيديو الواجب المباشر - تانية ثانوي
+
+                            يفتح بعد مشاهدة 30%
+                            بدون تسليم أو تصحيح
+                        ===================================== */}
+
+                        {hasDirectHomeworkVideo && (
+                          <button
+                            type="button"
+                            className={`course-content-card video-card ${
+                              canOpenVideo &&
+                              watched
+                                ? ""
+                                : "locked"
+                            }`}
+                            disabled={
+                              !canOpenVideo ||
+                              !watched
+                            }
+                            onClick={() =>
+                              onOpenHomeworkSolution?.(
+                                lesson,
+                                directHomeworkVideoUrl
+                              )
+                            }
+                          >
+                            <div className="course-content-card-icon">
+                              {canOpenVideo &&
+                              watched ? (
+                                <FaPlay />
+                              ) : (
+                                <FaLock />
+                              )}
+                            </div>
+
+                            <div className="course-content-card-info">
+                              <h3>
+                                {lesson.homeworkTitle ||
+                                  "فيديو الواجب"}
+                              </h3>
+
+                              <p>
+                                {!unlocked
+                                  ? "المحاضرة مقفولة"
+                                  : isSecondSecondLesson &&
+                                      !isSecondLecture1ExamCompleted
+                                    ? "سلّم امتحان المحاضرة الأولى أولًا"
+                                    : !watched
+                                      ? "يفتح بعد مشاهدة 30% من فيديو المحاضرة"
+                                      : "اضغط لمشاهدة فيديو الواجب"}
+                              </p>
+                            </div>
+                          </button>
+                        )}
+
+                        {/* =====================================
                             الواجب
                             بعد مشاهدة 30%
                         ===================================== */}
 
-                        {hasHomework && (
+                        {hasHomework &&
+                          !hasDirectHomeworkVideo && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${
@@ -1380,20 +1578,23 @@ function CourseContent({
                                   : isFirstSecondLesson &&
                                       !isFirstLecture1ExamCompleted
                                     ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
-                                    : isThirdSecondLesson &&
-                                        !isThirdLecture1ExamCompleted
+                                    : isSecondSecondLesson &&
+                                        !isSecondLecture1ExamCompleted
                                       ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
-                                      : isThirdThirdLesson &&
-                                          !isThirdLecture2ExamCompleted
+                                      : isThirdSecondLesson &&
+                                          !isThirdLecture1ExamCompleted
                                         ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
-                                        : isThirdFourthLesson &&
-                                            !isThirdLecture3ExamCompleted
+                                        : isThirdThirdLesson &&
+                                            !isThirdLecture2ExamCompleted
                                           ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
-                                          : !watched
-                                            ? "يفتح بعد مشاهدة 30% من فيديو الشرح"
-                                            : homeworkSubmitted
-                                              ? "تم تسليم الواجب"
-                                              : "اضغط لبدء الواجب"}
+                                          : isThirdFourthLesson &&
+                                              !isThirdLecture3ExamCompleted
+                                            ? "سلّم الامتحان أولًا ثم شاهد 30% من فيديو الشرح"
+                                            : !watched
+                                              ? "يفتح بعد مشاهدة 30% من فيديو الشرح"
+                                              : homeworkSubmitted
+                                                ? "تم تسليم الواجب"
+                                                : "اضغط لبدء الواجب"}
                               </p>
                             </div>
 
@@ -1408,7 +1609,8 @@ function CourseContent({
                             بعد تسليم الواجب
                         ===================================== */}
 
-                        {hasHomeworkSolution && (
+                        {hasHomeworkSolution &&
+                          !hasDirectHomeworkVideo && (
                           <button
                             type="button"
                             className={`course-content-card video-card ${
@@ -1449,18 +1651,21 @@ function CourseContent({
                                   : isFirstSecondLesson &&
                                       !isFirstLecture1ExamCompleted
                                     ? "سلّم الامتحان أولًا"
-                                    : isThirdSecondLesson &&
-                                        !isThirdLecture1ExamCompleted
+                                    : isSecondSecondLesson &&
+                                        !isSecondLecture1ExamCompleted
                                       ? "سلّم الامتحان أولًا"
-                                      : isThirdThirdLesson &&
-                                          !isThirdLecture2ExamCompleted
+                                      : isThirdSecondLesson &&
+                                          !isThirdLecture1ExamCompleted
                                         ? "سلّم الامتحان أولًا"
-                                        : isThirdFourthLesson &&
-                                            !isThirdLecture3ExamCompleted
+                                        : isThirdThirdLesson &&
+                                            !isThirdLecture2ExamCompleted
                                           ? "سلّم الامتحان أولًا"
-                                          : !homeworkSubmitted
-                                            ? "سلّم الواجب أولًا لفتح فيديو الحل"
-                                            : "اضغط لمشاهدة فيديو حل الواجب"}
+                                          : isThirdFourthLesson &&
+                                              !isThirdLecture3ExamCompleted
+                                            ? "سلّم الامتحان أولًا"
+                                            : !homeworkSubmitted
+                                              ? "سلّم الواجب أولًا لفتح فيديو الحل"
+                                              : "اضغط لمشاهدة فيديو حل الواجب"}
                               </p>
                             </div>
                           </button>
@@ -1468,9 +1673,6 @@ function CourseContent({
 
                         {/* =====================================
                             الامتحان الأول العادي
-
-                            امتحانات أولى وتالتة الخاصة
-                            تظهر قبل المحاضرة التالية.
                         ===================================== */}
 
                         {hasExam1 &&
@@ -1580,10 +1782,12 @@ function CourseContent({
                       {!hasVideo &&
                         !hasPdf &&
                         !hasHomework &&
+                        !hasDirectHomeworkVideo &&
                         !hasHomeworkSolution &&
                         !hasExam1 &&
                         !hasExam2 &&
                         !showFirstSecondaryExamBeforeSecondLesson &&
+                        !showSecondSecondaryExamBeforeSecondLesson &&
                         !showFirstExamBeforeSecondLesson &&
                         !showSecondExamBeforeThirdLesson &&
                         !showThirdExamBeforeFourthLesson && (

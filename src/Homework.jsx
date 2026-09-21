@@ -743,6 +743,32 @@ const SECOND_CENTER_VIDEO_ONLY = {
 
   questions: [],
 };
+/* =========================================================
+   واجب المحاضرة الثالثة - تانية ثانوي سنتر
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_3_VIDEO_ONLY = {
+  id: "second-center-lecture-3-video-only",
+
+  title:
+    "واجب المحاضرة الثالثة",
+
+  grade:
+    "الثاني الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "831X7hehJ2k",
+
+  questions: [],
+};
 
 /* =========================================================
    بيانات الواجبات
@@ -820,6 +846,9 @@ const HOMEWORKS = [
   FIRST_CENTER_VIDEO_ONLY,
 
   SECOND_CENTER_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_3_VIDEO_ONLY,
+  
 ];
 
 /* =========================================================
