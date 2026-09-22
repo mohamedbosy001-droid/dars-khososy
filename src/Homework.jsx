@@ -719,6 +719,33 @@ const FIRST_CENTER_VIDEO_ONLY = {
 };
 
 /* =========================================================
+   فيديو واجب المحاضرة الثانية - أولى ثانوي
+========================================================= */
+
+const FIRST_CENTER_LECTURE_2_VIDEO_ONLY = {
+  id: "first-center-video-only-2",
+
+  title:
+    "واجب المحاضرة الثانية",
+
+  grade:
+    "الأول الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "Y0OzJglU-BE",
+
+  questions: [],
+};
+
+
+/* =========================================================
    استثناء فيديو فقط - تانية ثانوي
 ========================================================= */
 
@@ -845,10 +872,12 @@ const HOMEWORKS = [
 
   FIRST_CENTER_VIDEO_ONLY,
 
+  FIRST_CENTER_LECTURE_2_VIDEO_ONLY,
+
   SECOND_CENTER_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_3_VIDEO_ONLY,
-  
+
 ];
 
 /* =========================================================

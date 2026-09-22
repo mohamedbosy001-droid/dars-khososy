@@ -260,10 +260,33 @@ const FIRST_SECONDARY_SECOND_LECTURE = {
   videoTitle:
     "المحاضرة التانية التعبير الحقيقي والمجازي والتشبيه",
 
+  homeworkEnabled: true,
+
+  homeworkVideoOnly: true,
+
+  homeworkTitle:
+
+    "واجب المحاضرة الثانية",
+
+  homeworkVideoUrl:
+
+    "https://www.youtube.com/watch?v=Y0OzJglU-BE",
+
   requiresPreviousExam: true,
 
   requiredExamId:
+
     FIRST_LECTURE_1_EXAM_ID,
+
+    homeworkEnabled: true,
+
+  homeworkVideoOnly: true,
+
+  homeworkTitle:
+    "واجب المحاضرة الثانية",
+
+  homeworkVideoUrl:
+    "https://www.youtube.com/watch?v=Y0OzJglU-BE",
 };
 
 /*
