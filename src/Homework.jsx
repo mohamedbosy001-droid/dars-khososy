@@ -753,7 +753,7 @@ const SECOND_CENTER_VIDEO_ONLY = {
   id: "second-center-video-only-1",
 
   title:
-    "فيديو واجب تانية ثانوي",
+    "واجب المحاضرة الثانية",
 
   grade:
     "الثاني الثانوي",
@@ -779,7 +779,35 @@ const SECOND_CENTER_LECTURE_3_VIDEO_ONLY = {
   id: "second-center-lecture-3-video-only",
 
   title:
-    "واجب المحاضرة الثالثة",
+    "واجب المحاضرة الثالثة الممنوع من الصرف",
+
+  grade:
+    "الثاني الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "831X7hehJ2k",
+
+  questions: [],
+};
+
+/* =========================================================
+   واجب المحاضرة الرابعة - تانية ثانوي
+   البلاغة
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_4_VIDEO_ONLY = {
+  id: "second-center-lecture-4-video-only",
+
+  title:
+    "واجب المحاضرة الرابعة البلاغة",
 
   grade:
     "الثاني الثانوي",
@@ -1085,6 +1113,8 @@ const HOMEWORKS = [
   SECOND_CENTER_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_3_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_4_VIDEO_ONLY,
 
 ];
 
