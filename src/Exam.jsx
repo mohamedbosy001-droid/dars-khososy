@@ -1442,6 +1442,43 @@ function Exam({
               1}
           </div>
 
+          {exam?.passage &&
+            currentQuestionIndex ===
+              0 && (
+              <div
+                style={{
+                  marginBottom:
+                    "24px",
+                  padding:
+                    "20px",
+                  borderRadius:
+                    "16px",
+                  border:
+                    "1px solid #d8c2aa",
+                  lineHeight:
+                    "2",
+                  whiteSpace:
+                    "pre-line",
+                  direction:
+                    "rtl",
+                }}
+              >
+                <h3
+                  style={{
+                    marginTop: 0,
+                    marginBottom:
+                      "14px",
+                  }}
+                >
+                  اقرأ ثم أجب
+                </h3>
+
+                <div>
+                  {exam.passage}
+                </div>
+              </div>
+            )}
+
           <h2>
             {renderQuestionText(
               currentQuestion.question
