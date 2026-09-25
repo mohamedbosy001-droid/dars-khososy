@@ -67,14 +67,31 @@ const gradesData = [
 
     lessonPrefix: "TL",
 
+    /*
+      الشهر الأول
+    */
     monthCourseId:
       "third-month-course",
 
     monthCourseTitle:
-      "كورس شهر تالتة ثانوي",
+      "كورس الشهر الأول - الصف الثالث الثانوي",
 
     monthPrefix: "TM",
 
+    /*
+      الشهر الثاني
+    */
+    month2CourseId:
+      "third-month-2-course",
+
+    month2CourseTitle:
+      "كورس الشهر الثاني - الصف الثالث الثانوي",
+
+    month2Prefix: "TM2",
+
+    /*
+      الترم
+    */
     termCourseId:
       "third-term-course",
 
@@ -177,7 +194,11 @@ function GenerateAccessCodes() {
     }
 
     if (type === "month") {
-      return "شهر";
+      return "الشهر الأول";
+    }
+
+    if (type === "month2") {
+      return "الشهر الثاني";
     }
 
     if (type === "term") {
@@ -215,6 +236,13 @@ function GenerateAccessCodes() {
       );
     }
 
+    if (type === "month2") {
+      return (
+        gradeData.month2Prefix ||
+        "M2"
+      );
+    }
+
     if (type === "term") {
       return (
         gradeData.termPrefix ||
@@ -243,13 +271,7 @@ function GenerateAccessCodes() {
     }
 
     /*
-      كود الحصة مرن.
-
-      مش مربوط بكورس أو
-      محاضرة محددة وقت الإنشاء.
-
-      بيتربط بالمحاضرة
-      وقت استخدام الطالب للكود.
+      كود الحصة مرن
     */
     if (type === "lesson") {
       return {
@@ -260,6 +282,9 @@ function GenerateAccessCodes() {
       };
     }
 
+    /*
+      الشهر الأول
+    */
     if (type === "month") {
       return {
         courseId:
@@ -270,6 +295,23 @@ function GenerateAccessCodes() {
       };
     }
 
+    /*
+      الشهر الثاني
+      موجود حاليًا لتالتة ثانوي
+    */
+    if (type === "month2") {
+      return {
+        courseId:
+          gradeData.month2CourseId,
+
+        courseTitle:
+          gradeData.month2CourseTitle,
+      };
+    }
+
+    /*
+      الترم
+    */
     if (type === "term") {
       return {
         courseId:
@@ -323,11 +365,6 @@ function GenerateAccessCodes() {
         grade:
           gradeData.grade,
 
-        /*
-          مهم جدًا:
-          الكود مش مربوط
-          بمحاضرة وقت الإنشاء
-        */
         flexibleLesson:
           true,
 
@@ -345,10 +382,6 @@ function GenerateAccessCodes() {
         courseTitle:
           courseData.courseTitle,
 
-        /*
-          القيم دي تتسجل
-          وقت استخدام الكود
-        */
         assignedCourseId:
           null,
 
@@ -370,7 +403,7 @@ function GenerateAccessCodes() {
     }
 
     /*
-      كود الشهر / الترم
+      كود الشهر / الشهر الثاني / الترم
     */
     return {
       code,
@@ -379,8 +412,16 @@ function GenerateAccessCodes() {
 
       used: false,
 
+      /*
+        مهم:
+        الشهر الثاني يفضل accessType = month
+        علشان نظام تفعيل الشهر القديم
+        يفضل شغال كما هو.
+      */
       accessType:
-        type,
+        type === "month2"
+          ? "month"
+          : type,
 
       grade:
         gradeData.grade,
@@ -395,7 +436,9 @@ function GenerateAccessCodes() {
         false,
 
       targetScope:
-        type,
+        type === "month2"
+          ? "month"
+          : type,
 
       createdAt: now,
 
@@ -414,9 +457,29 @@ function GenerateAccessCodes() {
   function handleGradeChange(
     event
   ) {
+    const newGrade =
+      event.target.value;
+
     setGrade(
-      event.target.value
+      newGrade
     );
+
+    /*
+      لو كانت مختارة الشهر الثاني
+      وبعدها غيرت السنة،
+      نرجعها للشهر الأول لأن الشهر
+      الثاني موجود حاليًا لتالتة فقط.
+    */
+    if (
+      newGrade !==
+        "الثالث الثانوي" &&
+      accessType ===
+        "month2"
+    ) {
+      setAccessType(
+        "month"
+      );
+    }
 
     setMessage("");
 
@@ -466,9 +529,6 @@ function GenerateAccessCodes() {
         type
       );
 
-    /*
-      إنشاء أكواد مختلفة
-    */
     while (
       createdCodes.size <
       count
@@ -555,6 +615,22 @@ function GenerateAccessCodes() {
     ) {
       setMessage(
         "❌ بيانات السنة غير موجودة."
+      );
+
+      return;
+    }
+
+    /*
+      حماية إضافية
+    */
+    if (
+      accessType ===
+        "month2" &&
+      grade !==
+        "الثالث الثانوي"
+    ) {
+      setMessage(
+        "❌ الشهر الثاني متاح حاليًا للصف الثالث الثانوي فقط."
       );
 
       return;
@@ -657,22 +733,25 @@ function GenerateAccessCodes() {
 
   /*
     =====================================
-    إنشاء الـ 2700 كود مرة واحدة
+    إنشاء كل الأكواد القديمة
 
     لكل سنة:
     300 حصة
-    300 شهر
+    300 شهر أول
     300 ترم
 
+    + الشهر الثاني لتالتة:
+    300 كود
+
     الإجمالي:
-    2700
+    3000 كود
     =====================================
   */
 
   async function generateAllCodes() {
     const confirmed =
       window.confirm(
-        `سيتم إنشاء 2700 كود مرة واحدة:
+        `سيتم إنشاء 3000 كود مرة واحدة:
 
 الأول الثانوي:
 300 حصة
@@ -686,7 +765,8 @@ function GenerateAccessCodes() {
 
 الثالث الثانوي:
 300 حصة
-300 شهر
+300 الشهر الأول
+300 الشهر الثاني
 300 ترم
 
 هل تريدين المتابعة؟`
@@ -703,51 +783,84 @@ function GenerateAccessCodes() {
     setCopyMessage("");
 
     setMessage(
-      "جاري بدء إنشاء 2700 كود..."
+      "جاري بدء إنشاء 3000 كود..."
     );
 
     try {
       const allCodes =
         [];
 
-      const types = [
-        "lesson",
-        "month",
-        "term",
-      ];
+      /*
+        المجموعات التي سيتم إنشاؤها
+      */
+      const groups = [];
+
+      for (
+        const gradeData of gradesData
+      ) {
+        groups.push({
+          gradeData,
+          type: "lesson",
+        });
+
+        groups.push({
+          gradeData,
+          type: "month",
+        });
+
+        /*
+          الشهر الثاني لتالتة فقط
+        */
+        if (
+          gradeData.grade ===
+          "الثالث الثانوي"
+        ) {
+          groups.push({
+            gradeData,
+            type: "month2",
+          });
+        }
+
+        groups.push({
+          gradeData,
+          type: "term",
+        });
+      }
 
       let finishedGroups =
         0;
 
       const totalGroups =
-        gradesData.length *
-        types.length;
+        groups.length;
 
       for (
-        const gradeData of gradesData
+        const group of groups
       ) {
-        for (
-          const type of types
-        ) {
-          const typeText =
-            getAccessTypeText(
-              type
-            );
+        const gradeData =
+          group.gradeData;
 
-          const codes =
-            await createCodesGroup({
-              gradeData,
+        const type =
+          group.type;
 
-              type,
+        const typeText =
+          getAccessTypeText(
+            type
+          );
 
-              count: 300,
+        const codes =
+          await createCodesGroup({
+            gradeData,
 
-              onProgress: (
-                current,
-                total
-              ) => {
-                setMessage(
-                  `جاري إنشاء الأكواد...
+            type,
+
+            count: 300,
+
+            onProgress: (
+              current,
+              total
+            ) => {
+              setMessage(
+                `جاري إنشاء الأكواد...
 
 السنة: ${gradeData.grade}
 النوع: ${typeText}
@@ -756,34 +869,29 @@ ${current} / ${total}
 
 المجموعات المكتملة:
 ${finishedGroups} / ${totalGroups}`
-                );
-              },
+              );
+            },
+          });
+
+        codes.forEach(
+          (code) => {
+            allCodes.push({
+              code,
+
+              grade:
+                gradeData.grade,
+
+              accessType:
+                type,
+
+              accessText:
+                typeText,
             });
+          }
+        );
 
-          /*
-            نخزن البيانات
-            بشكل منظم
-          */
-          codes.forEach(
-            (code) => {
-              allCodes.push({
-                code,
-
-                grade:
-                  gradeData.grade,
-
-                accessType:
-                  type,
-
-                accessText:
-                  typeText,
-              });
-            }
-          );
-
-          finishedGroups +=
-            1;
-        }
+        finishedGroups +=
+          1;
       }
 
       setGeneratedCodes(
@@ -796,7 +904,7 @@ ${finishedGroups} / ${totalGroups}`
       setMessage(
         `✅ تم إنشاء جميع الأكواد بنجاح.
 
-الإجمالي: 2700 كود
+الإجمالي: 3000 كود
 
 الأول الثانوي:
 300 حصة + 300 شهر + 300 ترم
@@ -805,7 +913,7 @@ ${finishedGroups} / ${totalGroups}`
 300 حصة + 300 شهر + 300 ترم
 
 الثالث الثانوي:
-300 حصة + 300 شهر + 300 ترم`
+300 حصة + 300 الشهر الأول + 300 الشهر الثاني + 300 ترم`
       );
     } catch (error) {
       console.error(
@@ -1043,8 +1151,15 @@ ${finishedGroups} / ${totalGroups}`
             </option>
 
             <option value="month">
-              كود شهر
+              كود الشهر الأول
             </option>
+
+            {grade ===
+              "الثالث الثانوي" && (
+              <option value="month2">
+                كود الشهر الثاني
+              </option>
+            )}
 
             <option value="term">
               كود ترم
@@ -1124,10 +1239,12 @@ ${finishedGroups} / ${totalGroups}`
                   "700",
               }}
             >
-              {accessType ===
-              "month"
-                ? selectedGradeData.monthCourseTitle
-                : selectedGradeData.termCourseTitle}
+              {
+                getCourseData(
+                  selectedGradeData,
+                  accessType
+                ).courseTitle
+              }
             </div>
           )}
 
@@ -1274,7 +1391,7 @@ ${finishedGroups} / ${totalGroups}`
           />
         </div>
 
-        {/* إنشاء 2700 */}
+        {/* إنشاء الكل */}
         <button
           type="button"
           disabled={
@@ -1316,7 +1433,7 @@ ${finishedGroups} / ${totalGroups}`
                 : "pointer",
           }}
         >
-          إنشاء كل الـ 2700 كود
+          إنشاء كل الـ 3000 كود
         </button>
 
         <p
@@ -1335,7 +1452,9 @@ ${finishedGroups} / ${totalGroups}`
           }}
         >
           300 حصة + 300 شهر +
-          300 ترم لكل سنة
+          300 ترم لكل سنة،
+          بالإضافة إلى 300 كود
+          للشهر الثاني لتالتة ثانوي
         </p>
 
         {/* الرسالة */}

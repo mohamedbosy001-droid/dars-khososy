@@ -112,6 +112,8 @@ import thirdSecondaryImage from "./assets/third-secondary.jpeg";
 
 import secondFreeCourse from "./assets/second-free-course.jpeg";
 
+
+
 const platformWhatsAppNumber = "201114497910";
 
 const initialRegisterData = {

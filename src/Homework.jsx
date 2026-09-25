@@ -792,10 +792,198 @@ const SECOND_CENTER_LECTURE_3_VIDEO_ONLY = {
   videoOnly: true,
 
   videoId:
-    "831X7hehJ2k",
+    "2yjNltfldpc",
 
   questions: [],
 };
+
+
+/* =========================================================
+   واجب المحاضرة الخامسة - تالتة ثانوي
+========================================================= */
+
+const FIFTH_HOMEWORK_QUESTIONS = [
+  {
+    id: "third-homework-5-q1",
+    question: "السؤال 1",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 3,
+  },
+  {
+    id: "third-homework-5-q2",
+    question: "السؤال 2",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q3",
+    question: "السؤال 3",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q4",
+    question: "السؤال 4",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q5",
+    question: "السؤال 5",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q6",
+    question: "السؤال 6",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q7",
+    question: "السؤال 7",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q8",
+    question: "السؤال 8",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q9",
+    question: "السؤال 9",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q10",
+    question: "السؤال 10",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q11",
+    question: "السؤال 11",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 3,
+  },
+  {
+    id: "third-homework-5-q12",
+    question: "السؤال 12",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 3,
+  },
+  {
+    id: "third-homework-5-q13",
+    question: "السؤال 13",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q14",
+    question: "السؤال 14",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q15",
+    question: "السؤال 15",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q16",
+    question: "السؤال 16",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q17",
+    question: "السؤال 17",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q18",
+    question: "السؤال 18",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q19",
+    question: "السؤال 19",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q20",
+    question: "السؤال 20",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 3,
+  },
+  {
+    id: "third-homework-5-q21",
+    question: "السؤال 21",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q22",
+    question: "السؤال 22",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q23",
+    question: "السؤال 23",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q24",
+    question: "السؤال 24",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q25",
+    question: "السؤال 25",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q26",
+    question: "السؤال 26",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q27",
+    question: "السؤال 27",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+  {
+    id: "third-homework-5-q28",
+    question: "السؤال 28",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 1,
+  },
+  {
+    id: "third-homework-5-q29",
+    question: "السؤال 29",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 2,
+  },
+  {
+    id: "third-homework-5-q30",
+    question: "السؤال 30",
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: 0,
+  },
+];
 
 /* =========================================================
    بيانات الواجبات
@@ -862,6 +1050,26 @@ const HOMEWORKS = [
 
     questions:
       FOURTH_HOMEWORK_QUESTIONS,
+  },
+
+  {
+    id: "third-homework-5",
+
+    title:
+      "واجب المحاضرة الخامسة",
+
+    grade:
+      "الثالث الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoId:
+      "2yjNltfldpc",
+
+    questions:
+      FIFTH_HOMEWORK_QUESTIONS,
   },
 
   ...(SECOND_CENTER_HOMEWORK
