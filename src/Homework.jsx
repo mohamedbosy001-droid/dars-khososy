@@ -744,6 +744,31 @@ const FIRST_CENTER_LECTURE_2_VIDEO_ONLY = {
   questions: [],
 };
 
+/* =========================================================
+   فيديو واجب المحاضرة الثالثة - أولى ثانوي
+========================================================= */
+
+const FIRST_CENTER_LECTURE_3_VIDEO_ONLY = {
+  id: "first-center-video-only-3",
+
+  title:
+    "واجب المحاضرة الثالثة",
+
+  grade:
+    "الأول الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "Rn3U3YRgLBY",
+
+  questions: [],
+};
 
 /* =========================================================
    استثناء فيديو فقط - تانية ثانوي
@@ -1109,6 +1134,8 @@ const HOMEWORKS = [
   FIRST_CENTER_VIDEO_ONLY,
 
   FIRST_CENTER_LECTURE_2_VIDEO_ONLY,
+
+  FIRST_CENTER_LECTURE_3_VIDEO_ONLY,
 
   SECOND_CENTER_VIDEO_ONLY,
 
