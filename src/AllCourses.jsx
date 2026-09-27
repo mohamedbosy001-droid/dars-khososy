@@ -247,6 +247,16 @@ const FIRST_SECONDARY_FIRST_LECTURE = {
 
   exam1Title:
     "امتحان المحاضرة الأولى",
+
+    homeworkEnabled: true,
+
+homeworkVideoOnly: true,
+
+homeworkTitle:
+  "واجب المحاضرة الأولى",
+
+homeworkVideoUrl:
+  "https://www.youtube.com/watch?v=Rn3U3YRgLBY",
 };
 
 /*
