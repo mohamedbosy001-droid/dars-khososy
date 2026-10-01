@@ -1039,6 +1039,49 @@ const FIFTH_HOMEWORK_QUESTIONS = [
 ];
 
 /* =========================================================
+   واجب المحاضرة السادسة - تالتة ثانوي
+========================================================= */
+
+const SIXTH_HOMEWORK_SOURCE =
+  homeworkData?.[
+    "third-homework-6"
+  ] || null;
+
+const SIXTH_HOMEWORK =
+  SIXTH_HOMEWORK_SOURCE
+    ? {
+        ...SIXTH_HOMEWORK_SOURCE,
+
+        id:
+          SIXTH_HOMEWORK_SOURCE.id ||
+          "third-homework-6",
+
+        title:
+          SIXTH_HOMEWORK_SOURCE.title ||
+          "واجب المحاضرة السادسة",
+
+        grade:
+          SIXTH_HOMEWORK_SOURCE.grade ||
+          "الثالث الثانوي",
+
+        studentType: "center",
+
+        centerOnly: true,
+
+        videoId:
+          SIXTH_HOMEWORK_SOURCE.videoId ||
+          "p91O3Ez8zcg",
+
+        questions:
+          Array.isArray(
+            SIXTH_HOMEWORK_SOURCE.questions
+          )
+            ? SIXTH_HOMEWORK_SOURCE.questions
+            : [],
+      }
+    : null;
+
+/* =========================================================
    بيانات الواجبات
 ========================================================= */
 
@@ -1124,6 +1167,12 @@ const HOMEWORKS = [
     questions:
       FIFTH_HOMEWORK_QUESTIONS,
   },
+
+  ...(SIXTH_HOMEWORK
+    ? [
+        SIXTH_HOMEWORK,
+      ]
+    : []),
 
   ...(SECOND_CENTER_HOMEWORK
     ? [

@@ -1547,6 +1547,63 @@ const homeworkData = {
 
     questions: [],
   },
+  "third-homework-6": {
+    id: "third-homework-6",
+
+    title: "واجب المحاضرة السادسة",
+
+    grade: "الثالث الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoId: "p91O3Ez8zcg",
+
+    questions: Array.from(
+      { length: 21 },
+      (_, index) => ({
+        id: `third-homework-6-q${index + 1}`,
+
+        questionNumber: index + 1,
+
+        question: `السؤال ${index + 1}`,
+
+        options: [
+          "أ",
+          "ب",
+          "ج",
+          "د",
+        ],
+
+        cancelled: false,
+
+        correctAnswer: [
+          0,
+          1,
+          0,
+          2,
+          1,
+          0,
+          3,
+          2,
+          3,
+          2,
+          1,
+          1,
+          0,
+          3,
+          0,
+          0,
+          0,
+          1,
+          3,
+          3,
+          3,
+        ][index],
+      })
+    ),
+  },
 };
 
 export default homeworkData;
