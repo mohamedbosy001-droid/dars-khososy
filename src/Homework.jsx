@@ -771,6 +771,33 @@ const FIRST_CENTER_LECTURE_3_VIDEO_ONLY = {
 };
 
 /* =========================================================
+   واجب كاد وأخواتها - أولى ثانوي
+   فيديو فقط بدون أسئلة
+========================================================= */
+
+const FIRST_CENTER_KADA_VIDEO_ONLY = {
+  id: "first-center-kada-video-only",
+
+  title:
+    "واجب كاد وأخواتها",
+
+  grade:
+    "الأول الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "jh8dpn6DIhQ",
+
+  questions: [],
+};
+
+/* =========================================================
    استثناء فيديو فقط - تانية ثانوي
 ========================================================= */
 
@@ -1070,7 +1097,7 @@ const SIXTH_HOMEWORK =
 
         videoId:
           SIXTH_HOMEWORK_SOURCE.videoId ||
-          "p91O3Ez8zcg",
+          "g4oIr06pQjI",
 
         questions:
           Array.isArray(
@@ -1185,6 +1212,8 @@ const HOMEWORKS = [
   FIRST_CENTER_LECTURE_2_VIDEO_ONLY,
 
   FIRST_CENTER_LECTURE_3_VIDEO_ONLY,
+
+  FIRST_CENTER_KADA_VIDEO_ONLY,
 
   SECOND_CENTER_VIDEO_ONLY,
 

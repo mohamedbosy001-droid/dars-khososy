@@ -1558,7 +1558,7 @@ const homeworkData = {
 
     centerOnly: true,
 
-    videoId: "p91O3Ez8zcg",
+videoId: "g4oIr06pQjI",
 
     questions: Array.from(
       { length: 21 },
@@ -1603,6 +1603,23 @@ const homeworkData = {
         ][index],
       })
     ),
+  },
+  "first-center-kada-homework": {
+    id: "first-center-kada-homework",
+
+    title: "واجب كاد وأخواتها",
+
+    grade: "الأول الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "jh8dpn6DIhQ",
+
+    questions: [],
   },
 };
 
