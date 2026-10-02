@@ -13,6 +13,7 @@ import {
   runTransaction,
   Timestamp,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
@@ -1443,6 +1444,54 @@ function Homework({
           )
       );
     }, [currentStudent]);
+
+  /* =========================================================
+     مزامنة كتالوج واجبات السنتر مع Firebase
+     الداشبورد يقرأ نفس الكتالوج، لذلك أي واجب جديد يضاف
+     إلى HOMEWORKS يظهر تلقائيًا بعد فتح المنصة.
+  ========================================================= */
+  useEffect(() => {
+    const syncHomeworkCatalog = async () => {
+      try {
+        await Promise.all(
+          HOMEWORKS.filter((homework) => homework?.id).map((homework) => {
+            const questions = Array.isArray(homework.questions)
+              ? homework.questions
+              : [];
+
+            const totalScore = questions.filter(
+              (question) => question?.cancelled !== true
+            ).length;
+
+            return setDoc(
+              doc(db, "homeworkCatalog", homework.id),
+              {
+                id: homework.id,
+                title: homework.title || "واجب بدون اسم",
+                grade: normalizeGrade(homework.grade),
+                studentType: homework.studentType || "center",
+                centerOnly: homework.centerOnly === true || homework.studentType === "center",
+                videoOnly: homework.videoOnly === true,
+                videoId: homework.videoId || "",
+                courseId: homework.courseId || "",
+                lessonId: homework.lessonId || "",
+                totalScore,
+                source: "platform-center",
+                isPublished: true,
+                updatedAt: Timestamp.now(),
+              },
+              { merge: true }
+            );
+          })
+        );
+      } catch (error) {
+        // لا نعطل صفحة الطالب لو قواعد Firestore منعت المزامنة.
+        console.error("Homework catalog sync error:", error);
+      }
+    };
+
+    syncHomeworkCatalog();
+  }, []);
 
   const activeHomework =
     useMemo(

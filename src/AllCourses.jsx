@@ -12,6 +12,8 @@ import {
   doc,
   onSnapshot,
   runTransaction,
+  setDoc,
+  serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
 
@@ -1546,6 +1548,91 @@ function AllCourses({
       lessons,
     };
   }
+
+  /*
+    ============================
+    مزامنة واجبات الأونلاين مع الداش بورد
+    ============================
+
+    أي واجب مفعّل داخل أي محاضرة يتم تسجيله تلقائيًا
+    في homeworkCatalog بدون تغيير نظام الواجب نفسه.
+  */
+  useEffect(() => {
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return;
+    }
+
+    const normalizeCatalogGrade = (grade = "") =>
+      String(grade)
+        .replace(/^الصف\s+/, "")
+        .trim();
+
+    const syncOnlineHomeworkCatalog = async () => {
+      const writes = [];
+      const seenHomeworkIds = new Set();
+
+      courses.forEach((course) => {
+        const lessons = Array.isArray(course?.lessons)
+          ? course.lessons
+          : [];
+
+        lessons.forEach((lesson, index) => {
+          if (lesson?.homeworkEnabled !== true) {
+            return;
+          }
+
+          const lessonId = lesson?.id || `lesson-${index + 1}`;
+          const homeworkId =
+            lesson?.homeworkKey ||
+            `${course?.id || "course"}-${lessonId}-homework`;
+
+          if (seenHomeworkIds.has(homeworkId)) {
+            return;
+          }
+          seenHomeworkIds.add(homeworkId);
+
+          const homeworkTitle =
+            lesson?.homeworkTitle ||
+            `واجب ${lesson?.title || `المحاضرة ${index + 1}`}`;
+
+          writes.push(
+            setDoc(
+              doc(db, "homeworkCatalog", homeworkId),
+              {
+                id: homeworkId,
+                title: homeworkTitle,
+                grade: normalizeCatalogGrade(course?.grade || ""),
+                studentType: "online",
+                centerOnly: false,
+                courseId: course?.id || "",
+                courseTitle: course?.title || "",
+                lessonId,
+                lessonTitle: lesson?.title || "",
+                videoOnly: lesson?.homeworkVideoOnly === true,
+                active: true,
+                source: "platform",
+                updatedAt: serverTimestamp(),
+              },
+              { merge: true }
+            )
+          );
+        });
+      });
+
+      if (writes.length > 0) {
+        try {
+          await Promise.all(writes);
+        } catch (error) {
+          console.error(
+            "Error syncing online homework catalog:",
+            error
+          );
+        }
+      }
+    };
+
+    syncOnlineHomeworkCatalog();
+  }, [courses]);
 
   /*
     ============================
