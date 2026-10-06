@@ -98,6 +98,8 @@ const FIRST_LECTURE_1_EXAM_KEY =
 
 const FIRST_LECTURE_1_EXAM_ID =
   "first-lecture-1-exam";
+const FIRST_LECTURE_2_EXAM_KEY = "firstLecture2Exam";
+const FIRST_LECTURE_2_EXAM_ID = "first-lecture-2-exam";
 
 /*
   ============================
@@ -116,6 +118,8 @@ const SECOND_LECTURE_2_EXAM_KEY =
 
 const SECOND_LECTURE_2_EXAM_ID =
   "second-lecture-2-exam";
+const SECOND_LECTURE_3_EXAM_KEY = "secondLecture3Exam";
+const SECOND_LECTURE_3_EXAM_ID = "second-lecture-3-exam";
 
 /*
   ============================
@@ -146,6 +150,8 @@ const THIRD_LECTURE_4_EXAM_KEY =
 
 const THIRD_LECTURE_4_EXAM_ID =
   "third-lecture-4-exam";
+const THIRD_LECTURE_5_EXAM_KEY = "thirdLecture5Exam";
+const THIRD_LECTURE_5_EXAM_ID = "third-lecture-5-exam";
 
 /*
   الكورسات المجانية القديمة تظل موجودة في الكود/Firestore
@@ -296,6 +302,10 @@ const FIRST_SECONDARY_SECOND_LECTURE = {
 
     FIRST_LECTURE_1_EXAM_ID,
 
+  exam1: true,
+  exam1Key: FIRST_LECTURE_2_EXAM_KEY,
+  exam1Title: "امتحان المحاضرة الثانية",
+
     homeworkEnabled: true,
 
   homeworkVideoOnly: true,
@@ -305,6 +315,17 @@ const FIRST_SECONDARY_SECOND_LECTURE = {
 
   homeworkVideoUrl:
     "https://www.youtube.com/watch?v=Y0OzJglU-BE",
+};
+
+const FIRST_SECONDARY_THIRD_LECTURE = {
+  id: "lesson-3",
+  title: "المحاضرة الثالثة - كان وأخواتها",
+  description: "سلّم امتحان المحاضرة الثانية أولًا لفتح فيديو المحاضرة الثالثة.",
+  youtubeUrl: "https://youtu.be/emRXibPGS4g",
+  videoUrl: "https://youtu.be/emRXibPGS4g",
+  videoTitle: "المحاضرة الثالثة - كان وأخواتها",
+  requiresPreviousExam: true,
+  requiredExamId: FIRST_LECTURE_2_EXAM_ID,
 };
 
 /*
@@ -423,6 +444,24 @@ const SECOND_SECONDARY_THIRD_LECTURE = {
   requiresPreviousExam: true,
   requiredExamId:
     SECOND_LECTURE_2_EXAM_ID,
+  exam1: true,
+  exam1Key: SECOND_LECTURE_3_EXAM_KEY,
+  exam1Title: "امتحان المحاضرة الثالثة",
+};
+
+const SECOND_SECONDARY_FOURTH_LECTURE = {
+  id: "lesson-4",
+  title: "المحاضرة الرابعة - شرح نص الخلق جوهر الفضيلة",
+  description: "سلّم امتحان المحاضرة الثالثة أولًا لفتح فيديو المحاضرة الرابعة، وبعد مشاهدة 30% يفتح الواجب.",
+  youtubeUrl: "https://www.youtube.com/watch?v=hpCLrQz3wN0",
+  videoUrl: "https://www.youtube.com/watch?v=hpCLrQz3wN0",
+  videoTitle: "المحاضرة الرابعة - شرح نص الخلق جوهر الفضيلة",
+  homeworkEnabled: true,
+  homeworkVideoOnly: true,
+  homeworkTitle: "فيديو واجب المحاضرة الرابعة",
+  homeworkVideoUrl: "https://www.youtube.com/watch?v=reqBg9w_j5E",
+  requiresPreviousExam: true,
+  requiredExamId: SECOND_LECTURE_3_EXAM_ID,
 };
 
 /*
@@ -607,6 +646,26 @@ const THIRD_FIFTH_LECTURE = {
     THIRD_LECTURE_4_EXAM_KEY,
   entryExamTitle:
     "امتحان المحاضرة الرابعة",
+  exam1: true,
+  exam1Key: THIRD_LECTURE_5_EXAM_KEY,
+  exam1Title: "امتحان المحاضرة الخامسة",
+};
+
+const THIRD_SIXTH_LECTURE = {
+  id: "lesson-6",
+  title: "المحاضرة السادسة - أدب الاتجاه الوجداني",
+  description: "سلّم امتحان المحاضرة الخامسة أولًا لفتح فيديو المحاضرة السادسة، وشاهد 30% من المحاضرة لفتح الواجب، وبعد تسليم الواجب يفتح فيديو الواجب.",
+  youtubeUrl: "https://youtu.be/qzReYngag9U?si=_RvYRlp5MBGctgJY",
+  videoUrl: "https://youtu.be/qzReYngag9U?si=_RvYRlp5MBGctgJY",
+  videoTitle: "المحاضرة السادسة - أدب الاتجاه الوجداني",
+  homeworkEnabled: true,
+  homeworkKey: "thirdLecture6Homework",
+  homeworkTitle: "واجب المحاضرة السادسة",
+  homeworkSolutionUrl: "https://youtu.be/g4oIr06pQjI?si=wOC56EmNAgIDJgfX",
+  solutionVideoUrl: "https://youtu.be/g4oIr06pQjI?si=wOC56EmNAgIDJgfX",
+  homeworkSolutionTitle: "فيديو الواجب",
+  requiresPreviousExam: true,
+  requiredExamId: THIRD_LECTURE_5_EXAM_ID,
 };
 
 function renderUnderlinedQuestionText(text) {
@@ -1164,9 +1223,12 @@ function AllCourses({
         });
       }
 
+      const thirdLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-3" || lesson?.courseLectureKey === "first-secondary-lecture-3");
+      if (thirdLessonIndex >= 0) lessons[thirdLessonIndex] = { ...lessons[thirdLessonIndex], ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" };
+      else lessons.push({ ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" });
+
       return {
         ...course,
-
         lessons,
       };
     }
@@ -1285,9 +1347,12 @@ function AllCourses({
         });
       }
 
+      const fourthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-4" || lesson?.courseLectureKey === "second-secondary-lecture-4");
+      if (fourthLessonIndex >= 0) lessons[fourthLessonIndex] = { ...lessons[fourthLessonIndex], ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" };
+      else lessons.push({ ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" });
+
       return {
         ...course,
-
         lessons,
       };
     }
@@ -1331,6 +1396,11 @@ function AllCourses({
             ...THIRD_FIFTH_LECTURE,
             courseLectureKey:
               "third-lecture-5",
+          },
+          {
+            ...THIRD_SIXTH_LECTURE,
+            courseLectureKey:
+              "third-lecture-6",
           },
         ],
       };
@@ -1542,9 +1612,14 @@ function AllCourses({
       }
     }
 
+    if (course.id === "third-term-course") {
+      const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "third-lecture-6");
+      if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" };
+      else lessons.push({ ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" });
+    }
+
     return {
       ...course,
-
       lessons,
     };
   }
@@ -2002,8 +2077,7 @@ function AllCourses({
           course.id ===
           selectedCourse.id
       );
-
-    if (updatedCourse) {
+      if (updatedCourse) {
       setSelectedCourse(
         updatedCourse
       );
@@ -4057,7 +4131,6 @@ function AllCourses({
     ) {
       return;
     }
-
     savingWatchRef.current.add(
       lessonKey
     );
@@ -5368,6 +5441,33 @@ function AllCourses({
           THIRD_LECTURE_4_EXAM_KEY
       );
 
+    const isFirstLectureTwoExam =
+      FIRST_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey === FIRST_LECTURE_2_EXAM_KEY ||
+        examKey === FIRST_LECTURE_2_EXAM_KEY
+      );
+
+    const isSecondLectureThreeExam =
+      SECOND_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey === SECOND_LECTURE_3_EXAM_KEY ||
+        examKey === SECOND_LECTURE_3_EXAM_KEY
+      );
+
+    const isThirdLectureFiveExam =
+      THIRD_SECONDARY_COURSE_IDS.has(
+        course.id
+      ) &&
+      (
+        finalExamKey === THIRD_LECTURE_5_EXAM_KEY ||
+        examKey === THIRD_LECTURE_5_EXAM_KEY
+      );
+
     const isFirstLectureOneExam =
       FIRST_SECONDARY_COURSE_IDS.has(
         course.id
@@ -5544,6 +5644,66 @@ function AllCourses({
       ) {
         window.alert(
           "فعّل المحاضرة الخامسة أولًا لفتح الامتحان."
+        );
+        return;
+      }
+    } else if (
+      isFirstLectureTwoExam
+    ) {
+      const thirdLesson =
+        Array.isArray(course.lessons)
+          ? course.lessons.find(
+              (courseLesson) =>
+                courseLesson?.id === "lesson-3"
+            )
+          : null;
+
+      if (
+        !thirdLesson ||
+        !hasLessonAccess(course, thirdLesson)
+      ) {
+        window.alert(
+          "فعّل المحاضرة الثالثة أولًا لفتح الامتحان."
+        );
+        return;
+      }
+    } else if (
+      isSecondLectureThreeExam
+    ) {
+      const fourthLesson =
+        Array.isArray(course.lessons)
+          ? course.lessons.find(
+              (courseLesson) =>
+                courseLesson?.id === "lesson-4"
+            )
+          : null;
+
+      if (
+        !fourthLesson ||
+        !hasLessonAccess(course, fourthLesson)
+      ) {
+        window.alert(
+          "فعّل المحاضرة الرابعة أولًا لفتح الامتحان."
+        );
+        return;
+      }
+    } else if (
+      isThirdLectureFiveExam
+    ) {
+      const sixthLesson =
+        Array.isArray(course.lessons)
+          ? course.lessons.find(
+              (courseLesson) =>
+                courseLesson?.id === "lesson-6"
+            )
+          : null;
+
+      if (
+        !sixthLesson ||
+        !hasLessonAccess(course, sixthLesson)
+      ) {
+        window.alert(
+          "فعّل المحاضرة السادسة أولًا لفتح الامتحان."
         );
         return;
       }
@@ -5997,7 +6157,7 @@ function AllCourses({
                 return (
                   <article
                     key={
-                      question.id
+                        question.id
                     }
                     className={`exam-review-item ${
                       isCorrect
@@ -6531,11 +6691,20 @@ function AllCourses({
           isFirstLecture1ExamCompleted={isExamCompleted(
             FIRST_LECTURE_1_EXAM_ID
           )}
+          isFirstLecture2ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_2_EXAM_ID
+          )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID
           )}
           isSecondLecture2ExamCompleted={isExamCompleted(
             SECOND_LECTURE_2_EXAM_ID
+          )}
+          isSecondLecture3ExamCompleted={isExamCompleted(
+            SECOND_LECTURE_3_EXAM_ID
+          )}
+          isThirdLecture5ExamCompleted={isExamCompleted(
+            THIRD_LECTURE_5_EXAM_ID
           )}
           onBack={
             closeCourseContent

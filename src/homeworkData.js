@@ -1547,6 +1547,24 @@ const homeworkData = {
 
     questions: [],
   },
+
+  "second-center-lecture-5-video-only": {
+    id: "second-center-lecture-5-video-only",
+
+    title: "واجب المحاضرة الخامسة الخلق جوهر الفضيلة",
+
+    grade: "الثاني الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "reqBg9w_j5E",
+
+    questions: [],
+  },
   "third-homework-6": {
     id: "third-homework-6",
 

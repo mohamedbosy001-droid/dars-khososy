@@ -55,6 +55,12 @@ function CourseContent({
   isFirstLecture1ExamCompleted = false,
 
   /*
+    هل امتحان المحاضرة الثانية
+    في أولى ثانوي تم تسليمه؟
+  */
+  isFirstLecture2ExamCompleted = false,
+
+  /*
     هل امتحان المحاضرة الأولى
     في تانية ثانوي تم تسليمه؟
   */
@@ -65,6 +71,18 @@ function CourseContent({
     في تانية ثانوي تم تسليمه؟
   */
   isSecondLecture2ExamCompleted = false,
+
+  /*
+    هل امتحان المحاضرة الثالثة
+    في تانية ثانوي تم تسليمه؟
+  */
+  isSecondLecture3ExamCompleted = false,
+
+  /*
+    هل امتحان المحاضرة الخامسة
+    في تالتة ثانوي تم تسليمه؟
+  */
+  isThirdLecture5ExamCompleted = false,
 
   lessonActivationCodes,
   onLessonCodeChange,
@@ -322,6 +340,10 @@ function CourseContent({
                 isFirstSecondaryCourse &&
                 lessonIndex === 1;
 
+              const isFirstThirdLesson =
+                isFirstSecondaryCourse &&
+                lesson.id === "lesson-3";
+
               /*
                 =====================================
                 المحاضرة الثانية لتانية ثانوي
@@ -331,6 +353,14 @@ function CourseContent({
               const isSecondSecondLesson =
                 isSecondSecondaryCourse &&
                 lessonIndex === 1;
+
+              const isSecondThirdLessonForExam =
+                isSecondSecondaryCourse &&
+                lesson.id === "lesson-3";
+
+              const isSecondFourthLesson =
+                isSecondSecondaryCourse &&
+                lesson.id === "lesson-4";
 
               /*
                 =====================================
@@ -375,6 +405,10 @@ function CourseContent({
                 lesson.id ===
                   "lesson-5";
 
+              const isThirdSixthLesson =
+                isThirdSecondaryCourse &&
+                lesson.id === "lesson-6";
+
               /*
                 =====================================
                 فتح فيديو المحاضرة
@@ -386,20 +420,31 @@ function CourseContent({
                 (
                   (
                     !isFirstSecondLesson &&
+                    !isFirstThirdLesson &&
                     !isSecondSecondLesson &&
-                    !isSecondThirdLesson &&
+                    !isSecondThirdLessonForExam &&
+                    !isSecondFourthLesson &&
                     !isThirdSecondLesson &&
                     !isThirdThirdLesson &&
                     !isThirdFourthLesson &&
-                    !isThirdFifthLesson
+                    !isThirdFifthLesson &&
+                    !isThirdSixthLesson
                   ) ||
                   (
                     isFirstSecondLesson &&
                     isFirstLecture1ExamCompleted
                   ) ||
                   (
+                    isFirstThirdLesson &&
+                    isFirstLecture2ExamCompleted
+                  ) ||
+                  (
                     isSecondSecondLesson &&
                     isSecondLecture1ExamCompleted
+                  ) ||
+                  (
+                    isSecondFourthLesson &&
+                    isSecondLecture3ExamCompleted
                   ) ||
                   (
                     isSecondThirdLesson &&
@@ -420,6 +465,10 @@ function CourseContent({
                   (
                     isThirdFifthLesson &&
                     isThirdLecture4ExamCompleted
+                  ) ||
+                  (
+                    isThirdSixthLesson &&
+                    isThirdLecture5ExamCompleted
                   )
                 );
 
@@ -539,13 +588,17 @@ function CourseContent({
               const hideExam1InSourceLesson =
                 (
                   isFirstSecondaryCourse &&
-                  lessonIndex === 0
+                  (
+                    lessonIndex === 0 ||
+                    lesson.id === "lesson-2"
+                  )
                 ) ||
                 (
                   isSecondSecondaryCourse &&
                   (
                     lesson.id === "lesson-1" ||
-                    lesson.id === "lesson-2"
+                    lesson.id === "lesson-2" ||
+                    lesson.id === "lesson-3"
                   )
                 ) ||
                 (
@@ -554,7 +607,9 @@ function CourseContent({
                     lesson.id === "lesson-1" ||
                     lesson.id === "lesson-2" ||
                     lesson.id === "lesson-3" ||
-                    lesson.id === "lesson-4"
+                    lesson.id === "lesson-4" ||
+                    lesson.id === "lesson-5" ||
+                    lesson.id === "lesson-6"
                   )
                 );
 
@@ -568,14 +623,7 @@ function CourseContent({
               const showFirstSecondaryExamBeforeSecondLesson =
                 isFirstSecondaryCourse &&
                 lessonIndex === 1 &&
-                firstLesson &&
-                (
-                  firstLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    firstLesson.exam1Key
-                  )
-                );
+                firstLesson;
 
               /*
                 =====================================
@@ -587,14 +635,7 @@ function CourseContent({
               const showSecondSecondaryExamBeforeSecondLesson =
                 isSecondSecondaryCourse &&
                 lessonIndex === 1 &&
-                firstLesson &&
-                (
-                  firstLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    firstLesson.exam1Key
-                  )
-                );
+                firstLesson;
 
               /*
                 =====================================
@@ -605,28 +646,14 @@ function CourseContent({
 
               const showSecondSecondaryExamBeforeThirdLesson =
                 isSecondSecondaryCourse &&
-                lesson.id ===
-                  "lesson-3" &&
-                secondLesson &&
-                (
-                  secondLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    secondLesson.exam1Key
-                  )
-                );
+                lesson.id === "lesson-3" &&
+                secondLesson;
 
               const showFirstExamBeforeSecondLesson =
                 isThirdSecondaryCourse &&
+                lesson.id !== "lesson-6" &&
                 lessonIndex === 1 &&
-                firstLesson &&
-                (
-                  firstLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    firstLesson.exam1Key
-                  )
-                );
+                firstLesson;
 
               /*
                 =====================================
@@ -637,15 +664,9 @@ function CourseContent({
 
               const showSecondExamBeforeThirdLesson =
                 isThirdSecondaryCourse &&
+                lesson.id !== "lesson-6" &&
                 lessonIndex === 2 &&
-                secondLesson &&
-                (
-                  secondLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    secondLesson.exam1Key
-                  )
-                );
+                secondLesson;
 
               /*
                 =====================================
@@ -656,18 +677,13 @@ function CourseContent({
 
               const showThirdExamBeforeFourthLesson =
                 isThirdSecondaryCourse &&
+                lesson.id !== "lesson-6" &&
                 lessonIndex === 3 &&
-                thirdLesson &&
-                (
-                  thirdLesson.exam1 ===
-                    true ||
-                  hasValue(
-                    thirdLesson.exam1Key
-                  )
-                );
+                thirdLesson;
 
               const showFourthExamBeforeFifthLesson =
                 isThirdSecondaryCourse &&
+                lesson.id !== "lesson-6" &&
                 lesson.id ===
                   "lesson-5" &&
                 (
@@ -684,6 +700,18 @@ function CourseContent({
                     lesson.entryExamKey
                   )
                 );
+
+              const showFirstSecondaryExamBeforeThirdLesson =
+                isFirstSecondaryCourse &&
+                lesson.id === "lesson-3";
+
+              const showSecondSecondaryExamBeforeFourthLesson =
+                isSecondSecondaryCourse &&
+                lesson.id === "lesson-4";
+
+              const showThirdExamBeforeSixthLesson =
+                isThirdSecondaryCourse &&
+                lesson.id === "lesson-6";
 
               return (
                 <div
@@ -1040,6 +1068,55 @@ function CourseContent({
                       )}
 
                       {/* =====================================
+                          امتحان المحاضرة الثانية - أولى ثانوي
+                          قبل المحاضرة الثالثة
+                      ===================================== */}
+                      {showFirstSecondaryExamBeforeThirdLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${
+                            unlocked ? "available" : "locked"
+                          }`}
+                          disabled={!unlocked}
+                          onClick={() =>
+                            onOpenExam?.(
+                              lesson,
+                              "firstLecture2Exam"
+                            )
+                          }
+                          style={{
+                            width: "100%",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (
+                              isFirstLecture2ExamCompleted ? (
+                                <FaCheckCircle />
+                              ) : (
+                                <FaClipboardCheck />
+                              )
+                            ) : (
+                              <FaLock />
+                            )}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>امتحان المحاضرة الثانية</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الثالثة بالكود أولًا"
+                                : isFirstLecture2ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك فتحه لمراجعة النتيجة"
+                                  : "ابدأ الامتحان - بعد تسليمه يفتح فيديو المحاضرة الثالثة"}
+                            </p>
+                          </div>
+                          {isFirstLecture2ExamCompleted && (
+                            <FaCheckCircle className="course-content-completed-icon" />
+                          )}
+                        </button>
+                      )}
+
+                      {/* =====================================
                           امتحان المحاضرة الثانية - تانية ثانوي
                           قبل المحاضرة الثالثة
                       ===================================== */}
@@ -1092,6 +1169,55 @@ function CourseContent({
                           </div>
 
                           {isSecondLecture2ExamCompleted && (
+                            <FaCheckCircle className="course-content-completed-icon" />
+                          )}
+                        </button>
+                      )}
+
+                      {/* =====================================
+                          امتحان المحاضرة الثالثة - تانية ثانوي
+                          قبل المحاضرة الرابعة
+                      ===================================== */}
+                      {showSecondSecondaryExamBeforeFourthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${
+                            unlocked ? "available" : "locked"
+                          }`}
+                          disabled={!unlocked}
+                          onClick={() =>
+                            onOpenExam?.(
+                              lesson,
+                              "secondLecture3Exam"
+                            )
+                          }
+                          style={{
+                            width: "100%",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (
+                              isSecondLecture3ExamCompleted ? (
+                                <FaCheckCircle />
+                              ) : (
+                                <FaClipboardCheck />
+                              )
+                            ) : (
+                              <FaLock />
+                            )}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>امتحان المحاضرة الثالثة</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الرابعة بالكود أولًا"
+                                : isSecondLecture3ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك فتحه لمراجعة النتيجة"
+                                  : "ابدأ الامتحان - بعد تسليمه يفتح فيديو المحاضرة الرابعة"}
+                            </p>
+                          </div>
+                          {isSecondLecture3ExamCompleted && (
                             <FaCheckCircle className="course-content-completed-icon" />
                           )}
                         </button>
@@ -1350,6 +1476,55 @@ function CourseContent({
                       )}
 
                       {/* =====================================
+                          امتحان المحاضرة الخامسة - تالتة ثانوي
+                          قبل المحاضرة السادسة
+                      ===================================== */}
+                      {showThirdExamBeforeSixthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${
+                            unlocked ? "available" : "locked"
+                          }`}
+                          disabled={!unlocked}
+                          onClick={() =>
+                            onOpenExam?.(
+                              lesson,
+                              "thirdLecture5Exam"
+                            )
+                          }
+                          style={{
+                            width: "100%",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (
+                              isThirdLecture5ExamCompleted ? (
+                                <FaCheckCircle />
+                              ) : (
+                                <FaClipboardCheck />
+                              )
+                            ) : (
+                              <FaLock />
+                            )}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>امتحان المحاضرة الخامسة</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة السادسة بالكود أولًا"
+                                : isThirdLecture5ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك فتحه لمراجعة النتيجة"
+                                  : "ابدأ الامتحان - بعد تسليمه يفتح فيديو المحاضرة السادسة"}
+                            </p>
+                          </div>
+                          {isThirdLecture5ExamCompleted && (
+                            <FaCheckCircle className="course-content-completed-icon" />
+                          )}
+                        </button>
+                      )}
+
+                      {/* =====================================
                           فيديو المحاضرة + كود التفعيل
                       ===================================== */}
 
@@ -1523,7 +1698,7 @@ function CourseContent({
                                   fontWeight:
                                     "bold",
                                 }}
-                              >
+                                >
                                 <FaKey />
 
                                 تفعيل المحاضرة بالكود
@@ -1992,7 +2167,10 @@ function CourseContent({
                         !showFirstExamBeforeSecondLesson &&
                         !showSecondExamBeforeThirdLesson &&
                         !showThirdExamBeforeFourthLesson &&
-                        !showFourthExamBeforeFifthLesson && (
+                        !showFourthExamBeforeFifthLesson &&
+                        !showFirstSecondaryExamBeforeThirdLesson &&
+                        !showSecondSecondaryExamBeforeFourthLesson &&
+                        !showThirdExamBeforeSixthLesson && (
                           <div
                             style={{
                               padding:
