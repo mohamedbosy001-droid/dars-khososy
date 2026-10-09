@@ -1136,6 +1136,92 @@ const SIXTH_HOMEWORK =
     : null;
 
 /* =========================================================
+   واجب المحاضرة السابعة - إن وأخواتها
+   احتياطيًا: تُستخدم هذه البيانات إذا لم يُضف الواجب إلى homeworkData.js
+========================================================= */
+
+const SEVENTH_HOMEWORK_SOURCE =
+  homeworkData?.["third-center-homework-7"] || null;
+
+const SEVENTH_HOMEWORK_ANSWERS = [
+  // النحو: 33 سؤالًا
+  0, 0, 0, 2, 3, 3, 2, 0, 1, 3, 2,
+  1, 3, 1, 3, 0, 2, 3, 3, 3, 3, 2,
+  2, 1, 0, 0, 1, 2, 2, 1, 0, 3, 3,
+];
+
+const SEVENTH_HOMEWORK_TEXT1_ANSWERS = [
+  2, 2, 1, 2, 2, 2, null, 2,
+];
+
+const SEVENTH_HOMEWORK_TEXT2_ANSWERS = [
+  2, 3, null, 2, 0, 3, 2, 2,
+];
+
+const SEVENTH_HOMEWORK_TEXT3_ANSWERS = [
+  1, 0, 0, 1, 3, 3, 0, 1, 3,
+];
+
+const SEVENTH_HOMEWORK_FALLBACK_QUESTIONS = [
+  ...SEVENTH_HOMEWORK_ANSWERS.map((answer, index) => ({
+    id: `third-center-homework-7-nahw-q${index + 1}`,
+    number: index + 1,
+    type: "choice",
+    question: `السؤال ${index + 1}`,
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: answer,
+  })),
+  ...SEVENTH_HOMEWORK_TEXT1_ANSWERS.map((answer, index) => ({
+    id: `third-center-homework-7-text1-q${index + 1}`,
+    number: index + 1,
+    type: "choice",
+    question: `السؤال ${SEVENTH_HOMEWORK_ANSWERS.length + index + 1}`,
+    options: ["أ", "ب", "ج", "د"],
+    cancelled: answer === null,
+    correctAnswer: answer,
+  })),
+  ...SEVENTH_HOMEWORK_TEXT2_ANSWERS.map((answer, index) => ({
+    id: `third-center-homework-7-text2-q${index + 1}`,
+    number: index + 1,
+    type: "choice",
+    question: `السؤال ${SEVENTH_HOMEWORK_ANSWERS.length + SEVENTH_HOMEWORK_TEXT1_ANSWERS.length + index + 1}`,
+    options: ["أ", "ب", "ج", "د"],
+    cancelled: answer === null,
+    correctAnswer: answer,
+  })),
+  ...SEVENTH_HOMEWORK_TEXT3_ANSWERS.map((answer, index) => ({
+    id: `third-center-homework-7-text3-q${index + 1}`,
+    number: index + 1,
+    type: "choice",
+    question: `السؤال ${SEVENTH_HOMEWORK_ANSWERS.length + SEVENTH_HOMEWORK_TEXT1_ANSWERS.length + SEVENTH_HOMEWORK_TEXT2_ANSWERS.length + index + 1}`,
+    options: ["أ", "ب", "ج", "د"],
+    correctAnswer: answer,
+  })),
+];
+
+const SEVENTH_HOMEWORK = {
+  ...(SEVENTH_HOMEWORK_SOURCE || {}),
+  id: "third-center-homework-7",
+  title: "واجب المحاضرة السابعة إن وأخواتها",
+  grade: "الثالث الثانوي",
+  studentType: "center",
+  centerOnly: true,
+  videoId: "6qkp2Rfh3vk",
+  questions: (
+    Array.isArray(SEVENTH_HOMEWORK_SOURCE?.questions)
+      ? SEVENTH_HOMEWORK_SOURCE.questions
+      : SEVENTH_HOMEWORK_FALLBACK_QUESTIONS
+  ).map((question, index) => ({
+    ...question,
+    number: index + 1,
+    question: `السؤال ${index + 1}`,
+    options: Array.isArray(question?.options)
+      ? question.options
+      : ["أ", "ب", "ج", "د"],
+  })),
+};
+
+/* =========================================================
    بيانات الواجبات
 ========================================================= */
 
@@ -1227,6 +1313,8 @@ const HOMEWORKS = [
         SIXTH_HOMEWORK,
       ]
     : []),
+
+  SEVENTH_HOMEWORK,
 
   ...(SECOND_CENTER_HOMEWORK
     ? [

@@ -1639,6 +1639,67 @@ videoId: "g4oIr06pQjI",
 
     questions: [],
   },
+  "third-center-homework-7": {
+    id: "third-center-homework-7",
+    title: "واجب المحاضرة السابعة إن وأخواتها",
+    grade: "الثالث الثانوي",
+    studentType: "center",
+    centerOnly: true,
+    videoId: "6qkp2Rfh3vk",
+    questions: [
+      // أولًا: واجب النحو - 33 سؤالًا
+      ...[
+        0, 0, 0, 2, 3, 3, 2, 0, 1, 3, 2,
+        1, 3, 1, 3, 0, 2, 3, 3, 3, 3, 2,
+        2, 1, 0, 0, 1, 2, 2, 1, 0, 3, 3,
+      ].map((answer, index) => ({
+        id: `third-center-homework-7-nahw-q${index + 1}`,
+        number: index + 1,
+        type: "choice",
+        question: `واجب النحو - السؤال ${index + 1}`,
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: answer,
+      })),
+
+      // ثانيًا: النص الأول - 8 أسئلة
+      ...[
+        2, 2, 1, 2, 2, 2, null, 2,
+      ].map((answer, index) => ({
+        id: `third-center-homework-7-text1-q${index + 1}`,
+        number: index + 1,
+        type: "choice",
+        question: `النص الأول - السؤال ${index + 1}`,
+        options: ["أ", "ب", "ج", "د"],
+        cancelled: answer === null,
+        correctAnswer: answer,
+      })),
+
+      // ثالثًا: النص الثاني - 8 أسئلة
+      ...[
+        2, 3, null, 2, 0, 3, 2, 2,
+      ].map((answer, index) => ({
+        id: `third-center-homework-7-text2-q${index + 1}`,
+        number: index + 1,
+        type: "choice",
+        question: `النص الثاني - السؤال ${index + 1}`,
+        options: ["أ", "ب", "ج", "د"],
+        cancelled: answer === null,
+        correctAnswer: answer,
+      })),
+
+      // رابعًا: النص الثالث - 9 أسئلة
+      ...[
+        1, 0, 0, 1, 3, 3, 0, 1, 3,
+      ].map((answer, index) => ({
+        id: `third-center-homework-7-text3-q${index + 1}`,
+        number: index + 1,
+        type: "choice",
+        question: `النص الثالث - السؤال ${index + 1}`,
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: answer,
+      })),
+    ],
+  },
 };
 
 export default homeworkData;
