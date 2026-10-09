@@ -1700,6 +1700,15 @@ videoId: "g4oIr06pQjI",
       })),
     ],
   },
+  "second-center-homework-6": {
+    id: "second-center-homework-6",
+    title: "واجب المحاضرة السادسة نص العلم نور",
+    grade: "الثاني الثانوي",
+    studentType: "center",
+    centerOnly: true,
+    videoId: "RfgqUnuRJ6k",
+    questions: [],
+  },
 };
 
 export default homeworkData;

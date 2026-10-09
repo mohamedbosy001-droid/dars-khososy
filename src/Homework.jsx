@@ -906,6 +906,34 @@ const SECOND_CENTER_LECTURE_5_VIDEO_ONLY = {
 
 
 /* =========================================================
+   واجب المحاضرة السادسة - تانية ثانوي سنتر
+   نص العلم نور - فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_6_VIDEO_ONLY = {
+  id: "second-center-lecture-6-video-only",
+
+  title:
+    "واجب المحاضرة السادسة نص العلم نور",
+
+  grade:
+    "الثاني الثانوي",
+
+  studentType:
+    "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId:
+    "RfgqUnuRJ6k",
+
+  questions: [],
+};
+
+
+/* =========================================================
    واجب المحاضرة الخامسة - تالتة ثانوي
 ========================================================= */
 
@@ -1337,6 +1365,8 @@ const HOMEWORKS = [
   SECOND_CENTER_LECTURE_4_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_5_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_6_VIDEO_ONLY,
 
 ];
 
