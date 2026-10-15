@@ -409,6 +409,16 @@ function CourseContent({
                 isThirdSecondaryCourse &&
                 lesson.id === "lesson-6";
 
+              // مراجعة أكتوبر تفتح مباشرة بدون امتحانات أو واجبات سابقة.
+              const isOctoberReviewLesson =
+                lesson?.id === "october-review" ||
+                lesson?.courseLectureKey === "third-october-review";
+
+              // مراجعة أكتوبر لأولى ثانوي: فيديو فقط بدون امتحان أو واجب سابق.
+              const isFirstOctoberReviewLesson =
+                lesson?.id === "first-october-review" ||
+                lesson?.courseLectureKey === "first-october-review";
+
               /*
                 =====================================
                 فتح فيديو المحاضرة
@@ -418,6 +428,9 @@ function CourseContent({
               const canOpenVideo =
                 unlocked &&
                 (
+                  isOctoberReviewLesson ||
+                  isFirstOctoberReviewLesson ||
+                  (
                   (
                     !isFirstSecondLesson &&
                     !isFirstThirdLesson &&
@@ -469,6 +482,7 @@ function CourseContent({
                   (
                     isThirdSixthLesson &&
                     isThirdLecture5ExamCompleted
+                  )
                   )
                 );
 
@@ -650,10 +664,11 @@ function CourseContent({
                 secondLesson;
 
               const showFirstExamBeforeSecondLesson =
-                isThirdSecondaryCourse &&
+                !isOctoberReviewLesson &&
+                (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 1 &&
-                firstLesson;
+                firstLesson);
 
               /*
                 =====================================
@@ -663,10 +678,11 @@ function CourseContent({
               */
 
               const showSecondExamBeforeThirdLesson =
-                isThirdSecondaryCourse &&
+                !isOctoberReviewLesson &&
+                (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 2 &&
-                secondLesson;
+                secondLesson);
 
               /*
                 =====================================
@@ -676,13 +692,15 @@ function CourseContent({
               */
 
               const showThirdExamBeforeFourthLesson =
-                isThirdSecondaryCourse &&
+                !isOctoberReviewLesson &&
+                (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 3 &&
-                thirdLesson;
+                thirdLesson);
 
               const showFourthExamBeforeFifthLesson =
-                isThirdSecondaryCourse &&
+                !isOctoberReviewLesson &&
+                (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lesson.id ===
                   "lesson-5" &&
@@ -699,7 +717,7 @@ function CourseContent({
                   hasValue(
                     lesson.entryExamKey
                   )
-                );
+                ));
 
               const showFirstSecondaryExamBeforeThirdLesson =
                 isFirstSecondaryCourse &&
@@ -710,8 +728,9 @@ function CourseContent({
                 lesson.id === "lesson-4";
 
               const showThirdExamBeforeSixthLesson =
-                isThirdSecondaryCourse &&
-                lesson.id === "lesson-6";
+                !isOctoberReviewLesson &&
+                (                isThirdSecondaryCourse &&
+                lesson.id === "lesson-6");
 
               return (
                 <div

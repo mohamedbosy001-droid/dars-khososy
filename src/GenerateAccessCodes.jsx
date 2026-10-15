@@ -53,6 +53,14 @@ const gradesData = [
 
     monthPrefix: "SM",
 
+    month2CourseId:
+      "second-month-2-course",
+
+    month2CourseTitle:
+      "كورس الشهر الثاني - الصف الثاني الثانوي",
+
+    month2Prefix: "SM2",
+
     termCourseId:
       "second-term-course",
 
@@ -471,8 +479,8 @@ function GenerateAccessCodes() {
       الثاني موجود حاليًا لتالتة فقط.
     */
     if (
-      newGrade !==
-        "الثالث الثانوي" &&
+      newGrade !== "الثاني الثانوي" &&
+      newGrade !== "الثالث الثانوي" &&
       accessType ===
         "month2"
     ) {
@@ -624,13 +632,12 @@ function GenerateAccessCodes() {
       حماية إضافية
     */
     if (
-      accessType ===
-        "month2" &&
-      grade !==
-        "الثالث الثانوي"
+      accessType === "month2" &&
+      grade !== "الثاني الثانوي" &&
+      grade !== "الثالث الثانوي"
     ) {
       setMessage(
-        "❌ الشهر الثاني متاح حاليًا للصف الثالث الثانوي فقط."
+        "❌ كود الشهر الثاني متاح للصف الثاني والثالث الثانوي فقط."
       );
 
       return;
@@ -809,11 +816,11 @@ function GenerateAccessCodes() {
         });
 
         /*
-          الشهر الثاني لتالتة فقط
+          الشهر الثاني لتانية وتالتة ثانوي
         */
         if (
-          gradeData.grade ===
-          "الثالث الثانوي"
+          gradeData.grade === "الثاني الثانوي" ||
+          gradeData.grade === "الثالث الثانوي"
         ) {
           groups.push({
             gradeData,
@@ -1154,8 +1161,8 @@ ${finishedGroups} / ${totalGroups}`
               كود الشهر الأول
             </option>
 
-            {grade ===
-              "الثالث الثانوي" && (
+            {(grade === "الثاني الثانوي" ||
+              grade === "الثالث الثانوي") && (
               <option value="month2">
                 كود الشهر الثاني
               </option>

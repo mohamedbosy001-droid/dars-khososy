@@ -50,6 +50,7 @@ import secondTmhede from "./assets/second-tmhede.jpeg";
 import firstMonthCourse from "./assets/first-month.jpeg";
 import firstTermCourse from "./assets/first-term.jpeg";
 import secondMonthCourse from "./assets/second-month.jpeg";
+import secondMonth2Course from "./assets/second-2month.jpeg";
 import secondTermCourse from "./assets/second-term.jpeg";
 import thirdMonthCourse from "./assets/third-month.jpeg";
 import thirdMonth2Course from "./assets/coursemonth2.jpeg";
@@ -78,6 +79,7 @@ const FIRST_SECONDARY_COURSE_IDS = new Set([
 
 const SECOND_SECONDARY_COURSE_IDS = new Set([
   "second-month-course",
+  "second-month-2-course",
   "second-term-course",
 ]);
 
@@ -1227,6 +1229,36 @@ function AllCourses({
       if (thirdLessonIndex >= 0) lessons[thirdLessonIndex] = { ...lessons[thirdLessonIndex], ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" };
       else lessons.push({ ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" });
 
+      // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
+      const octoberReview = {
+        id: "first-october-review",
+        title: "مراجعة شهر أكتوبر أقوى مراجعة لأمتحان الشهر الأول",
+        description: "",
+        youtubeUrl: "https://youtu.be/SHzayit3pag",
+        videoUrl: "https://youtu.be/SHzayit3pag",
+        exam1: false,
+        exam1Key: "",
+        exam1Title: "",
+        homeworkEnabled: false,
+        homeworkKey: "",
+        courseLectureKey: "first-october-review",
+      };
+
+      const octoberReviewIndex = lessons.findIndex(
+        (lesson) =>
+          lesson?.id === "first-october-review" ||
+          lesson?.courseLectureKey === "first-october-review"
+      );
+
+      if (octoberReviewIndex >= 0) {
+        lessons[octoberReviewIndex] = {
+          ...lessons[octoberReviewIndex],
+          ...octoberReview,
+        };
+      } else {
+        lessons.push(octoberReview);
+      }
+
       return {
         ...course,
         lessons,
@@ -1401,6 +1433,18 @@ function AllCourses({
             ...THIRD_SIXTH_LECTURE,
             courseLectureKey:
               "third-lecture-6",
+          },
+          {
+            id: "october-review",
+            title: "مراجعة شهر أكتوبر",
+            description: "على جميع ما سبق شرحه",
+            youtubeUrl: "https://youtu.be/ZFoRtWQotiE",
+            videoUrl: "https://youtu.be/ZFoRtWQotiE",
+            exam1: false,
+            exam1Key: "",
+            exam1Title: "",
+            homeworkEnabled: false,
+            courseLectureKey: "third-october-review",
           },
         ],
       };
@@ -1616,6 +1660,33 @@ function AllCourses({
       const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "third-lecture-6");
       if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" };
       else lessons.push({ ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" });
+
+      // مراجعة شهر أكتوبر: تفتح مباشرة دون امتحان أو واجب.
+      const octoberReviewIndex = lessons.findIndex(
+        (lesson) =>
+          lesson?.id === "october-review" ||
+          lesson?.courseLectureKey === "third-october-review"
+      );
+      const octoberReviewLesson = {
+        id: "october-review",
+        title: "مراجعة شهر أكتوبر",
+        description: "على جميع ما سبق شرحه",
+        youtubeUrl: "https://youtu.be/ZFoRtWQotiE",
+        videoUrl: "https://youtu.be/ZFoRtWQotiE",
+        exam1: false,
+        exam1Key: "",
+        exam1Title: "",
+        homeworkEnabled: false,
+        courseLectureKey: "third-october-review",
+      };
+      if (octoberReviewIndex >= 0) {
+        lessons[octoberReviewIndex] = {
+          ...lessons[octoberReviewIndex],
+          ...octoberReviewLesson,
+        };
+      } else {
+        lessons.push(octoberReviewLesson);
+      }
     }
 
     return {
@@ -1932,6 +2003,35 @@ function AllCourses({
               }
             );
 
+          const secondMonthOneCourse =
+            loadedCourses.find(
+              (course) =>
+                course.id ===
+                "second-month-course"
+            );
+
+          const secondMonthTwoExists =
+            loadedCourses.some(
+              (course) =>
+                course.id ===
+                "second-month-2-course"
+            );
+
+          const secondMonthTwoCourse =
+            secondMonthTwoExists
+              ? null
+              : {
+                  id: "second-month-2-course",
+                  title: "كورس الشهر الثاني - الصف الثاني الثانوي",
+                  grade: "الثاني الثانوي",
+                  description: "كورس الشهر الثاني للصف الثاني الثانوي.",
+                  price: secondMonthOneCourse?.price ?? 150,
+                  active: true,
+                  isPublished: true,
+                  status: "active",
+                  lessons: [],
+                };
+
           const thirdMonthOneCourse =
             loadedCourses.find(
               (course) =>
@@ -1974,6 +2074,9 @@ function AllCourses({
                 course.id !==
                 SECOND_FREE_INTRO_COURSE.id
             ),
+            ...(secondMonthTwoCourse
+              ? [secondMonthTwoCourse]
+              : []),
             ...(thirdMonthTwoCourse
               ? [
                   thirdMonthTwoCourse,
@@ -2134,27 +2237,45 @@ function AllCourses({
         }
       ).sort(
         (a, b) => {
+          const normalizedStudentGrade =
+            normalizeGrade(studentGrade);
+
           if (
-            normalizeGrade(
-              studentGrade
-            ) !==
-            normalizeGrade(
-              "الصف الثالث الثانوي"
-            )
+            normalizedStudentGrade ===
+            normalizeGrade("الثاني الثانوي")
           ) {
-            return 0;
+            const secondOrder = {
+              "second-term-course": 0,
+              "second-month-course": 1,
+              "second-month-2-course": 2,
+              "second-free-intro-course": 3,
+            };
+
+            return (
+              (secondOrder[a.id] ?? 99) -
+              (secondOrder[b.id] ?? 99)
+            );
           }
 
-          const order = {
-            "third-term-course": 0,
-            "third-month-course": 1,
-            "third-month-2-course": 2,
-          };
+          if (
+            normalizedStudentGrade ===
+            normalizeGrade("الصف الثالث الثانوي")
+          ) {
+            const thirdOrder = {
+              "third-term-course": 0,
+              "third-month-course": 1,
+              "third-month-2-course": 2,
+            };
 
-          return (
-            (order[a.id] ?? 99) -
-            (order[b.id] ?? 99)
-          );
+            return (
+              (thirdOrder[a.id] ?? 99) -
+              (thirdOrder[b.id] ?? 99)
+            );
+          }
+
+          if (a.id === "second-free-intro-course") return 1;
+          if (b.id === "second-free-intro-course") return -1;
+          return 0;
         }
       );
     }, [
@@ -3603,6 +3724,13 @@ function AllCourses({
       "second-month-course"
     ) {
       return secondMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "second-month-2-course"
+    ) {
+      return secondMonth2Course;
     }
 
     if (
@@ -6902,6 +7030,16 @@ function AllCourses({
                             "صورة الكورس"
                           }
                           className="course-shop-image"
+                          style={
+                            course.id === "second-month-2-course"
+                              ? {
+                                  objectFit: "contain",
+                                  objectPosition: "center center",
+                                  width: "100%",
+                                  height: "100%",
+                                }
+                              : undefined
+                          }
                         />
 
                         <span
