@@ -1383,6 +1383,34 @@ function AllCourses({
       if (fourthLessonIndex >= 0) lessons[fourthLessonIndex] = { ...lessons[fourthLessonIndex], ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" };
       else lessons.push({ ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" });
 
+      // مراجعة أكتوبر: فيديو فقط في كورس الشهر الثاني وكورس الترم.
+      if (
+        course.id === "second-month-2-course" ||
+        course.id === "second-term-course"
+      ) {
+        const octoberReviewLesson = {
+          id: "second-october-review",
+          title: "مراجعة شهر أكتوبر",
+          description: "",
+          youtubeUrl: "https://youtu.be/Fn3I2bqnwOU",
+          videoUrl: "https://youtu.be/Fn3I2bqnwOU",
+          exam1: false,
+          exam1Key: "",
+          exam1Title: "",
+          homeworkEnabled: false,
+          homeworkKey: "",
+          courseLectureKey: "second-october-review",
+        };
+        const octoberReviewIndex = lessons.findIndex(
+          (lesson) => lesson?.id === "second-october-review" || lesson?.courseLectureKey === "second-october-review"
+        );
+        if (octoberReviewIndex >= 0) {
+          lessons[octoberReviewIndex] = { ...lessons[octoberReviewIndex], ...octoberReviewLesson };
+        } else {
+          lessons.push(octoberReviewLesson);
+        }
+      }
+
       return {
         ...course,
         lessons,
@@ -2029,7 +2057,21 @@ function AllCourses({
                   active: true,
                   isPublished: true,
                   status: "active",
-                  lessons: [],
+                  lessons: [
+                    {
+                      id: "second-october-review",
+                      title: "مراجعة شهر أكتوبر",
+                      description: "",
+                      youtubeUrl: "https://youtu.be/Fn3I2bqnwOU",
+                      videoUrl: "https://youtu.be/Fn3I2bqnwOU",
+                      exam1: false,
+                      exam1Key: "",
+                      exam1Title: "",
+                      homeworkEnabled: false,
+                      homeworkKey: "",
+                      courseLectureKey: "second-october-review",
+                    },
+                  ],
                 };
 
           const thirdMonthOneCourse =
