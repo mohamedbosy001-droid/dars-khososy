@@ -61,6 +61,12 @@ function CourseContent({
   isFirstLecture2ExamCompleted = false,
 
   /*
+    هل امتحان المحاضرة الرابعة
+    في أولى ثانوي تم تسليمه؟
+  */
+  isFirstLecture4ExamCompleted = false,
+
+  /*
     هل امتحان المحاضرة الأولى
     في تانية ثانوي تم تسليمه؟
   */
@@ -344,6 +350,10 @@ function CourseContent({
                 isFirstSecondaryCourse &&
                 lesson.id === "lesson-3";
 
+              const isFirstFourthLesson =
+                isFirstSecondaryCourse &&
+                (lesson.id === "lesson-4" || lesson.courseLectureKey === "first-secondary-lecture-4");
+
               /*
                 =====================================
                 المحاضرة الثانية لتانية ثانوي
@@ -426,14 +436,15 @@ function CourseContent({
               */
 
               const canOpenVideo =
-                unlocked &&
+                isOctoberReviewLesson ||
+                isFirstOctoberReviewLesson ||
                 (
-                  isOctoberReviewLesson ||
-                  isFirstOctoberReviewLesson ||
+                  unlocked &&
                   (
                   (
                     !isFirstSecondLesson &&
                     !isFirstThirdLesson &&
+                    !isFirstFourthLesson &&
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
@@ -450,6 +461,10 @@ function CourseContent({
                   (
                     isFirstThirdLesson &&
                     isFirstLecture2ExamCompleted
+                  ) ||
+                  (
+                    isFirstFourthLesson &&
+                    isFirstLecture4ExamCompleted
                   ) ||
                   (
                     isSecondSecondLesson &&
@@ -722,6 +737,12 @@ function CourseContent({
               const showFirstSecondaryExamBeforeThirdLesson =
                 isFirstSecondaryCourse &&
                 lesson.id === "lesson-3";
+
+              // امتحان المحاضرة الرابعة لأولى ثانوي يظهر قبل بطاقة المحاضرة الرابعة.
+              const showFirstSecondaryExamBeforeFourthLesson =
+                isFirstSecondaryCourse &&
+                (lesson.id === "lesson-4" || lesson.courseLectureKey === "first-secondary-lecture-4") &&
+                hasValue(lesson.exam1Key);
 
               const showSecondSecondaryExamBeforeFourthLesson =
                 isSecondSecondaryCourse &&
@@ -1019,6 +1040,38 @@ function CourseContent({
                           {isFirstLecture1ExamCompleted && (
                             <FaCheckCircle className="course-content-completed-icon" />
                           )}
+                        </button>
+                      )}
+
+                      {/* =====================================
+                          امتحان قبل المحاضرة الرابعة - أولى ثانوي
+                          يظهر قبل فيديو المحاضرة الرابعة
+                      ===================================== */}
+
+                      {showFirstSecondaryExamBeforeFourthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() =>
+                            onOpenExam?.(
+                              lesson,
+                              lesson.exam1Key || "firstLecture4Exam"
+                            )
+                          }
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? <FaClipboardCheck /> : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان قبل المحاضرة الرابعة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الرابعة بالكود أولًا"
+                                : "ابدأ الامتحان أولًا؛ وبعد تسليمه افتح فيديو المحاضرة الرابعة"}
+                            </p>
+                          </div>
                         </button>
                       )}
 
@@ -2070,7 +2123,8 @@ function CourseContent({
                         ===================================== */}
 
                         {hasExam1 &&
-                          !hideExam1InSourceLesson && (
+                          !hideExam1InSourceLesson &&
+                          !showFirstSecondaryExamBeforeFourthLesson && (
                             <button
                               type="button"
                               className={`course-content-card exam-card ${

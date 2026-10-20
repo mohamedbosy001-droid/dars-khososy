@@ -23,6 +23,8 @@ import {
 
 import "./Exam.css";
 
+// ملاحظة تنظيمية داخلية: تُترك إعدادات العرض والتنسيق في ملف Exam.css.
+
 const AI_GRADER_URL =
   "https://dars-khososy-ai-grader.mohamedbosy001.workers.dev/";
 

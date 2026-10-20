@@ -102,6 +102,7 @@ const FIRST_LECTURE_1_EXAM_ID =
   "first-lecture-1-exam";
 const FIRST_LECTURE_2_EXAM_KEY = "firstLecture2Exam";
 const FIRST_LECTURE_2_EXAM_ID = "first-lecture-2-exam";
+const FIRST_LECTURE_4_EXAM_ID = "first-lecture-4-exam";
 
 /*
   ============================
@@ -328,6 +329,20 @@ const FIRST_SECONDARY_THIRD_LECTURE = {
   videoTitle: "المحاضرة الثالثة - كان وأخواتها",
   requiresPreviousExam: true,
   requiredExamId: FIRST_LECTURE_2_EXAM_ID,
+};
+
+const FIRST_SECONDARY_FOURTH_LECTURE = {
+  id: "lesson-4",
+  title: "المحاضرة الرابعة - شرح النثر في العصر الجاهلي",
+  description: "امتحان المحاضرة الرابعة أولًا، ثم شاهد شرح النثر في العصر الجاهلي.",
+  youtubeUrl: "https://youtu.be/MZlDoGv6ciI",
+  videoUrl: "https://youtu.be/MZlDoGv6ciI",
+  videoTitle: "المحاضرة الرابعة - شرح النثر في العصر الجاهلي",
+  exam1: true,
+  exam1Key: "firstLecture4Exam",
+  exam1Title: "امتحان قبل المحاضرة الرابعة",
+  requiresPreviousExam: true,
+  requiredExamId: FIRST_LECTURE_4_EXAM_ID,
 };
 
 /*
@@ -1228,6 +1243,10 @@ function AllCourses({
       const thirdLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-3" || lesson?.courseLectureKey === "first-secondary-lecture-3");
       if (thirdLessonIndex >= 0) lessons[thirdLessonIndex] = { ...lessons[thirdLessonIndex], ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" };
       else lessons.push({ ...FIRST_SECONDARY_THIRD_LECTURE, courseLectureKey: "first-secondary-lecture-3" });
+
+      const fourthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-4" || lesson?.courseLectureKey === "first-secondary-lecture-4");
+      if (fourthLessonIndex >= 0) lessons[fourthLessonIndex] = { ...lessons[fourthLessonIndex], ...FIRST_SECONDARY_FOURTH_LECTURE, courseLectureKey: "first-secondary-lecture-4" };
+      else lessons.push({ ...FIRST_SECONDARY_FOURTH_LECTURE, courseLectureKey: "first-secondary-lecture-4" });
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
       const octoberReview = {
@@ -2481,6 +2500,14 @@ function AllCourses({
       !lesson
     ) {
       return false;
+    }
+
+    // مراجعة أكتوبر متاحة مباشرة ولا تتطلب كود محاضرة.
+    if (
+      FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+      (lesson.id === "first-october-review" || lesson.courseLectureKey === "first-october-review")
+    ) {
+      return true;
     }
 
     if (
@@ -4055,6 +4082,16 @@ function AllCourses({
         window.alert(
           "سلّم امتحان المحاضرة الأولى أولًا لفتح فيديو المحاضرة الثانية."
         );
+      }
+
+      /*
+        أولى ثانوي - المحاضرة الرابعة
+      */
+      else if (
+        FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+        lesson.id === "lesson-4"
+      ) {
+        window.alert("سلّمي امتحان المحاضرة الرابعة أولًا لفتح الفيديو.");
       }
 
       /*
@@ -5649,7 +5686,13 @@ function AllCourses({
           FIRST_LECTURE_1_EXAM_KEY
       );
 
-    if (
+    const isFirstLectureFourExam =
+      FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+      (finalExamKey === "firstLecture4Exam" || examKey === "firstLecture4Exam");
+
+    if (isFirstLectureFourExam) {
+      // امتحان المحاضرة الرابعة يظهر قبل فتح الفيديو؛ لا يشترط فتح المحاضرة أولًا.
+    } else if (
       isSecondLectureOneExam
     ) {
       const secondLesson =
@@ -6863,6 +6906,9 @@ function AllCourses({
           )}
           isFirstLecture2ExamCompleted={isExamCompleted(
             FIRST_LECTURE_2_EXAM_ID
+          )}
+          isFirstLecture4ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_4_EXAM_ID
           )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID
