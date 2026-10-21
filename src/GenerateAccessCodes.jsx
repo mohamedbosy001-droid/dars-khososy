@@ -31,6 +31,14 @@ const gradesData = [
 
     monthPrefix: "FM",
 
+    month2CourseId:
+      "first-month-2-course",
+
+    month2CourseTitle:
+      "كورس الشهر الثاني - الصف الأول الثانوي",
+
+    month2Prefix: "FM2",
+
     termCourseId:
       "first-term-course",
 
@@ -479,8 +487,7 @@ function GenerateAccessCodes() {
       الثاني موجود حاليًا لتالتة فقط.
     */
     if (
-      newGrade !== "الثاني الثانوي" &&
-      newGrade !== "الثالث الثانوي" &&
+      !gradesData.find((item) => item.grade === newGrade)?.month2CourseId &&
       accessType ===
         "month2"
     ) {
@@ -633,11 +640,10 @@ function GenerateAccessCodes() {
     */
     if (
       accessType === "month2" &&
-      grade !== "الثاني الثانوي" &&
-      grade !== "الثالث الثانوي"
+      !selectedGradeData.month2CourseId
     ) {
       setMessage(
-        "❌ كود الشهر الثاني متاح للصف الثاني والثالث الثانوي فقط."
+        "❌ كود الشهر الثاني غير مهيأ لهذه السنة الدراسية."
       );
 
       return;
@@ -751,18 +757,19 @@ function GenerateAccessCodes() {
     300 كود
 
     الإجمالي:
-    3000 كود
+    3600 كود
     =====================================
   */
 
   async function generateAllCodes() {
     const confirmed =
       window.confirm(
-        `سيتم إنشاء 3000 كود مرة واحدة:
+        `سيتم إنشاء 3600 كود مرة واحدة:
 
 الأول الثانوي:
 300 حصة
-300 شهر
+300 شهر أول
+300 شهر ثاني
 300 ترم
 
 الثاني الثانوي:
@@ -816,12 +823,9 @@ function GenerateAccessCodes() {
         });
 
         /*
-          الشهر الثاني لتانية وتالتة ثانوي
+          الشهر الثاني للصفوف المجهزة له
         */
-        if (
-          gradeData.grade === "الثاني الثانوي" ||
-          gradeData.grade === "الثالث الثانوي"
-        ) {
+        if (gradeData.month2CourseId) {
           groups.push({
             gradeData,
             type: "month2",
@@ -911,10 +915,10 @@ ${finishedGroups} / ${totalGroups}`
       setMessage(
         `✅ تم إنشاء جميع الأكواد بنجاح.
 
-الإجمالي: 3000 كود
+الإجمالي: 3600 كود
 
 الأول الثانوي:
-300 حصة + 300 شهر + 300 ترم
+300 حصة + 300 شهر أول + 300 شهر ثاني + 300 ترم
 
 الثاني الثانوي:
 300 حصة + 300 شهر + 300 ترم
@@ -1161,7 +1165,8 @@ ${finishedGroups} / ${totalGroups}`
               كود الشهر الأول
             </option>
 
-            {(grade === "الثاني الثانوي" ||
+            {(grade === "الأول الثانوي" ||
+              grade === "الثاني الثانوي" ||
               grade === "الثالث الثانوي") && (
               <option value="month2">
                 كود الشهر الثاني

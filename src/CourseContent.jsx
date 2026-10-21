@@ -65,6 +65,7 @@ function CourseContent({
     في أولى ثانوي تم تسليمه؟
   */
   isFirstLecture4ExamCompleted = false,
+  isFirstLecture5ExamCompleted = false,
 
   /*
     هل امتحان المحاضرة الأولى
@@ -138,6 +139,8 @@ function CourseContent({
   const isFirstSecondaryCourse =
     course.id ===
       "first-month-course" ||
+    course.id ===
+      "first-month-2-course" ||
     course.id ===
       "first-term-course";
 
@@ -354,6 +357,10 @@ function CourseContent({
                 isFirstSecondaryCourse &&
                 (lesson.id === "lesson-4" || lesson.courseLectureKey === "first-secondary-lecture-4");
 
+              const isFirstFifthLesson =
+                isFirstSecondaryCourse &&
+                (lesson.id === "lesson-5" || lesson.courseLectureKey === "first-secondary-lecture-5");
+
               /*
                 =====================================
                 المحاضرة الثانية لتانية ثانوي
@@ -445,6 +452,7 @@ function CourseContent({
                     !isFirstSecondLesson &&
                     !isFirstThirdLesson &&
                     !isFirstFourthLesson &&
+                    !isFirstFifthLesson &&
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
@@ -465,6 +473,10 @@ function CourseContent({
                   (
                     isFirstFourthLesson &&
                     isFirstLecture4ExamCompleted
+                  ) ||
+                  (
+                    isFirstFifthLesson &&
+                    isFirstLecture5ExamCompleted
                   ) ||
                   (
                     isSecondSecondLesson &&
@@ -747,6 +759,11 @@ function CourseContent({
               const showSecondSecondaryExamBeforeFourthLesson =
                 isSecondSecondaryCourse &&
                 lesson.id === "lesson-4";
+
+              const showFirstSecondaryExamBeforeFifthLesson =
+                isFirstSecondaryCourse &&
+                isFirstFifthLesson &&
+                hasValue(lesson.exam1Key);
 
               const showThirdExamBeforeSixthLesson =
                 !isOctoberReviewLesson &&
@@ -1072,6 +1089,32 @@ function CourseContent({
                                 : "ابدأ الامتحان أولًا؛ وبعد تسليمه افتح فيديو المحاضرة الرابعة"}
                             </p>
                           </div>
+                        </button>
+                      )}
+
+                      {/* امتحان المحاضرة الخامسة لأولى ثانوي يظهر قبل الفيديو */}
+                      {showFirstSecondaryExamBeforeFifthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.exam1Key || "firstLecture5Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? <FaClipboardCheck /> : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان قبل المحاضرة الخامسة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل الكورس أولًا لفتح الامتحان"
+                                : isFirstLecture5ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك مراجعة النتيجة"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة الخامسة"}
+                            </p>
+                          </div>
+                          {isFirstLecture5ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
                         </button>
                       )}
 

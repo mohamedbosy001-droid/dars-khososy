@@ -48,6 +48,7 @@ import secondTmhede from "./assets/second-tmhede.jpeg";
 
 /* صور الكورسات المدفوعة */
 import firstMonthCourse from "./assets/first-month.jpeg";
+import firstMonth2Course from "./assets/first-2month.jpeg";
 import firstTermCourse from "./assets/first-term.jpeg";
 import secondMonthCourse from "./assets/second-month.jpeg";
 import secondMonth2Course from "./assets/second-2month.jpeg";
@@ -74,6 +75,7 @@ const AI_GRADER_URL =
 
 const FIRST_SECONDARY_COURSE_IDS = new Set([
   "first-month-course",
+  "first-month-2-course",
   "first-term-course",
 ]);
 
@@ -103,6 +105,8 @@ const FIRST_LECTURE_1_EXAM_ID =
 const FIRST_LECTURE_2_EXAM_KEY = "firstLecture2Exam";
 const FIRST_LECTURE_2_EXAM_ID = "first-lecture-2-exam";
 const FIRST_LECTURE_4_EXAM_ID = "first-lecture-4-exam";
+const FIRST_LECTURE_5_EXAM_KEY = "firstLecture5Exam";
+const FIRST_LECTURE_5_EXAM_ID = "first-lecture-5-exam";
 
 /*
   ============================
@@ -343,6 +347,19 @@ const FIRST_SECONDARY_FOURTH_LECTURE = {
   exam1Title: "امتحان قبل المحاضرة الرابعة",
   requiresPreviousExam: true,
   requiredExamId: FIRST_LECTURE_4_EXAM_ID,
+};
+
+const FIRST_SECONDARY_FIFTH_LECTURE = {
+  id: "lesson-5",
+  title: "المحاضرة الخامسة - كاد وأخواتها نحو",
+  description: "سلّم امتحان المحاضرة الخامسة أولًا، وبعد التسليم سيفتح فيديو الشرح.",
+  youtubeUrl: "https://youtu.be/1VqGq2E7r9Y",
+  videoUrl: "https://youtu.be/1VqGq2E7r9Y",
+  videoTitle: "المحاضرة الخامسة - كاد وأخواتها نحو",
+  exam1: true,
+  exam1Key: FIRST_LECTURE_5_EXAM_KEY,
+  exam1Title: "امتحان قبل المحاضرة الخامسة",
+  courseLectureKey: "first-secondary-lecture-5",
 };
 
 /*
@@ -1154,6 +1171,18 @@ function AllCourses({
       ============================
     */
 
+    if (course.id === "first-month-2-course") {
+      return {
+        ...course,
+        lessons: [
+          {
+            ...FIRST_SECONDARY_FIFTH_LECTURE,
+            courseLectureKey: "first-secondary-lecture-5",
+          },
+        ],
+      };
+    }
+
     if (
       FIRST_SECONDARY_COURSE_IDS.has(
         course.id
@@ -1247,6 +1276,12 @@ function AllCourses({
       const fourthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-4" || lesson?.courseLectureKey === "first-secondary-lecture-4");
       if (fourthLessonIndex >= 0) lessons[fourthLessonIndex] = { ...lessons[fourthLessonIndex], ...FIRST_SECONDARY_FOURTH_LECTURE, courseLectureKey: "first-secondary-lecture-4" };
       else lessons.push({ ...FIRST_SECONDARY_FOURTH_LECTURE, courseLectureKey: "first-secondary-lecture-4" });
+
+      if (course.id === "first-term-course") {
+        const fifthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-5" || lesson?.courseLectureKey === "first-secondary-lecture-5");
+        if (fifthLessonIndex >= 0) lessons[fifthLessonIndex] = { ...lessons[fifthLessonIndex], ...FIRST_SECONDARY_FIFTH_LECTURE, courseLectureKey: "first-secondary-lecture-5" };
+        else lessons.push({ ...FIRST_SECONDARY_FIFTH_LECTURE, courseLectureKey: "first-secondary-lecture-5" });
+      }
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
       const octoberReview = {
@@ -2050,6 +2085,38 @@ function AllCourses({
               }
             );
 
+          // كورس الشهر الثاني لأولى ثانوي يظهر حتى لو لم يُنشأ مستنده في Firebase بعد.
+          const firstMonthOneCourse =
+            loadedCourses.find(
+              (course) => course.id === "first-month-course"
+            );
+
+          const firstMonthTwoExists =
+            loadedCourses.some(
+              (course) => course.id === "first-month-2-course"
+            );
+
+          const firstMonthTwoCourse =
+            firstMonthTwoExists
+              ? null
+              : {
+                  id: "first-month-2-course",
+                  title: "كورس الشهر الثاني - الصف الأول الثانوي",
+                  grade: "الأول الثانوي",
+                  description: "شرح الشهر الثاني للصف الأول الثانوي مع التدريبات والاختبارات.",
+                  price: firstMonthOneCourse?.price ?? 100,
+                  active: true,
+                  isPublished: true,
+                  status: "active",
+                  // الشهر الثاني لأولى ثانوي يحتوي المحاضرة الخامسة فقط.
+                  lessons: [
+                    {
+                      ...FIRST_SECONDARY_FIFTH_LECTURE,
+                      courseLectureKey: "first-secondary-lecture-5",
+                    },
+                  ],
+                };
+
           const secondMonthOneCourse =
             loadedCourses.find(
               (course) =>
@@ -2135,6 +2202,9 @@ function AllCourses({
                 course.id !==
                 SECOND_FREE_INTRO_COURSE.id
             ),
+            ...(firstMonthTwoCourse
+              ? [firstMonthTwoCourse]
+              : []),
             ...(secondMonthTwoCourse
               ? [secondMonthTwoCourse]
               : []),
@@ -2256,7 +2326,7 @@ function AllCourses({
 
   const visibleCourses =
     useMemo(() => {
-      return courses.filter(
+      const filteredCourses = courses.filter(
         (course) => {
           const belongsToStudentGrade =
             normalizeGrade(
@@ -2303,6 +2373,22 @@ function AllCourses({
 
           if (
             normalizedStudentGrade ===
+            normalizeGrade("الأول الثانوي")
+          ) {
+            const firstOrder = {
+              "first-term-course": 0,
+              "first-month-course": 1,
+              "first-month-2-course": 2,
+            };
+
+            return (
+              (firstOrder[a.id] ?? 99) -
+              (firstOrder[b.id] ?? 99)
+            );
+          }
+
+          if (
+            normalizedStudentGrade ===
             normalizeGrade("الثاني الثانوي")
           ) {
             const secondOrder = {
@@ -2339,6 +2425,8 @@ function AllCourses({
           return 0;
         }
       );
+
+      return filteredCourses;
     }, [
       courses,
       studentGrade,
@@ -3779,6 +3867,13 @@ function AllCourses({
       "first-month-course"
     ) {
       return firstMonthCourse;
+    }
+
+    if (
+      course.id ===
+      "first-month-2-course"
+    ) {
+      return firstMonth2Course;
     }
 
     if (
@@ -5690,7 +5785,11 @@ function AllCourses({
       FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
       (finalExamKey === "firstLecture4Exam" || examKey === "firstLecture4Exam");
 
-    if (isFirstLectureFourExam) {
+    const isFirstLectureFiveExam =
+      FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+      (finalExamKey === FIRST_LECTURE_5_EXAM_KEY || examKey === FIRST_LECTURE_5_EXAM_KEY);
+
+    if (isFirstLectureFourExam || isFirstLectureFiveExam) {
       // امتحان المحاضرة الرابعة يظهر قبل فتح الفيديو؛ لا يشترط فتح المحاضرة أولًا.
     } else if (
       isSecondLectureOneExam
@@ -6910,6 +7009,9 @@ function AllCourses({
           isFirstLecture4ExamCompleted={isExamCompleted(
             FIRST_LECTURE_4_EXAM_ID
           )}
+          isFirstLecture5ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_5_EXAM_ID
+          )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID
           )}
@@ -7119,7 +7221,7 @@ function AllCourses({
                           }
                           className="course-shop-image"
                           style={
-                            course.id === "second-month-2-course"
+                            course.id === "first-month-2-course"
                               ? {
                                   objectFit: "contain",
                                   objectPosition: "center center",
