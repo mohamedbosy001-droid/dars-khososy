@@ -95,6 +95,11 @@ function CourseContent({
   onLessonCodeChange,
   onActivateLessonCode,
   activatingLessonId,
+  comprehensiveExamCode,
+  onComprehensiveExamCodeChange,
+  onActivateComprehensiveExamCode,
+  activatingComprehensiveExam,
+  hasComprehensiveExamCodeAccess = false,
 
   onOpenVideo,
   onOpenPdf,
@@ -104,6 +109,8 @@ function CourseContent({
 }) {
   const [openedLessons, setOpenedLessons] =
     useState({});
+  const [comprehensiveExamExpanded, setComprehensiveExamExpanded] =
+    useState(false);
 
   if (!course) {
     return (
@@ -153,6 +160,8 @@ function CourseContent({
   const isSecondSecondaryCourse =
     course.id ===
       "second-month-course" ||
+    course.id ===
+      "second-month-2-course" ||
     course.id ===
       "second-term-course";
 
@@ -261,6 +270,7 @@ function CourseContent({
           </p>
         </div>
       </div>
+
 
       {/* =========================
           لا توجد محاضرات
@@ -2322,6 +2332,145 @@ function CourseContent({
           )}
         </div>
       )}
+      {[
+        "second-month-2-course",
+        "second-term-course",
+        "third-month-2-course",
+        "third-term-course",
+      ].includes(course.id) && (
+        <div
+          className="course-comprehensive-exam-wrap"
+          style={{ marginBottom: 14 }}
+        >
+          <button
+            type="button"
+            className="course-comprehensive-exam-card"
+            onClick={() =>
+              setComprehensiveExamExpanded((previous) => !previous)
+            }
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              textAlign: "right",
+              padding: "18px 20px",
+              borderRadius: 18,
+              border: "1px solid rgba(255, 255, 255, 0.28)",
+              background: "linear-gradient(115deg, rgba(255,255,255,.07), rgba(255,255,255,.025))",
+              color: "inherit",
+              cursor: "pointer",
+              font: "inherit",
+              boxShadow: "0 8px 24px rgba(0,0,0,.12)",
+              transition: "transform .18s ease, border-color .18s ease, background .18s ease",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                width: 44,
+                height: 44,
+                flexShrink: 0,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 13,
+                background: "rgba(255, 190, 120, .14)",
+                color: "#f4bd8b",
+                fontSize: 20,
+              }}
+            >
+              <FaClipboardCheck />
+            </span>
+            <span style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, minWidth: 0 }}>
+              <span style={{ fontWeight: 750, fontSize: "1.04rem" }}>الامتحان الشامل</span>
+              <span style={{ opacity: .72, fontSize: ".84rem" }}>اختبر مستواك في محتوى الكورس بالكامل</span>
+            </span>
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+              <span style={{ fontSize: ".8rem", color: "#f4bd8b", fontWeight: 700 }}>180 دقيقة</span>
+              <span style={{ fontSize: ".76rem", opacity: .72 }}>محاولة واحدة</span>
+            </span>
+          </button>
+
+          {comprehensiveExamExpanded && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 14,
+                borderRadius: 14,
+                background: "rgba(255,255,255,.04)",
+                border: "1px solid rgba(255,255,255,.14)",
+              }}
+            >
+              {!hasComprehensiveExamCodeAccess && (
+                <div
+                  style={{
+                    maxWidth: 360,
+                    padding: 14,
+                    borderRadius: 14,
+                    background: "#f8f3ed",
+                    border: "1px solid #eadbcd",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#6f4930", fontWeight: "bold" }}>
+                    <FaKey />
+                    تفعيل الامتحان الشامل بالكود
+                  </div>
+                  <input
+                    type="text"
+                    value={comprehensiveExamCode || ""}
+                    onChange={(event) => onComprehensiveExamCodeChange?.(event.target.value)}
+                    placeholder="اكتب كود الحصة"
+                    autoComplete="off"
+                    maxLength={20}
+                    style={{
+                      width: "100%", minHeight: 44, padding: "9px 12px",
+                      boxSizing: "border-box", border: "1px solid #d7c2ae",
+                      borderRadius: 10, background: "#fff", color: "#31271f",
+                      WebkitTextFillColor: "#31271f", caretColor: "#31271f",
+                      fontSize: 14, fontWeight: 700, textAlign: "center", direction: "ltr",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={activatingComprehensiveExam}
+                    onClick={onActivateComprehensiveExamCode}
+                    style={{
+                      width: "100%", minHeight: 44, border: 0, borderRadius: 10,
+                      background: "#6f4930", color: "#fff", font: "inherit",
+                      fontWeight: 700, cursor: activatingComprehensiveExam ? "wait" : "pointer",
+                    }}
+                  >
+                    <FaKey /> {activatingComprehensiveExam ? "جاري التفعيل..." : "تفعيل الامتحان بالكود"}
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenExam?.(
+                    { id: "comprehensive-exam", title: "الامتحان الشامل" },
+                    course.id.startsWith("second-")
+                      ? "secondMonthComprehensiveExam"
+                      : "thirdMonthComprehensiveExam"
+                  )
+                }
+                style={{
+                  marginTop: 12, minHeight: 44, padding: "10px 16px",
+                  borderRadius: 10, border: "1px solid rgba(255,255,255,.2)",
+                  background: "rgba(255,255,255,.08)", color: "inherit",
+                  cursor: "pointer", font: "inherit", fontWeight: 700,
+                }}
+              >
+                دخول الامتحان الشامل
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
     </section>
   );
 }

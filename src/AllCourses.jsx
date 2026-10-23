@@ -850,6 +850,10 @@ function AllCourses({
     setActivatingLessonId,
   ] = useState("");
 
+  const [comprehensiveExamCode, setComprehensiveExamCode] = useState("");
+  const [activatingComprehensiveExam, setActivatingComprehensiveExam] = useState(false);
+  const [comprehensiveExamCodeAccess, setComprehensiveExamCodeAccess] = useState({});
+
   const savingWatchRef =
     useRef(new Set());
 
@@ -3391,6 +3395,64 @@ function AllCourses({
     ============================
   */
 
+  async function activateComprehensiveExamCode(course) {
+    const enteredCode = (comprehensiveExamCode || "").trim().toUpperCase();
+    if (!studentUid) {
+      window.alert("برجاء تسجيل الدخول أولًا.");
+      return;
+    }
+    if (!enteredCode) {
+      window.alert("اكتب كود الحصة أولًا.");
+      return;
+    }
+    setActivatingComprehensiveExam(true);
+    try {
+      const codeReference = doc(db, "accessCode", enteredCode);
+      const studentReference = doc(db, "students", studentUid);
+      await runTransaction(db, async (transaction) => {
+        const codeSnapshot = await transaction.get(codeReference);
+        if (!codeSnapshot.exists()) throw new Error("CODE_NOT_FOUND");
+        const codeData = codeSnapshot.data();
+        const studentSnapshot = await transaction.get(studentReference);
+        if (!studentSnapshot.exists()) throw new Error("STUDENT_NOT_FOUND");
+        const savedStudent = studentSnapshot.data();
+        const validation = validateBasicCode({ codeData, course, studentUid });
+        if (!validation.valid) {
+          if (codeData.active === false) throw new Error("CODE_INACTIVE");
+          if (codeData.used === true || codeData.isUsed === true) throw new Error("CODE_ALREADY_USED");
+          if (codeData.courseId && codeData.courseId !== course.id) throw new Error("WRONG_COURSE");
+          throw new Error("INVALID_CODE");
+        }
+        if (codeData.accessType !== "lesson") throw new Error("NOT_LESSON_CODE");
+        const allowed = [];
+        if (codeData.lessonId) allowed.push(codeData.lessonId);
+        if (Array.isArray(codeData.lessonIds)) allowed.push(...codeData.lessonIds);
+        const courseLessonIds = (Array.isArray(course.lessons) ? course.lessons : []).map((lesson) => lesson.id);
+        if (allowed.length && !allowed.some((id) => courseLessonIds.includes(id))) throw new Error("WRONG_LESSON");
+        const now = Timestamp.now();
+        const courseProgress = { ...(savedStudent.courseProgress || {}) };
+        const savedProgress = { ...(courseProgress[course.id] || {}) };
+        courseProgress[course.id] = {
+          ...savedProgress,
+          comprehensiveExamCodeUnlocked: true,
+          comprehensiveExamCodeActivatedAt: now,
+          comprehensiveExamCode: enteredCode,
+          updatedAt: now,
+        };
+        transaction.update(codeReference, { used: true, usedBy: studentUid, usedAt: now });
+        transaction.update(studentReference, { courseProgress, updatedAt: now });
+      });
+      setComprehensiveExamCode("");
+      setComprehensiveExamCodeAccess((prev) => ({ ...prev, [course.id]: true }));
+      window.alert("✅ تم تفعيل دخول الامتحان الشامل بنجاح.");
+    } catch (error) {
+      console.error("Comprehensive exam activation error:", error);
+      showActivationError(error);
+    } finally {
+      setActivatingComprehensiveExam(false);
+    }
+  }
+
   async function activateLessonCode(
     course,
     lesson
@@ -5677,6 +5739,14 @@ function AllCourses({
       }
     }
 
+    const isComprehensiveSecondMonthExam =
+      finalExamKey === "secondMonthComprehensiveExam" &&
+      ["second-month-2-course", "second-term-course"].includes(course.id);
+
+    const isComprehensiveThirdExam =
+      finalExamKey === "thirdMonthComprehensiveExam" &&
+      ["third-month-2-course", "third-term-course"].includes(course.id);
+
     const isSecondLectureOneExam =
       SECOND_SECONDARY_COURSE_IDS.has(
         course.id
@@ -5789,7 +5859,19 @@ function AllCourses({
       FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
       (finalExamKey === FIRST_LECTURE_5_EXAM_KEY || examKey === FIRST_LECTURE_5_EXAM_KEY);
 
-    if (isFirstLectureFourExam || isFirstLectureFiveExam) {
+    if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
+      const courseAccess = getCourseAccess(course);
+      const hasFullCourseAccess =
+        !isPaidCourse(course) ||
+        (courseAccess?.active === true &&
+          ["month", "term", "fullCourse", undefined].includes(courseAccess.accessType));
+      const hasExamCodeAccess =
+        studentData?.courseProgress?.[course.id]?.comprehensiveExamCodeUnlocked === true;
+      if (!hasFullCourseAccess && !hasExamCodeAccess) {
+        window.alert("اشتركي في الشهر أو فعّلي الامتحان الشامل بكود الحصة أولًا.");
+        return;
+      }
+    } else if (isFirstLectureFourExam || isFirstLectureFiveExam) {
       // امتحان المحاضرة الرابعة يظهر قبل فتح الفيديو؛ لا يشترط فتح المحاضرة أولًا.
     } else if (
       isSecondLectureOneExam
@@ -6048,7 +6130,7 @@ function AllCourses({
 
         return;
       }
-    } else {
+    } else if (!isComprehensiveSecondMonthExam && !isComprehensiveThirdExam) {
       if (
         !hasLessonAccess(
           course,
@@ -7060,6 +7142,16 @@ function AllCourses({
           activatingLessonId={
             activatingLessonId
           }
+          comprehensiveExamCode={comprehensiveExamCode}
+          onComprehensiveExamCodeChange={setComprehensiveExamCode}
+          activatingComprehensiveExam={activatingComprehensiveExam}
+          hasComprehensiveExamCodeAccess={
+            comprehensiveExamCodeAccess[selectedCourse.id] === true ||
+            studentData?.courseProgress?.[selectedCourse.id]?.comprehensiveExamCodeUnlocked === true
+          }
+          onActivateComprehensiveExamCode={() =>
+            activateComprehensiveExamCode(selectedCourse)
+          }
           onActivateLessonCode={(
             lesson
           ) =>
@@ -7228,7 +7320,12 @@ function AllCourses({
                                   width: "100%",
                                   height: "100%",
                                 }
-                              : undefined
+                              : {
+                                  objectFit: "contain",
+                                  objectPosition: "center center",
+                                  width: "100%",
+                                  height: "100%",
+                                }
                           }
                         />
 

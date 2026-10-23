@@ -1,11 +1,13 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
 import {
   doc,
+  onSnapshot,
   runTransaction,
   Timestamp,
   updateDoc,
@@ -209,6 +211,8 @@ function Exam({
 }) {
   const [answers, setAnswers] =
     useState({});
+  // Keep the latest typed values available synchronously, including the final keystroke before submit.
+  const answersRef = useRef({});
 
   const [
     currentQuestionIndex,
@@ -228,6 +232,18 @@ function Exam({
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
+
+  const [showExitModal, setShowExitModal] =
+    useState(false);
+
+  const [remainingSeconds, setRemainingSeconds] =
+    useState(null);
+
+  const isTimedExam = Number(exam?.durationMinutes) > 0;
+  // التصحيح اليدوي مخصص لامتحاني الشامل فقط.
+  const isComprehensiveExam =
+    exam?.isComprehensiveExam === true ||
+    /^(second|third)-month-comprehensive$/.test(String(exam?.id || ""));
 
   const studentUid =
     currentStudent?.uid ||
@@ -350,19 +366,27 @@ function Exam({
 
               setSubmitted(true);
 
-              setAnswers(
-                savedAttempt?.answers ||
-                  {}
-              );
+              const completedAnswers = savedAttempt?.answers || {};
+              answersRef.current = completedAnswers;
+              setAnswers(completedAnswers);
 
               return;
             }
 
             if (savedAttempt) {
-              setAnswers(
-                savedAttempt.answers ||
-                  {}
-              );
+              if (Number(exam?.durationMinutes) > 0) {
+                const startedAtMs = savedAttempt.startedAt?.toMillis
+                  ? savedAttempt.startedAt.toMillis()
+                  : savedAttempt.startedAt?.seconds
+                    ? savedAttempt.startedAt.seconds * 1000
+                    : Date.now();
+                const deadline = startedAtMs + Number(exam.durationMinutes) * 60 * 1000;
+                setRemainingSeconds(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+              }
+
+              const restoredAnswers = savedAttempt.answers || {};
+              answersRef.current = restoredAnswers;
+              setAnswers(restoredAnswers);
 
               setCurrentQuestionIndex(
                 Math.min(
@@ -399,9 +423,15 @@ function Exam({
               startedAt:
                 Timestamp.now(),
 
+              durationMinutes: Number(exam?.durationMinutes) || null,
+
               updatedAt:
                 Timestamp.now(),
             };
+
+            if (Number(exam?.durationMinutes) > 0) {
+              setRemainingSeconds(Number(exam.durationMinutes) * 60);
+            }
 
             transaction.update(
               studentReference,
@@ -437,6 +467,50 @@ function Exam({
     exam?.title,
     questions.length,
   ]);
+
+  // متابعة نتيجة الشامل مباشرةً؛ عند اعتماد المقالي تظهر الدرجة النهائية دون الحاجة لإعادة تحميل الصفحة.
+  useEffect(() => {
+    if (!isComprehensiveExam || !submitted || result?.gradingStatus === "graded" || !studentUid || !exam?.id) {
+      return undefined;
+    }
+
+    const studentReference = doc(db, "students", studentUid);
+    return onSnapshot(studentReference, (snapshot) => {
+      if (!snapshot.exists()) return;
+      const studentData = snapshot.data();
+      const latestResult = (Array.isArray(studentData.examResults) ? studentData.examResults : [])
+        .find((item) => item?.examId === exam.id);
+      const attemptResult = studentData.examAttempts?.[exam.id]?.result;
+      const approvedResult = latestResult?.gradingStatus === "graded"
+        ? latestResult
+        : attemptResult?.gradingStatus === "graded"
+          ? attemptResult
+          : null;
+      if (approvedResult) setResult(approvedResult);
+    }, (error) => {
+      console.error("Failed to listen for final comprehensive exam result:", error);
+    });
+  }, [isComprehensiveExam, submitted, result?.gradingStatus, studentUid, exam?.id]);
+
+  useEffect(() => {
+    if (!isTimedExam || isLoadingAttempt || submitted || remainingSeconds === null) return;
+    if (remainingSeconds <= 0) {
+      submitExam(true);
+      return;
+    }
+    const timerId = window.setTimeout(() => {
+      setRemainingSeconds((seconds) => Math.max(0, (seconds ?? 1) - 1));
+    }, 1000);
+    return () => window.clearTimeout(timerId);
+  }, [isTimedExam, isLoadingAttempt, submitted, remainingSeconds]);
+
+  function formatRemainingTime(totalSeconds) {
+    const safe = Math.max(0, Number(totalSeconds) || 0);
+    const hours = Math.floor(safe / 3600);
+    const minutes = Math.floor((safe % 3600) / 60);
+    const seconds = safe % 60;
+    return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+  }
 
   /*
     ============================
@@ -508,6 +582,7 @@ function Exam({
         optionIndex,
     };
 
+    answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
 
     saveAttemptProgress(
@@ -530,12 +605,12 @@ function Exam({
       return;
     }
 
-    setAnswers(
-      (previousAnswers) => ({
-        ...previousAnswers,
-        [questionId]: value,
-      })
-    );
+    const nextAnswers = {
+      ...answersRef.current,
+      [questionId]: value,
+    };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
   }
 
   /*
@@ -551,18 +626,16 @@ function Exam({
       return;
     }
 
+    const latestAnswers = answersRef.current || answers;
     const nextAnswers = {
-      ...answers,
+      ...latestAnswers,
       [questionId]:
-        typeof answers[
-          questionId
-        ] === "string"
-          ? answers[
-              questionId
-            ].trim()
+        typeof latestAnswers[questionId] === "string"
+          ? latestAnswers[questionId].trim()
           : "",
     };
 
+    answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
 
     saveAttemptProgress(
@@ -616,12 +689,30 @@ function Exam({
   }
 
   /*
+    الخروج من الامتحان ينهي المحاولة ويسلم الإجابات الحالية.
+  */
+  async function handleExitExam() {
+    if (submitted) {
+      onBack?.();
+      return;
+    }
+
+    setShowExitModal(true);
+  }
+
+  async function confirmExitExam() {
+    setShowExitModal(false);
+    await submitExam(true);
+    onBack?.();
+  }
+
+  /*
     ============================
     تسليم الامتحان
     ============================
   */
 
-  async function submitExam() {
+  async function submitExam(isAutoSubmit = false) {
     if (
       !exam ||
       questions.length === 0
@@ -633,6 +724,7 @@ function Exam({
     }
 
     if (
+      !isAutoSubmit &&
       answeredQuestionsCount <
       questions.length
     ) {
@@ -648,6 +740,9 @@ function Exam({
 
     setIsSubmitting(true);
 
+    // Use the latest controlled input values, not a potentially stale render snapshot.
+    const submittedAnswers = answersRef.current || answers;
+
     try {
       let score = 0;
 
@@ -662,6 +757,8 @@ function Exam({
 
       const essayGrades = {};
 
+      // في الشامل لا نصحح المقالي آليًا؛ يُترك للمدرسة للتصحيح اليدوي.
+      if (!isComprehensiveExam) {
       for (
         const question of questions
       ) {
@@ -674,7 +771,7 @@ function Exam({
         }
 
         const savedAnswer =
-          answers[question.id];
+          submittedAnswers[question.id];
 
         const studentAnswer =
           typeof savedAnswer ===
@@ -701,6 +798,7 @@ function Exam({
             studentAnswer,
             question
           );
+      }
       }
 
       /*
@@ -730,7 +828,7 @@ function Exam({
               )
             ) {
               const savedAnswer =
-                answers[
+                submittedAnswers[
                   question.id
                 ];
 
@@ -740,14 +838,12 @@ function Exam({
                   ? savedAnswer.trim()
                   : "";
 
-              const isCorrect =
-                essayGrades[
-                  question.id
-                ] === true;
+              const isCorrect = isComprehensiveExam
+                ? null
+                : essayGrades[question.id] === true;
 
-              if (isCorrect) {
-                score +=
-                  questionPoints;
+              if (isCorrect === true) {
+                score += questionPoints;
               }
 
               return {
@@ -778,7 +874,7 @@ function Exam({
                   questionPoints,
 
                 earnedPoints:
-                  isCorrect
+                  isCorrect === true
                     ? questionPoints
                     : 0,
               };
@@ -791,7 +887,7 @@ function Exam({
             */
 
             const selectedOption =
-              answers[
+              submittedAnswers[
                 question.id
               ];
 
@@ -885,6 +981,10 @@ function Exam({
           reviewedAnswers,
 
         completed: true,
+        isComprehensiveExam,
+        gradingStatus: isComprehensiveExam && reviewedAnswers.some((answer) => answer.type === "essay")
+          ? "pending_essay"
+          : "graded",
 
         submittedAt:
           Timestamp.now(),
@@ -990,7 +1090,7 @@ function Exam({
             started: true,
             completed: true,
 
-            answers,
+            answers: submittedAnswers,
 
             currentQuestionIndex,
 
@@ -1000,6 +1100,8 @@ function Exam({
             updatedAt:
               Timestamp.now(),
 
+            isComprehensiveExam,
+            gradingStatus: examResult.gradingStatus,
             result:
               examResult,
           };
@@ -1115,6 +1217,41 @@ function Exam({
     submitted &&
     result
   ) {
+    if (isComprehensiveExam && result.gradingStatus !== "graded") {
+      return (
+        <section className="exam-page">
+          <button type="button" className="exam-back-btn" onClick={onBack}>
+            <FaArrowRight /> الرجوع إلى محتوى الكورس
+          </button>
+          <div className="exam-result-card" role="status" aria-live="polite">
+            <FaClipboardCheck />
+            <h1>تم استلام إجاباتك بنجاح</h1>
+            <h2>{exam.title}</h2>
+            <p style={{ lineHeight: 1.9, maxWidth: 620, margin: "12px auto" }}>
+              تم تسليم الامتحان بنجاح، وجارٍ مراجعة إجابات الأسئلة المقالية. ستظهر نتيجتك النهائية فور الانتهاء من التصحيح.
+            </p>
+          </div>
+        </section>
+      );
+    }
+
+    if (isComprehensiveExam) {
+      return (
+        <section className="exam-page">
+          <button type="button" className="exam-back-btn" onClick={onBack}>
+            <FaArrowRight /> الرجوع إلى محتوى الكورس
+          </button>
+          <div className="exam-result-card">
+            <FaClipboardCheck />
+            <h1>النتيجة النهائية</h1>
+            <h2>{exam.title}</h2>
+            <strong>{result.score} من {result.totalQuestions}</strong>
+            <span>{result.percentage}%</span>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="exam-page">
         <button
@@ -1333,13 +1470,19 @@ function Exam({
 
   return (
     <section className="exam-page">
+      {isTimedExam && !submitted && remainingSeconds !== null && (
+        <div role="status" style={{ position: "sticky", top: 8, zIndex: 20, margin: "0 auto 12px", width: "fit-content", padding: "10px 16px", borderRadius: 12, background: remainingSeconds <= 300 ? "#b91c1c" : "#172554", color: "#fff", fontWeight: 700 }}>
+          الوقت المتبقي: {formatRemainingTime(remainingSeconds)}
+        </div>
+      )}
       <button
         type="button"
         className="exam-back-btn"
-        onClick={onBack}
+        onClick={handleExitExam}
+        disabled={isSubmitting}
       >
         <FaArrowRight />
-        الرجوع إلى محتوى الكورس
+        خروج وتسليم الامتحان
       </button>
 
       <div className="exam-header">
@@ -1444,9 +1587,7 @@ function Exam({
               1}
           </div>
 
-          {exam?.passage &&
-            currentQuestionIndex ===
-              0 && (
+          {(currentQuestion?.passage || (currentQuestionIndex === 0 ? exam?.passage : "")) && (
               <div
                 style={{
                   marginBottom:
@@ -1476,7 +1617,7 @@ function Exam({
                 </h3>
 
                 <div>
-                  {exam.passage}
+                  {currentQuestion?.passage || exam?.passage}
                 </div>
               </div>
             )}
@@ -1702,6 +1843,83 @@ function Exam({
           </button>
         )}
       </div>
+
+
+      {showExitModal && (
+        <div
+          role="presentation"
+          onClick={() => setShowExitModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "grid",
+            placeItems: "center",
+            padding: 20,
+            background: "rgba(12, 7, 10, .76)",
+            backdropFilter: "blur(7px)",
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exit-exam-title"
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: "min(100%, 440px)",
+              padding: "28px 24px 22px",
+              borderRadius: 24,
+              border: "1px solid rgba(244,189,139,.35)",
+              background: "linear-gradient(145deg, #2d1d22, #191318)",
+              color: "#fff7f1",
+              boxShadow: "0 24px 80px rgba(0,0,0,.45)",
+              textAlign: "center",
+              direction: "rtl",
+            }}
+          >
+            <div style={{
+              width: 62, height: 62, margin: "0 auto 16px",
+              display: "grid", placeItems: "center",
+              borderRadius: 20, background: "rgba(244,189,139,.13)",
+              color: "#f4bd8b", fontSize: 28,
+            }}>
+              <FaTimesCircle />
+            </div>
+            <h2 id="exit-exam-title" style={{ margin: "0 0 10px", fontSize: "1.35rem" }}>
+              هل تريد الخروج من الامتحان؟
+            </h2>
+            <p style={{ margin: "0 0 24px", lineHeight: 1.9, color: "rgba(255,247,241,.78)", fontSize: ".96rem" }}>
+              لو أكدت الخروج، هيتسلّم الامتحان بإجاباتك الحالية وهتنتهي المحاولة، ومش هتقدر ترجع تكملها.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => setShowExitModal(false)}
+                style={{
+                  flex: "1 1 150px", padding: "13px 16px", borderRadius: 13,
+                  border: "1px solid rgba(255,255,255,.2)", background: "rgba(255,255,255,.07)",
+                  color: "inherit", font: "inherit", fontWeight: 700, cursor: "pointer",
+                }}
+              >
+                لا، أكمل الامتحان
+              </button>
+              <button
+                type="button"
+                onClick={confirmExitExam}
+                disabled={isSubmitting}
+                style={{
+                  flex: "1 1 130px", padding: "13px 16px", borderRadius: 13,
+                  border: "1px solid rgba(244,189,139,.5)", background: "#d99a68",
+                  color: "#24151a", font: "inherit", fontWeight: 800, cursor: "pointer",
+                  opacity: isSubmitting ? .65 : 1,
+                }}
+              >
+                {isSubmitting ? "جاري التسليم..." : "أيوه، اخرج"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
