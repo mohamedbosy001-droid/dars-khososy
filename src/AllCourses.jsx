@@ -719,6 +719,32 @@ const THIRD_SIXTH_LECTURE = {
   requiredExamId: THIRD_LECTURE_5_EXAM_ID,
 };
 
+const THIRD_SEVENTH_LECTURE = {
+  id: "lesson-7",
+  title: "المحاضرة السابعة - إن وأخواتها، لا النافية للجنس، الضمائر، المحل الإعرابي للجمل",
+  description: "",
+  youtubeUrl: "https://youtu.be/cXajWWttliI?si=mmN02o2-obGJHBIv",
+  videoUrl: "https://youtu.be/cXajWWttliI?si=mmN02o2-obGJHBIv",
+  videoTitle: "المحاضرة السابعة - إن وأخواتها، لا النافية للجنس، الضمائر، المحل الإعرابي للجمل",
+  exam1: false,
+  exam1Key: "",
+  exam1Title: "",
+  exam2: false,
+  exam2Key: "",
+  exam2Title: "",
+  homeworkEnabled: false,
+  homeworkKey: "",
+  homeworkTitle: "",
+  homeworkSolutionUrl: "",
+  solutionVideoUrl: "",
+  homeworkSolutionTitle: "",
+  requiresPreviousExam: false,
+  requiredExamId: "",
+  entryExamKey: "",
+  entryExamTitle: "",
+  courseLectureKey: "third-lecture-7",
+};
+
 function renderUnderlinedQuestionText(text) {
   if (
     typeof text !== "string" ||
@@ -1306,6 +1332,11 @@ function AllCourses({
         const fifthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-5" || lesson?.courseLectureKey === "first-secondary-lecture-5");
         if (fifthLessonIndex >= 0) lessons[fifthLessonIndex] = { ...lessons[fifthLessonIndex], ...FIRST_SECONDARY_FIFTH_LECTURE, courseLectureKey: "first-secondary-lecture-5" };
         else lessons.push({ ...FIRST_SECONDARY_FIFTH_LECTURE, courseLectureKey: "first-secondary-lecture-5" });
+
+        // المحاضرة السادسة تظهر أيضًا داخل كورس الترم الأول لأولى ثانوي.
+        const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "first-secondary-lecture-6");
+        if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...FIRST_SECONDARY_SIXTH_LECTURE, courseLectureKey: "first-secondary-lecture-6" };
+        else lessons.push({ ...FIRST_SECONDARY_SIXTH_LECTURE, courseLectureKey: "first-secondary-lecture-6" });
       }
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
@@ -1542,6 +1573,10 @@ function AllCourses({
               "third-lecture-6",
           },
           {
+            ...THIRD_SEVENTH_LECTURE,
+            courseLectureKey: "third-lecture-7",
+          },
+          {
             id: "october-review",
             title: "مراجعة شهر أكتوبر",
             description: "على جميع ما سبق شرحه",
@@ -1767,6 +1802,11 @@ function AllCourses({
       const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "third-lecture-6");
       if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" };
       else lessons.push({ ...THIRD_SIXTH_LECTURE, exam1: false, exam1Key: "", exam1Title: "", courseLectureKey: "third-lecture-6" });
+
+      // المحاضرة السابعة: فيديو فقط بدون امتحان أو واجب أو قفل سابق.
+      const seventhLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7");
+      if (seventhLessonIndex >= 0) lessons[seventhLessonIndex] = { ...lessons[seventhLessonIndex], ...THIRD_SEVENTH_LECTURE };
+      else lessons.push({ ...THIRD_SEVENTH_LECTURE });
 
       // مراجعة شهر أكتوبر: تفتح مباشرة دون امتحان أو واجب.
       const octoberReviewIndex = lessons.findIndex(
@@ -2751,6 +2791,19 @@ function AllCourses({
     if (
       !course ||
       !lesson
+    ) {
+      return false;
+    }
+
+    // المحاضرة السابعة لا تحتاج كود تفعيل منفصل؛ يكفي اشتراك الكورس وتسليم الشامل.
+    if (
+      THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
+      (lesson.id === "lesson-7" || lesson.courseLectureKey === "third-lecture-7") &&
+      !(
+        isExamCompleted("comprehensive-exam") ||
+        isExamCompleted("thirdMonthComprehensiveExam") ||
+        isExamCompleted("third-month-comprehensive")
+      )
     ) {
       return false;
     }
@@ -4260,6 +4313,20 @@ function AllCourses({
       window.alert(
         "المحاضرة مقفولة. اكتب كود المحاضرة أولًا."
       );
+      return;
+    }
+
+    // المحاضرة السابعة تحتاج تسليم الشامل فقط بالإضافة إلى صلاحية الاشتراك المعتادة.
+    if (
+      THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
+      (lesson.id === "lesson-7" || lesson.courseLectureKey === "third-lecture-7") &&
+      !(
+        isExamCompleted("comprehensive-exam") ||
+        isExamCompleted("thirdMonthComprehensiveExam") ||
+        isExamCompleted("third-month-comprehensive")
+      )
+    ) {
+      window.alert("لازم تمتحن الامتحان الشامل وتسلّمه الأول علشان تفتح المحاضرة السابعة.");
       return;
     }
 
@@ -7178,6 +7245,11 @@ function AllCourses({
           isThirdLecture5ExamCompleted={isExamCompleted(
             THIRD_LECTURE_5_EXAM_ID
           )}
+          isThirdComprehensiveExamCompleted={
+            isExamCompleted("comprehensive-exam") ||
+            isExamCompleted("thirdMonthComprehensiveExam") ||
+            isExamCompleted("third-month-comprehensive")
+          }
           onBack={
             closeCourseContent
           }
