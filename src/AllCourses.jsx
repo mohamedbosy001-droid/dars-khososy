@@ -107,6 +107,8 @@ const FIRST_LECTURE_2_EXAM_ID = "first-lecture-2-exam";
 const FIRST_LECTURE_4_EXAM_ID = "first-lecture-4-exam";
 const FIRST_LECTURE_5_EXAM_KEY = "firstLecture5Exam";
 const FIRST_LECTURE_5_EXAM_ID = "first-lecture-5-exam";
+const FIRST_LECTURE_6_EXAM_KEY = "firstLecture6Exam";
+const FIRST_LECTURE_6_EXAM_ID = "first-lecture-6-exam";
 
 /*
   ============================
@@ -360,6 +362,21 @@ const FIRST_SECONDARY_FIFTH_LECTURE = {
   exam1Key: FIRST_LECTURE_5_EXAM_KEY,
   exam1Title: "امتحان قبل المحاضرة الخامسة",
   courseLectureKey: "first-secondary-lecture-5",
+};
+
+const FIRST_SECONDARY_SIXTH_LECTURE = {
+  id: "lesson-6",
+  title: "المحاضرة السادسة الأدب في عصر صدر الإسلام وحل تدريبات الدرس",
+  description: "سلّم امتحان ما قبل المحاضرة السادسة أولًا، وبعد التسليم فقط سيفتح فيديو الشرح.",
+  youtubeUrl: "https://youtu.be/Pw5sHKPmpfA?si=2F_Ay3sAgF1R_cpj",
+  videoUrl: "https://youtu.be/Pw5sHKPmpfA?si=2F_Ay3sAgF1R_cpj",
+  videoTitle: "المحاضرة السادسة الأدب في عصر صدر الإسلام وحل تدريبات الدرس",
+  exam1: true,
+  exam1Key: FIRST_LECTURE_6_EXAM_KEY,
+  exam1Title: "امتحان قبل المحاضرة السادسة",
+  courseLectureKey: "first-secondary-lecture-6",
+  requiresPreviousExam: true,
+  requiredExamId: FIRST_LECTURE_6_EXAM_ID,
 };
 
 /*
@@ -1183,6 +1200,10 @@ function AllCourses({
             ...FIRST_SECONDARY_FIFTH_LECTURE,
             courseLectureKey: "first-secondary-lecture-5",
           },
+          {
+            ...FIRST_SECONDARY_SIXTH_LECTURE,
+            courseLectureKey: "first-secondary-lecture-6",
+          },
         ],
       };
     }
@@ -1851,6 +1872,36 @@ function AllCourses({
         });
       });
 
+      // فيديو واجب الأدب في عصر صدر الإسلام: يظهر في قسم تسليم الواجب لطلاب السنتر فقط.
+      writes.push(
+        setDoc(
+          doc(db, "homeworkCatalog", "first-secondary-center-islamic-literature-homework-video"),
+          {
+            id: "first-secondary-center-islamic-literature-homework-video",
+            title: "واجب سنتر الأدب في عصر صدر الإسلام",
+            grade: "الأول الثانوي",
+            studentType: "center",
+            centerOnly: true,
+            targetAudience: "center",
+            courseId: "first-month-2-course",
+            courseTitle: "كورس الشهر الثاني - الصف الأول الثانوي",
+            lessonId: "lesson-6",
+            lessonTitle: "المحاضرة السادسة الأدب في عصر صدر الإسلام وحل تدريبات الدرس",
+            videoOnly: true,
+            homeworkVideoOnly: true,
+            videoId: "Q6ADoI9RUNU",
+            videoUrl: "https://youtu.be/Q6ADoI9RUNU?si=uK84k5nSiUMAIFtP",
+            homeworkVideoUrl: "https://youtu.be/Q6ADoI9RUNU?si=uK84k5nSiUMAIFtP",
+            youtubeUrl: "https://youtu.be/Q6ADoI9RUNU?si=uK84k5nSiUMAIFtP",
+            active: true,
+            isPublished: true,
+            source: "platform-center-homework",
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        )
+      );
+
       if (writes.length > 0) {
         try {
           await Promise.all(writes);
@@ -2112,11 +2163,15 @@ function AllCourses({
                   active: true,
                   isPublished: true,
                   status: "active",
-                  // الشهر الثاني لأولى ثانوي يحتوي المحاضرة الخامسة فقط.
+                  // الشهر الثاني لأولى ثانوي يحتوي المحاضرتين الخامسة والسادسة.
                   lessons: [
                     {
                       ...FIRST_SECONDARY_FIFTH_LECTURE,
                       courseLectureKey: "first-secondary-lecture-5",
+                    },
+                    {
+                      ...FIRST_SECONDARY_SIXTH_LECTURE,
+                      courseLectureKey: "first-secondary-lecture-6",
                     },
                   ],
                 };
@@ -4208,6 +4263,16 @@ function AllCourses({
       return;
     }
 
+    /* قفل خاص للمحاضرة السادسة في كورس الشهر الثاني لأولى ثانوي */
+    if (
+      course.id === "first-month-2-course" &&
+      lesson.id === "lesson-6" &&
+      !isExamCompleted(FIRST_LECTURE_6_EXAM_ID)
+    ) {
+      window.alert("سلّم امتحان ما قبل المحاضرة السادسة أولًا لفتح فيديو المحاضرة.");
+      return;
+    }
+
     /*
       =====================================
       منع فتح فيديو المحاضرة
@@ -5859,6 +5924,10 @@ function AllCourses({
       FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
       (finalExamKey === FIRST_LECTURE_5_EXAM_KEY || examKey === FIRST_LECTURE_5_EXAM_KEY);
 
+    const isFirstLectureSixExam =
+      course.id === "first-month-2-course" &&
+      (finalExamKey === FIRST_LECTURE_6_EXAM_KEY || examKey === FIRST_LECTURE_6_EXAM_KEY);
+
     if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
       const courseAccess = getCourseAccess(course);
       const hasFullCourseAccess =
@@ -5871,8 +5940,8 @@ function AllCourses({
         window.alert("اشتركي في الشهر أو فعّلي الامتحان الشامل بكود الحصة أولًا.");
         return;
       }
-    } else if (isFirstLectureFourExam || isFirstLectureFiveExam) {
-      // امتحان المحاضرة الرابعة يظهر قبل فتح الفيديو؛ لا يشترط فتح المحاضرة أولًا.
+    } else if (isFirstLectureFourExam || isFirstLectureFiveExam || isFirstLectureSixExam) {
+      // امتحانات أولى ثانوي قبل المحاضرات الرابعة والخامسة والسادسة؛ لا تشترط مشاهدة الفيديو أولًا.
     } else if (
       isSecondLectureOneExam
     ) {
@@ -7093,6 +7162,9 @@ function AllCourses({
           )}
           isFirstLecture5ExamCompleted={isExamCompleted(
             FIRST_LECTURE_5_EXAM_ID
+          )}
+          isFirstLecture6ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_6_EXAM_ID
           )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID

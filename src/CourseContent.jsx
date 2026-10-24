@@ -66,6 +66,7 @@ function CourseContent({
   */
   isFirstLecture4ExamCompleted = false,
   isFirstLecture5ExamCompleted = false,
+  isFirstLecture6ExamCompleted = false,
 
   /*
     هل امتحان المحاضرة الأولى
@@ -357,7 +358,8 @@ function CourseContent({
 
               const isFirstSecondLesson =
                 isFirstSecondaryCourse &&
-                lessonIndex === 1;
+                lessonIndex === 1 &&
+                course.id !== "first-month-2-course";
 
               const isFirstThirdLesson =
                 isFirstSecondaryCourse &&
@@ -370,6 +372,10 @@ function CourseContent({
               const isFirstFifthLesson =
                 isFirstSecondaryCourse &&
                 (lesson.id === "lesson-5" || lesson.courseLectureKey === "first-secondary-lecture-5");
+
+              const isFirstSixthLesson =
+                course.id === "first-month-2-course" &&
+                (lesson.id === "lesson-6" || lesson.courseLectureKey === "first-secondary-lecture-6");
 
               /*
                 =====================================
@@ -463,6 +469,7 @@ function CourseContent({
                     !isFirstThirdLesson &&
                     !isFirstFourthLesson &&
                     !isFirstFifthLesson &&
+                    !isFirstSixthLesson &&
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
@@ -487,6 +494,10 @@ function CourseContent({
                   (
                     isFirstFifthLesson &&
                     isFirstLecture5ExamCompleted
+                  ) ||
+                  (
+                    isFirstSixthLesson &&
+                    isFirstLecture6ExamCompleted
                   ) ||
                   (
                     isSecondSecondLesson &&
@@ -641,7 +652,8 @@ function CourseContent({
                   isFirstSecondaryCourse &&
                   (
                     lessonIndex === 0 ||
-                    lesson.id === "lesson-2"
+                    lesson.id === "lesson-2" ||
+                    (course.id === "first-month-2-course" && lesson.id === "lesson-6")
                   )
                 ) ||
                 (
@@ -673,6 +685,7 @@ function CourseContent({
 
               const showFirstSecondaryExamBeforeSecondLesson =
                 isFirstSecondaryCourse &&
+                course.id !== "first-month-2-course" &&
                 lessonIndex === 1 &&
                 firstLesson;
 
@@ -770,9 +783,17 @@ function CourseContent({
                 isSecondSecondaryCourse &&
                 lesson.id === "lesson-4";
 
+              // امتحان المحاضرة الخامسة يظل ظاهرًا في المحاضرة الخامسة فقط.
+              // لا نعرضه داخل بطاقة المحاضرة السادسة حتى لو وصلت بيانات امتحان قديمة معها.
               const showFirstSecondaryExamBeforeFifthLesson =
                 isFirstSecondaryCourse &&
-                isFirstFifthLesson &&
+                !isFirstSixthLesson &&
+                (lesson.id === "lesson-5" || lesson.courseLectureKey === "first-secondary-lecture-5") &&
+                !String(lesson.title || "").includes("المحاضرة السادسة") &&
+                hasValue(lesson.exam1Key);
+
+              const showFirstSecondaryExamBeforeSixthLesson =
+                isFirstSixthLesson &&
                 hasValue(lesson.exam1Key);
 
               const showThirdExamBeforeSixthLesson =
@@ -1125,6 +1146,32 @@ function CourseContent({
                             </p>
                           </div>
                           {isFirstLecture5ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
+                      {/* امتحان ما قبل المحاضرة السادسة - أولى ثانوي */}
+                      {showFirstSecondaryExamBeforeSixthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.exam1Key || "firstLecture6Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isFirstLecture6ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان قبل المحاضرة السادسة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة السادسة بالكود أولًا"
+                                : isFirstLecture6ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك مراجعة النتيجة"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة السادسة"}
+                            </p>
+                          </div>
+                          {isFirstLecture6ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
                         </button>
                       )}
 
@@ -2177,6 +2224,7 @@ function CourseContent({
 
                         {hasExam1 &&
                           !hideExam1InSourceLesson &&
+                          !isFirstSixthLesson &&
                           !showFirstSecondaryExamBeforeFourthLesson && (
                             <button
                               type="button"
@@ -2228,7 +2276,7 @@ function CourseContent({
                             الامتحان الثاني القديم
                         ========================= */}
 
-                        {hasExam2 && (
+                        {hasExam2 && !isFirstSixthLesson && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${
@@ -2286,7 +2334,7 @@ function CourseContent({
                         !hasDirectHomeworkVideo &&
                         !hasHomeworkSolution &&
                         !hasExam1 &&
-                        !hasExam2 &&
+                        (!hasExam2 || isFirstSixthLesson) &&
                         !showFirstSecondaryExamBeforeSecondLesson &&
                         !showSecondSecondaryExamBeforeSecondLesson &&
                         !showSecondSecondaryExamBeforeThirdLesson &&

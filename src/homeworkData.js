@@ -1671,6 +1671,16 @@ videoId: "g4oIr06pQjI",
     videoId: "RfgqUnuRJ6k",
     questions: [],
   },
+  "first-center-islamic-literature-homework-video": {
+    id: "first-center-islamic-literature-homework-video",
+    title: "واجب سنتر الأدب في عصر صدر الإسلام",
+    grade: "الأول الثانوي",
+    studentType: "center",
+    centerOnly: true,
+    videoOnly: true,
+    videoId: "Q6ADoI9RUNU",
+    questions: [],
+  },
 };
 
 export default homeworkData;

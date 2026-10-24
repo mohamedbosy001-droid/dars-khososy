@@ -797,6 +797,39 @@ const FIRST_CENTER_KADA_VIDEO_ONLY = {
   questions: [],
 };
 
+
+/* =========================================================
+   واجب الأدب في عصر صدر الإسلام - أولى ثانوي سنتر
+   فيديو فقط، ويظهر لطلاب السنتر في قسم تسليم الواجب
+========================================================= */
+
+const FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK_SOURCE =
+  homeworkData?.[
+    "first-center-islamic-literature-homework-video"
+  ] || {};
+
+const FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK = {
+  ...FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK_SOURCE,
+
+  id: "first-center-islamic-literature-homework-video",
+
+  title:
+    "واجب سنتر الأدب في عصر صدر الإسلام",
+
+  grade:
+    "الأول الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "Q6ADoI9RUNU",
+
+  questions: [],
+};
+
 /* =========================================================
    استثناء فيديو فقط - تانية ثانوي
 ========================================================= */
@@ -1357,6 +1390,8 @@ const HOMEWORKS = [
   FIRST_CENTER_LECTURE_3_VIDEO_ONLY,
 
   FIRST_CENTER_KADA_VIDEO_ONLY,
+
+  FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK,
 
   SECOND_CENTER_VIDEO_ONLY,
 
