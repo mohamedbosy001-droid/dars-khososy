@@ -2562,6 +2562,40 @@ function AllCourses({
     );
   }
 
+  function hasComprehensiveCourseSubscription(course) {
+    if (!course) {
+      return false;
+    }
+
+    if (!isPaidCourse(course)) {
+      return true;
+    }
+
+    const fullCourseAccessTypes = ["month", "term", "fullCourse", undefined];
+    const courseAccess = getCourseAccess(course);
+    const hasActiveFullAccess =
+      courseAccess?.active === true &&
+      fullCourseAccessTypes.includes(courseAccess.accessType);
+
+    const savedSubscriptions = Array.isArray(studentData?.subscribedCourses)
+      ? studentData.subscribedCourses
+      : [];
+    const matchingSubscription = savedSubscriptions.find((subscription) => {
+      if (typeof subscription === "string") {
+        return subscription === course.id;
+      }
+      return subscription?.id === course.id || subscription?.courseId === course.id;
+    });
+    const hasSavedFullSubscription =
+      Boolean(matchingSubscription) &&
+      (typeof matchingSubscription === "string" || matchingSubscription?.subscribed !== false) &&
+      fullCourseAccessTypes.includes(
+        typeof matchingSubscription === "string" ? undefined : matchingSubscription?.accessType
+      );
+
+    return hasActiveFullAccess || hasSavedFullSubscription;
+  }
+
   function hasCourseAccess(
     course
   ) {
@@ -5998,9 +6032,7 @@ function AllCourses({
     if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
       const courseAccess = getCourseAccess(course);
       const hasFullCourseAccess =
-        !isPaidCourse(course) ||
-        (courseAccess?.active === true &&
-          ["month", "term", "fullCourse", undefined].includes(courseAccess.accessType));
+        hasComprehensiveCourseSubscription(course);
       const hasExamCodeAccess =
         studentData?.courseProgress?.[course.id]?.comprehensiveExamCodeUnlocked === true;
       if (!hasFullCourseAccess && !hasExamCodeAccess) {
@@ -7292,6 +7324,9 @@ function AllCourses({
           hasComprehensiveExamCodeAccess={
             comprehensiveExamCodeAccess[selectedCourse.id] === true ||
             studentData?.courseProgress?.[selectedCourse.id]?.comprehensiveExamCodeUnlocked === true
+          }
+          hasComprehensiveCourseSubscription={
+            hasComprehensiveCourseSubscription(selectedCourse)
           }
           onActivateComprehensiveExamCode={() =>
             activateComprehensiveExamCode(selectedCourse)

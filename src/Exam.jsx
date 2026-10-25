@@ -92,7 +92,7 @@ function getQuestionPoints(question) {
 
   if (
     Number.isFinite(points) &&
-    points > 0
+    points >= 0
   ) {
     return points;
   }
@@ -374,33 +374,56 @@ function Exam({
             }
 
             if (savedAttempt) {
-              if (Number(exam?.durationMinutes) > 0) {
+              let attemptToRestore = savedAttempt;
+              const durationMs = Number(exam?.durationMinutes) * 60 * 1000;
+
+              if (durationMs > 0) {
                 const startedAtMs = savedAttempt.startedAt?.toMillis
                   ? savedAttempt.startedAt.toMillis()
                   : savedAttempt.startedAt?.seconds
                     ? savedAttempt.startedAt.seconds * 1000
-                    : Date.now();
-                const deadline = startedAtMs + Number(exam.durationMinutes) * 60 * 1000;
-                setRemainingSeconds(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+                    : 0;
+                const deadline = startedAtMs + durationMs;
+                const remaining = startedAtMs > 0
+                  ? Math.ceil((deadline - Date.now()) / 1000)
+                  : 0;
+
+                // لو لوحة التحكم أعادت فتح محاولة قديمة ولم تحدّث startedAt،
+                // فالموعد القديم يجعل المؤقت يبدأ بصفر ويُسلّم الامتحان فورًا.
+                // المحاولة المنتهية وغير المسلّمة تُعاد هنا من البداية بمدة الامتحان كاملة.
+                if (remaining <= 0) {
+                  attemptToRestore = {
+                    ...savedAttempt,
+                    examId: exam.id,
+                    examTitle: exam.title,
+                    started: true,
+                    completed: false,
+                    answers: {},
+                    currentQuestionIndex: 0,
+                    startedAt: Timestamp.now(),
+                    durationMinutes: Number(exam.durationMinutes),
+                    updatedAt: Timestamp.now(),
+                    result: null,
+                  };
+                  examAttempts[exam.id] = attemptToRestore;
+                  transaction.update(studentReference, {
+                    examAttempts,
+                    updatedAt: Timestamp.now(),
+                  });
+                  setRemainingSeconds(Number(exam.durationMinutes) * 60);
+                } else {
+                  setRemainingSeconds(remaining);
+                }
               }
 
-              const restoredAnswers = savedAttempt.answers || {};
+              const restoredAnswers = attemptToRestore.answers || {};
               answersRef.current = restoredAnswers;
               setAnswers(restoredAnswers);
 
               setCurrentQuestionIndex(
                 Math.min(
-                  Math.max(
-                    Number(
-                      savedAttempt.currentQuestionIndex ||
-                        0
-                    ),
-                    0
-                  ),
-                  Math.max(
-                    questions.length - 1,
-                    0
-                  )
+                  Math.max(Number(attemptToRestore.currentQuestionIndex || 0), 0),
+                  Math.max(questions.length - 1, 0)
                 )
               );
 
@@ -605,10 +628,21 @@ function Exam({
       return;
     }
 
+    const chooseOneIds = [
+      "second-month-comprehensive-q46",
+      "second-month-comprehensive-q47",
+      "second-month-comprehensive-q48",
+    ];
     const nextAnswers = {
-      ...answersRef.current,
-      [questionId]: value,
+      ...(answersRef.current || answers),
     };
+    if (chooseOneIds.includes(questionId) && value.trim()) {
+      // الأسئلة 46–48 مجموعة اختيارية: إجابة واحدة فقط.
+      chooseOneIds.forEach((id) => {
+        if (id !== questionId) nextAnswers[id] = "";
+      });
+    }
+    nextAnswers[questionId] = value;
     answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
   }
@@ -946,18 +980,13 @@ function Exam({
         = درجة واحدة تلقائيًا
       */
 
-      const totalQuestions =
-        questions.reduce(
-          (
-            total,
-            question
-          ) =>
-            total +
-            getQuestionPoints(
-              question
-            ),
-          0
-        );
+      const calculatedTotal = questions.reduce(
+        (total, question) => total + getQuestionPoints(question),
+        0
+      );
+      const totalQuestions = Number(exam?.maxScore) > 0
+        ? Number(exam.maxScore)
+        : calculatedTotal;
 
       const percentage =
         totalQuestions > 0
@@ -1581,6 +1610,12 @@ function Exam({
       </div>
 
       {currentQuestion && (
+        <>
+        {exam?.id === "second-month-comprehensive" && [45, 46, 47].includes(currentQuestionIndex) && (
+          <div role="note" style={{ margin: "0 0 16px", padding: "14px 18px", borderRadius: "12px", border: "2px solid #d97706", background: "#fff3cd", color: "#7f1d1d", direction: "rtl", lineHeight: 1.9, fontWeight: 600, boxShadow: "0 2px 8px rgba(127, 29, 29, 0.10)" }}>
+            <strong style={{ color: "#991b1b" }}>تنبيه مهم:</strong> <span style={{ color: "#7f1d1d" }}>الأسئلة 46 و47 و48 بدائل لبعضها؛ اختر سؤالًا واحدًا فقط للإجابة عنه، ولا تجب عن الأسئلة الثلاثة.</span>
+          </div>
+        )}
         <article className="exam-question-card">
           <div className="exam-question-number">
             {currentQuestionIndex +
@@ -1796,6 +1831,7 @@ function Exam({
             </div>
           )}
         </article>
+        </>
       )}
 
       <div className="exam-navigation-buttons">
