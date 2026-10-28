@@ -129,6 +129,8 @@ const SECOND_LECTURE_2_EXAM_ID =
   "second-lecture-2-exam";
 const SECOND_LECTURE_3_EXAM_KEY = "secondLecture3Exam";
 const SECOND_LECTURE_3_EXAM_ID = "second-lecture-3-exam";
+const SECOND_LECTURE_4_EXAM_KEY = "secondLecture4Exam";
+const SECOND_LECTURE_4_EXAM_ID = "second-lecture-4-exam";
 
 /*
   ============================
@@ -513,6 +515,36 @@ const SECOND_SECONDARY_FOURTH_LECTURE = {
   homeworkVideoUrl: "https://www.youtube.com/watch?v=reqBg9w_j5E",
   requiresPreviousExam: true,
   requiredExamId: SECOND_LECTURE_3_EXAM_ID,
+};
+
+const SECOND_SECONDARY_FIFTH_LECTURE = {
+  id: "lesson-5",
+  title: "المحاضرة الخامسة - شرح نص العلم نور والفقرة القصيرة وحل تدريبات",
+  description: "تُفتح لطلاب الأونلاين بعد تسليم الامتحان الشامل. طلاب السنتر يمكنهم فتحها بالتفعيل المعتاد.",
+  youtubeUrl: "https://youtu.be/1rK4t7ufdHM?si=Ojk6k_AJvUfPEOoM",
+  videoUrl: "https://youtu.be/1rK4t7ufdHM?si=Ojk6k_AJvUfPEOoM",
+  videoTitle: "المحاضرة الخامسة - شرح نص العلم نور والفقرة القصيرة وحل تدريبات",
+  exam1: true,
+  exam1Key: SECOND_LECTURE_4_EXAM_KEY,
+  exam1Title: "امتحان قبل المحاضرة الخامسة",
+  requiresPreviousExam: true,
+  requiredExamId: "secondMonthComprehensiveExam",
+  courseLectureKey: "second-secondary-lecture-5",
+};
+
+const SECOND_SECONDARY_SIXTH_LECTURE = {
+  id: "lesson-6",
+  title: "المحاضرة السادسة - شرح همزة القطع وألف الوصل والتاء المربوطة والهاء المربوطة وقصة عودة الروح وحل تدريبات",
+  description: "تُفتح لطلاب الأونلاين بعد تسليم الامتحان الشامل. طلاب السنتر يمكنهم فتحها بالتفعيل المعتاد.",
+  youtubeUrl: "https://youtu.be/FDGOYdAZNqo?si=vwxZcZ_q1SjlY5Jo",
+  videoUrl: "https://youtu.be/FDGOYdAZNqo?si=vwxZcZ_q1SjlY5Jo",
+  videoTitle: "المحاضرة السادسة - شرح همزة القطع وألف الوصل والتاء المربوطة والهاء المربوطة وقصة عودة الروح وحل تدريبات",
+  exam1: false,
+  exam1Key: "",
+  exam1Title: "",
+  requiresPreviousExam: true,
+  requiredExamId: "secondMonthComprehensiveExam",
+  courseLectureKey: "second-secondary-lecture-6",
 };
 
 /*
@@ -1492,6 +1524,17 @@ function AllCourses({
       const fourthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-4" || lesson?.courseLectureKey === "second-secondary-lecture-4");
       if (fourthLessonIndex >= 0) lessons[fourthLessonIndex] = { ...lessons[fourthLessonIndex], ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" };
       else lessons.push({ ...SECOND_SECONDARY_FOURTH_LECTURE, courseLectureKey: "second-secondary-lecture-4" });
+
+      // المحاضرتان الخامسة والسادسة تظهران في كورس الشهر الثاني وكورس الترم فقط.
+      if (["second-month-2-course", "second-term-course"].includes(course.id)) {
+        const fifthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-5" || lesson?.courseLectureKey === "second-secondary-lecture-5");
+        if (fifthLessonIndex >= 0) lessons[fifthLessonIndex] = { ...lessons[fifthLessonIndex], ...SECOND_SECONDARY_FIFTH_LECTURE, courseLectureKey: "second-secondary-lecture-5" };
+        else lessons.push({ ...SECOND_SECONDARY_FIFTH_LECTURE, courseLectureKey: "second-secondary-lecture-5" });
+
+        const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "second-secondary-lecture-6");
+        if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...SECOND_SECONDARY_SIXTH_LECTURE, courseLectureKey: "second-secondary-lecture-6" };
+        else lessons.push({ ...SECOND_SECONDARY_SIXTH_LECTURE, courseLectureKey: "second-secondary-lecture-6" });
+      }
 
       // مراجعة أكتوبر: فيديو فقط في كورس الشهر الثاني وكورس الترم.
       if (
@@ -2831,6 +2874,7 @@ function AllCourses({
 
     // المحاضرة السابعة لا تحتاج كود تفعيل منفصل؛ يكفي اشتراك الكورس وتسليم الشامل.
     if (
+      studentData?.studentType !== "center" &&
       THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
       (lesson.id === "lesson-7" || lesson.courseLectureKey === "third-lecture-7") &&
       !(
@@ -2840,6 +2884,24 @@ function AllCourses({
       )
     ) {
       return false;
+    }
+
+    // المحاضرتان الخامسة والسادسة في كورس تانية ثانوي: الاشتراك الفعّال
+    // في الكورس يغني عن كود تفعيل المحاضرة، مع بقاء شروط الامتحانات داخل openLesson.
+    const isSecondSecondaryFifthOrSixthLesson =
+      SECOND_SECONDARY_COURSE_IDS.has(course.id) &&
+      (
+        ["lesson-5", "lesson-6"].includes(String(lesson.id || "")) ||
+        ["second-secondary-lecture-5", "second-secondary-lecture-6"].includes(
+          String(lesson.courseLectureKey || "")
+        )
+      );
+
+    if (
+      isSecondSecondaryFifthOrSixthLesson &&
+      hasComprehensiveCourseSubscription(course)
+    ) {
+      return true;
     }
 
     const basicAccess =
@@ -4352,6 +4414,7 @@ function AllCourses({
 
     // المحاضرة السابعة تحتاج تسليم الشامل فقط بالإضافة إلى صلاحية الاشتراك المعتادة.
     if (
+      studentData?.studentType !== "center" &&
       THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
       (lesson.id === "lesson-7" || lesson.courseLectureKey === "third-lecture-7") &&
       !(
@@ -4381,21 +4444,59 @@ function AllCourses({
       =====================================
     */
 
+    const isSecondSecondaryFifthOrSixthLesson =
+      SECOND_SECONDARY_COURSE_IDS.has(course.id) &&
+      (["lesson-5", "lesson-6"].includes(String(lesson.id || "")) ||
+        ["second-secondary-lecture-5", "second-secondary-lecture-6"].includes(String(lesson.courseLectureKey || "")));
+
+    const isSecondSecondaryCenterLectureWithoutExam =
+      studentData?.studentType === "center" &&
+      isSecondSecondaryFifthOrSixthLesson &&
+      !(lesson.id === "lesson-5" || lesson.courseLectureKey === "second-secondary-lecture-5");
+
+    const comprehensiveExamCompleted =
+      isExamCompleted("secondMonthComprehensiveExam") ||
+      isExamCompleted("second-month-comprehensive") ||
+      isExamCompleted("comprehensive-exam");
+
+    const isSecondSecondaryFifthLesson =
+      lesson.id === "lesson-5" ||
+      lesson.courseLectureKey === "second-secondary-lecture-5";
+
+    const requiredExamCompleted = isSecondSecondaryFifthOrSixthLesson
+      ? (
+          (studentData?.studentType === "center" || comprehensiveExamCompleted) &&
+          (!isSecondSecondaryFifthLesson || isExamCompleted(SECOND_LECTURE_4_EXAM_ID))
+        )
+      : isExamCompleted(lesson.requiredExamId);
+
     if (
       lesson.requiresPreviousExam ===
         true &&
       hasValue(
         lesson.requiredExamId
       ) &&
-      !isExamCompleted(
-        lesson.requiredExamId
-      )
+      !requiredExamCompleted &&
+      !isSecondSecondaryCenterLectureWithoutExam
     ) {
       /*
         أولى ثانوي - المحاضرة الثانية
       */
 
       if (
+        isSecondSecondaryFifthOrSixthLesson &&
+        (lesson.id === "lesson-5" || lesson.courseLectureKey === "second-secondary-lecture-5") &&
+        !isExamCompleted(SECOND_LECTURE_4_EXAM_ID)
+      ) {
+        window.alert("سلّم امتحان ما قبل المحاضرة الخامسة أولًا لفتح فيديو المحاضرة.");
+      }
+      else if (
+        isSecondSecondaryFifthOrSixthLesson &&
+        !comprehensiveExamCompleted
+      ) {
+        window.alert("سلّم امتحان الشامل أولًا لفتح المحاضرة.");
+      }
+      else if (
         FIRST_SECONDARY_COURSE_IDS.has(
           course.id
         ) &&
@@ -5997,6 +6098,10 @@ function AllCourses({
         examKey === SECOND_LECTURE_3_EXAM_KEY
       );
 
+    const isSecondLectureFourExam =
+      ["second-month-2-course", "second-term-course"].includes(course.id) &&
+      (finalExamKey === SECOND_LECTURE_4_EXAM_KEY || examKey === SECOND_LECTURE_4_EXAM_KEY);
+
     const isThirdLectureFiveExam =
       THIRD_SECONDARY_COURSE_IDS.has(
         course.id
@@ -6249,6 +6354,9 @@ function AllCourses({
         );
         return;
       }
+    } else if (isSecondLectureFourExam) {
+      // امتحان ما قبل المحاضرة الخامسة يجب أن يفتح قبل تفعيل/فتح المحاضرة الخامسة.
+      // لا نطلب صلاحية المحاضرة الخامسة هنا لأن الامتحان يسبقها.
     } else if (
       isThirdLectureFiveExam
     ) {
@@ -7274,6 +7382,14 @@ function AllCourses({
           isSecondLecture3ExamCompleted={isExamCompleted(
             SECOND_LECTURE_3_EXAM_ID
           )}
+          isSecondLecture4ExamCompleted={isExamCompleted(
+            SECOND_LECTURE_4_EXAM_ID
+          )}
+          isSecondComprehensiveExamCompleted={
+            isExamCompleted("secondMonthComprehensiveExam") ||
+            isExamCompleted("second-month-comprehensive") ||
+            isExamCompleted("comprehensive-exam")
+          }
           isThirdLecture5ExamCompleted={isExamCompleted(
             THIRD_LECTURE_5_EXAM_ID
           )}
@@ -7282,6 +7398,7 @@ function AllCourses({
             isExamCompleted("thirdMonthComprehensiveExam") ||
             isExamCompleted("third-month-comprehensive")
           }
+          isCenterStudent={studentData?.studentType === "center"}
           onBack={
             closeCourseContent
           }

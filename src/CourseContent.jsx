@@ -85,6 +85,8 @@ function CourseContent({
     في تانية ثانوي تم تسليمه؟
   */
   isSecondLecture3ExamCompleted = false,
+  isSecondLecture4ExamCompleted = false,
+  isSecondComprehensiveExamCompleted = false,
 
   /*
     هل امتحان المحاضرة الخامسة
@@ -92,6 +94,7 @@ function CourseContent({
   */
   isThirdLecture5ExamCompleted = false,
   isThirdComprehensiveExamCompleted = false,
+  isCenterStudent = false,
 
   lessonActivationCodes,
   onLessonCodeChange,
@@ -176,18 +179,97 @@ function CourseContent({
     courseLectureKey: "third-lecture-7",
   };
 
-  const allLessons = isThirdLectureSevenCourse && !hasThirdLectureSeven
-    ? [...rawLessons, thirdLectureSeven]
-    : rawLessons;
+  const isSecondLectureFiveSixCourse = [
+    "second-month-2-course",
+    "second-term-course",
+  ].includes(course.id);
+
+  const secondSecondaryFifthLesson = {
+    id: "lesson-5",
+    title: "المحاضرة الخامسة - شرح نص العلم نور والفقرة القصيرة وحل تدريبات",
+    description: "تُفتح لطلاب الأونلاين بعد تسليم الامتحان الشامل. طلاب السنتر يمكنهم فتحها بالتفعيل المعتاد.",
+    youtubeUrl: "https://youtu.be/1rK4t7ufdHM?si=Ojk6k_AJvUfPEOoM",
+    videoUrl: "https://youtu.be/1rK4t7ufdHM?si=Ojk6k_AJvUfPEOoM",
+    videoTitle: "المحاضرة الخامسة - شرح نص العلم نور والفقرة القصيرة وحل تدريبات",
+    exam1: true,
+    exam1Key: "secondLecture4Exam",
+    exam1Title: "امتحان قبل المحاضرة الخامسة",
+    exam2: false,
+    exam2Key: "",
+    exam2Title: "",
+    homeworkEnabled: false,
+    homeworkKey: "",
+    homeworkTitle: "",
+    homeworkVideoOnly: false,
+    homeworkVideoUrl: "",
+    homeworkSolutionUrl: "",
+    pdfUrl: "",
+    requiresPreviousExam: true,
+    requiredExamId: "secondMonthComprehensiveExam",
+    courseLectureKey: "second-secondary-lecture-5",
+  };
+
+  const secondSecondarySixthLesson = {
+    id: "lesson-6",
+    title: "المحاضرة السادسة - شرح همزة القطع وألف الوصل والتاء المربوطة والهاء المربوطة وقصة عودة الروح وحل تدريبات",
+    description: "تُفتح لطلاب الأونلاين بعد تسليم الامتحان الشامل. طلاب السنتر يمكنهم فتحها بالتفعيل المعتاد.",
+    youtubeUrl: "https://youtu.be/FDGOYdAZNqo?si=vwxZcZ_q1SjlY5Jo",
+    videoUrl: "https://youtu.be/FDGOYdAZNqo?si=vwxZcZ_q1SjlY5Jo",
+    videoTitle: "المحاضرة السادسة - شرح همزة القطع وألف الوصل والتاء المربوطة والهاء المربوطة وقصة عودة الروح وحل تدريبات",
+    exam1: false,
+    exam1Key: "",
+    exam1Title: "",
+    exam2: false,
+    exam2Key: "",
+    exam2Title: "",
+    homeworkEnabled: false,
+    homeworkKey: "",
+    requiresPreviousExam: true,
+    requiredExamId: "secondMonthComprehensiveExam",
+    courseLectureKey: "second-secondary-lecture-6",
+  };
+
+  // أضف المحاضرتين احتياطيًا من داخل صفحة المحتوى حتى تظهرا أيضًا
+  // إذا كانت بيانات الكورس المحفوظة في Firebase قديمة أو ناقصة.
+  const lessonsWithSecondSecondaryVideos = (() => {
+    if (!isSecondLectureFiveSixCourse) return rawLessons;
+    // إزالة النسخ المكررة القديمة للمحاضرتين حتى تظهر كل واحدة مرة واحدة فقط.
+    const result = rawLessons.filter((lesson, index, list) => {
+      const isTargetLesson =
+        lesson?.id === "lesson-5" ||
+        lesson?.id === "lesson-6" ||
+        lesson?.courseLectureKey === "second-secondary-lecture-5" ||
+        lesson?.courseLectureKey === "second-secondary-lecture-6";
+      if (!isTargetLesson) return true;
+      const key = lesson?.id === "lesson-5" || lesson?.courseLectureKey === "second-secondary-lecture-5"
+        ? "second-secondary-lecture-5"
+        : "second-secondary-lecture-6";
+      return list.findIndex((item) =>
+        (item?.id === (key.endsWith("-5") ? "lesson-5" : "lesson-6")) ||
+        item?.courseLectureKey === key
+      ) === index;
+    });
+    const fifthIndex = result.findIndex((lesson) => lesson?.id === "lesson-5" || lesson?.courseLectureKey === "second-secondary-lecture-5");
+    if (fifthIndex >= 0) result[fifthIndex] = { ...result[fifthIndex], ...secondSecondaryFifthLesson };
+    else result.push(secondSecondaryFifthLesson);
+    const sixthIndex = result.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "second-secondary-lecture-6");
+    if (sixthIndex >= 0) result[sixthIndex] = { ...result[sixthIndex], ...secondSecondarySixthLesson };
+    else result.push(secondSecondarySixthLesson);
+    return result;
+  })();
+
+  const lessonsWithRequiredVideos = isThirdLectureSevenCourse && !hasThirdLectureSeven
+    ? [...lessonsWithSecondSecondaryVideos, thirdLectureSeven]
+    : lessonsWithSecondSecondaryVideos;
 
   // المحاضرة السابعة تظل ظاهرة دائمًا، وتأتي مباشرة بعد الامتحان الشامل.
   const lessons = (() => {
-    if (!isThirdLectureSevenCourse) return allLessons;
-    const seventhIndex = allLessons.findIndex(
+    if (!isThirdLectureSevenCourse) return lessonsWithRequiredVideos;
+    const seventhIndex = lessonsWithRequiredVideos.findIndex(
       (lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7"
     );
-    if (seventhIndex < 0) return allLessons;
-    const ordered = [...allLessons];
+    if (seventhIndex < 0) return lessonsWithRequiredVideos;
+    const ordered = [...lessonsWithRequiredVideos];
     const [seventhLesson] = ordered.splice(seventhIndex, 1);
     const comprehensiveIndex = ordered.findIndex((lesson) => {
       const id = String(lesson?.id || "").toLowerCase();
@@ -467,11 +549,20 @@ function CourseContent({
                 ["third-month-2-course", "third-term-course"].includes(course?.id) &&
                 (lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7");
 
+              const isSecondLectureFiveSixCourse =
+                ["second-month-2-course", "second-term-course"].includes(course?.id);
+              const isSecondLectureFiveOrSix =
+                isSecondLectureFiveSixCourse &&
+                (lesson?.id === "lesson-5" || lesson?.id === "lesson-6" ||
+                  lesson?.courseLectureKey === "second-secondary-lecture-5" ||
+                  lesson?.courseLectureKey === "second-secondary-lecture-6");
+
               const unlocked =
-                (!isThirdSeventhLesson || isThirdComprehensiveExamCompleted) &&
-                (typeof isLessonUnlocked === "function"
-                  ? isLessonUnlocked(lesson)
-                  : true);
+                (!isThirdSeventhLesson || isCenterStudent || isThirdComprehensiveExamCompleted) &&
+                (hasComprehensiveCourseSubscription ||
+                  (typeof isLessonUnlocked === "function"
+                    ? isLessonUnlocked(lesson)
+                    : true));
 
               /*
                 هل الطالب شاهد 30%؟
@@ -546,6 +637,14 @@ function CourseContent({
               const isSecondFourthLesson =
                 isSecondSecondaryCourse &&
                 lesson.id === "lesson-4";
+
+              const isSecondFifthLesson =
+                ["second-month-2-course", "second-term-course"].includes(course.id) &&
+                (lesson.id === "lesson-5" || lesson.courseLectureKey === "second-secondary-lecture-5");
+
+              const isSecondSixthLesson =
+                ["second-month-2-course", "second-term-course"].includes(course.id) &&
+                (lesson.id === "lesson-6" || lesson.courseLectureKey === "second-secondary-lecture-6");
 
               /*
                 =====================================
@@ -625,6 +724,8 @@ function CourseContent({
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
+                    !isSecondFifthLesson &&
+                    !isSecondSixthLesson &&
                     !isThirdSecondLesson &&
                     !isThirdThirdLesson &&
                     !isThirdFourthLesson &&
@@ -658,6 +759,15 @@ function CourseContent({
                   (
                     isSecondFourthLesson &&
                     isSecondLecture3ExamCompleted
+                  ) ||
+                  (
+                    isSecondFifthLesson &&
+                    (isCenterStudent || isSecondComprehensiveExamCompleted) &&
+                    isSecondLecture4ExamCompleted
+                  ) ||
+                  (
+                    isSecondSixthLesson &&
+                    (isCenterStudent || isSecondComprehensiveExamCompleted)
                   ) ||
                   (
                     isSecondThirdLesson &&
@@ -849,6 +959,7 @@ function CourseContent({
               */
 
               const showSecondSecondaryExamBeforeSecondLesson =
+                !isSecondLectureFiveSixCourse &&
                 isSecondSecondaryCourse &&
                 lessonIndex === 1 &&
                 firstLesson;
@@ -861,16 +972,18 @@ function CourseContent({
               */
 
               const showSecondSecondaryExamBeforeThirdLesson =
+                !isSecondLectureFiveSixCourse &&
                 isSecondSecondaryCourse &&
                 lesson.id === "lesson-3" &&
                 secondLesson;
 
               const showFirstExamBeforeSecondLesson =
                 !isOctoberReviewLesson &&
-                (                isThirdSecondaryCourse &&
-                lesson.id !== "lesson-6" &&
-                lessonIndex === 1 &&
-                firstLesson);
+                !isSecondLectureFiveSixCourse &&
+                (isThirdSecondaryCourse &&
+                  lesson.id !== "lesson-6" &&
+                  lessonIndex === 1 &&
+                  firstLesson);
 
               /*
                 =====================================
@@ -935,6 +1048,11 @@ function CourseContent({
                 isSecondSecondaryCourse &&
                 lesson.id === "lesson-4";
 
+              const showSecondSecondaryExamBeforeFifthLesson =
+                ["second-month-2-course", "second-term-course"].includes(course.id) &&
+                isSecondFifthLesson &&
+                hasValue(lesson.exam1Key);
+
               // امتحان المحاضرة الخامسة يظل ظاهرًا في المحاضرة الخامسة فقط.
               // لا نعرضه داخل بطاقة المحاضرة السادسة حتى لو وصلت بيانات امتحان قديمة معها.
               const showFirstSecondaryExamBeforeFifthLesson =
@@ -956,6 +1074,7 @@ function CourseContent({
               return (
                 <div key={lessonId} style={{ display: "contents" }}>
                   {isThirdSeventhLesson && renderComprehensiveExamCard()}
+                  {isSecondFifthLesson && renderComprehensiveExamCard()}
                   <div
                   style={{
                     background:
@@ -1548,6 +1667,32 @@ function CourseContent({
                         </button>
                       )}
 
+                      {/* امتحان قبل المحاضرة الخامسة - تانية ثانوي */}
+                      {showSecondSecondaryExamBeforeFifthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.exam1Key || "secondLecture4Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isSecondLecture4ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان قبل المحاضرة الخامسة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الخامسة بالكود أولًا"
+                                : isSecondLecture4ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك مراجعة النتيجة"
+                                  : "ابدأ الامتحان قبل مشاهدة المحاضرة الخامسة"}
+                            </p>
+                          </div>
+                          {isSecondLecture4ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
                       {/* =====================================
                           امتحان المحاضرة الأولى - تالتة ثانوي
                           قبل المحاضرة الثانية
@@ -1929,7 +2074,11 @@ function CourseContent({
                                       : isSecondSecondLesson &&
                                           !isSecondLecture1ExamCompleted
                                         ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
-                                        : isThirdSecondLesson &&
+                                        : (isSecondFifthLesson || isSecondSixthLesson) &&
+                                            !isCenterStudent &&
+                                            !isSecondComprehensiveExamCompleted
+                                          ? "ادخل الامتحان الشامل وسلّمه أولًا لفتح المحاضرتين الخامسة والسادسة"
+                                          : isThirdSecondLesson &&
                                             !isThirdLecture1ExamCompleted
                                           ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
                                           : isThirdThirdLesson &&
@@ -2183,7 +2332,7 @@ function CourseContent({
                             بدون تسليم أو تصحيح
                         ===================================== */}
 
-                        {hasDirectHomeworkVideo && (
+                        {hasDirectHomeworkVideo && !isSecondFifthLesson && !isSecondSixthLesson && (
                           <button
                             type="button"
                             className={`course-content-card video-card ${
@@ -2378,6 +2527,8 @@ function CourseContent({
                         {hasExam1 &&
                           !hideExam1InSourceLesson &&
                           !isFirstSixthLesson &&
+                          !isSecondFifthLesson &&
+                          !isSecondSixthLesson &&
                           !showFirstSecondaryExamBeforeFourthLesson && (
                             <button
                               type="button"
@@ -2429,7 +2580,7 @@ function CourseContent({
                             الامتحان الثاني القديم
                         ========================= */}
 
-                        {hasExam2 && !isFirstSixthLesson && (
+                        {hasExam2 && !isFirstSixthLesson && !isSecondFifthLesson && !isSecondSixthLesson && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${
@@ -2534,10 +2685,6 @@ function CourseContent({
           )}
         </div>
       )}
-      {[
-        "second-month-2-course",
-        "second-term-course",
-      ].includes(course.id) && renderComprehensiveExamCard()}
 
     </section>
   );

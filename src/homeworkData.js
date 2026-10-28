@@ -1565,6 +1565,24 @@ const homeworkData = {
 
     questions: [],
   },
+  "second-center-lecture-7-video-only": {
+    id: "second-center-lecture-7-video-only",
+
+    title: "واجب المحاضرة السابعة الهمزات والتاء المربوطة والهاء المربوطة وعودة الروح",
+
+    grade: "الثاني الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "kisG2zxuVJ0",
+
+    questions: [],
+  },
+
   "third-homework-6": {
     id: "third-homework-6",
 

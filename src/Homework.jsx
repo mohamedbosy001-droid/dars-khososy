@@ -967,6 +967,33 @@ const SECOND_CENTER_LECTURE_6_VIDEO_ONLY = {
 
 
 /* =========================================================
+   واجب المحاضرة السابعة - تانية ثانوي سنتر
+   الهمزات والتاء المربوطة والهاء المربوطة وعودة الروح
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_7_VIDEO_ONLY = {
+  id: "second-center-lecture-7-video-only",
+
+  title:
+    "واجب المحاضرة السابعة الهمزات والتاء المربوطة والهاء المربوطة وعودة الروح",
+
+  grade:
+    "الثاني الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "kisG2zxuVJ0",
+
+  questions: [],
+};
+
+
+/* =========================================================
    واجب المحاضرة الخامسة - تالتة ثانوي
 ========================================================= */
 
@@ -1402,6 +1429,8 @@ const HOMEWORKS = [
   SECOND_CENTER_LECTURE_5_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_6_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_7_VIDEO_ONLY,
 
 ];
 
