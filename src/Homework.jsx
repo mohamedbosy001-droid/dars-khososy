@@ -799,6 +799,29 @@ const FIRST_CENTER_KADA_VIDEO_ONLY = {
 
 
 /* =========================================================
+   فيديو واجب درس اسم الفاعل - أولى ثانوي سنتر
+   فيديو فقط، ويظهر لطلاب السنتر في قسم تسليم الواجب
+========================================================= */
+
+const FIRST_CENTER_ACTIVE_PARTICIPLE_HOMEWORK = {
+  id: "first-center-active-participle-homework-video",
+
+  title: "فيديو واجب درس اسم الفاعل",
+
+  grade: "الأول الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "0ERBMDds67w",
+
+  questions: [],
+};
+
+/* =========================================================
    واجب الأدب في عصر صدر الإسلام - أولى ثانوي سنتر
    فيديو فقط، ويظهر لطلاب السنتر في قسم تسليم الواجب
 ========================================================= */
@@ -1419,6 +1442,8 @@ const HOMEWORKS = [
   FIRST_CENTER_KADA_VIDEO_ONLY,
 
   FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK,
+
+  FIRST_CENTER_ACTIVE_PARTICIPLE_HOMEWORK,
 
   SECOND_CENTER_VIDEO_ONLY,
 
