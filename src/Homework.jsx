@@ -1333,6 +1333,37 @@ const SEVENTH_HOMEWORK = {
 };
 
 /* =========================================================
+   واجب المحاضرة الثامنة - تالتة ثانوي سنتر
+   لا النافية للجنس والضمائر والجمل
+========================================================= */
+
+const THIRD_CENTER_HOMEWORK_8_SOURCE =
+  homeworkData?.["third-center-homework-8"] || null;
+
+const THIRD_CENTER_HOMEWORK_8 =
+  THIRD_CENTER_HOMEWORK_8_SOURCE
+    ? {
+        ...THIRD_CENTER_HOMEWORK_8_SOURCE,
+        id: "third-center-homework-8",
+        title: "واجب المحاضرة الثامنه لا النافية للجنس والضمائر والجمل",
+        grade: "الثالث الثانوي",
+        studentType: "center",
+        centerOnly: true,
+        videoId: "m4cUYvq57BU",
+        videoTitle: "فيديو شرح واجب المحاضرة الثامنه لا النافية للجنس والضمائر والجمل",
+        // ترتيب عرض أسئلة واجب المحاضرة الثامنة بالتسلسل من 1 إلى 53،
+        // مع الحفاظ على نصوص الأسئلة وترتيبها كما أرسلها المستخدم.
+        questions: Array.isArray(THIRD_CENTER_HOMEWORK_8_SOURCE.questions)
+          ? THIRD_CENTER_HOMEWORK_8_SOURCE.questions.map((question, index) => ({
+              ...question,
+              number: index + 1,
+              questionNumber: index + 1,
+            }))
+          : [],
+      }
+    : null;
+
+/* =========================================================
    بيانات الواجبات
 ========================================================= */
 
@@ -1426,6 +1457,8 @@ const HOMEWORKS = [
     : []),
 
   SEVENTH_HOMEWORK,
+
+  ...(THIRD_CENTER_HOMEWORK_8 ? [THIRD_CENTER_HOMEWORK_8] : []),
 
   ...(SECOND_CENTER_HOMEWORK
     ? [
@@ -3297,10 +3330,7 @@ function Homework({
 
                     <div className="homework-video-card-content">
                       <h3>
-                        فيديو شرح{" "}
-                        {
-                          homework.title
-                        }
+                        {homework.videoTitle || `فيديو شرح ${homework.title}`}
                       </h3>
 
                       <p>
@@ -3410,7 +3440,7 @@ function Homework({
                 {activeHomework.videoOnly ===
                 true
                   ? activeHomework.title
-                  : `فيديو شرح ${activeHomework.title}`}
+                  : activeHomework.videoTitle || `فيديو شرح ${activeHomework.title}`}
               </h2>
 
               <p>
