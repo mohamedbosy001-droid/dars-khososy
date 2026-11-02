@@ -1017,6 +1017,30 @@ const SECOND_CENTER_LECTURE_7_VIDEO_ONLY = {
 
 
 /* =========================================================
+   واجب المحاضرة الثامنة - تانية ثانوي سنتر
+   التقنية وصناعة الرأي - قراءة، فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_8_VIDEO_ONLY = {
+  id: "second-center-lecture-8-video-only",
+
+  title: "واجب المحاضرة الثامنة التقنية وصناعة الرأي قراءة",
+
+  grade: "الثاني الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "UP18Ej_H_ts",
+
+  questions: [],
+};
+
+
+/* =========================================================
    واجب المحاضرة الخامسة - تالتة ثانوي
 ========================================================= */
 
@@ -1489,6 +1513,8 @@ const HOMEWORKS = [
   SECOND_CENTER_LECTURE_6_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_7_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_8_VIDEO_ONLY,
 
 ];
 

@@ -1583,6 +1583,24 @@ const homeworkData = {
     questions: [],
   },
 
+  "second-center-lecture-8-video-only": {
+    id: "second-center-lecture-8-video-only",
+
+    title: "واجب المحاضرة الثامنة التقنية وصناعة الرأي قراءة",
+
+    grade: "الثاني الثانوي",
+
+    studentType: "center",
+
+    centerOnly: true,
+
+    videoOnly: true,
+
+    videoId: "UP18Ej_H_ts",
+
+    questions: [],
+  },
+
   "third-homework-6": {
     id: "third-homework-6",
 
