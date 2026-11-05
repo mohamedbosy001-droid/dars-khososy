@@ -131,6 +131,8 @@ const SECOND_LECTURE_3_EXAM_KEY = "secondLecture3Exam";
 const SECOND_LECTURE_3_EXAM_ID = "second-lecture-3-exam";
 const SECOND_LECTURE_4_EXAM_KEY = "secondLecture4Exam";
 const SECOND_LECTURE_4_EXAM_ID = "second-lecture-4-exam";
+const SECOND_LECTURE_7_EXAM_KEY = "secondLecture7Exam";
+const SECOND_LECTURE_7_EXAM_ID = "second-lecture-7-exam";
 
 /*
   ============================
@@ -545,6 +547,25 @@ const SECOND_SECONDARY_SIXTH_LECTURE = {
   requiresPreviousExam: true,
   requiredExamId: "secondMonthComprehensiveExam",
   courseLectureKey: "second-secondary-lecture-6",
+};
+
+const SECOND_SECONDARY_SEVENTH_LECTURE = {
+  id: "lesson-7",
+  title: "المحاضرة السابعة الوحدة التانية درس التقنية وصناعة الرأي قراءة",
+  description: "سلّم امتحان ما قبل المحاضرة السابعة أولًا لفتح فيديو المحاضرة، وبعد مشاهدة 30% يفتح فيديو الواجب.",
+  youtubeUrl: "https://youtu.be/FrDVA1VWtDY",
+  videoUrl: "https://youtu.be/FrDVA1VWtDY",
+  videoTitle: "المحاضرة السابعة الوحدة التانية درس التقنية وصناعة الرأي قراءة",
+  exam1: true,
+  exam1Key: SECOND_LECTURE_7_EXAM_KEY,
+  exam1Title: "امتحان قبل المحاضرة السابعة",
+  requiresPreviousExam: true,
+  requiredExamId: SECOND_LECTURE_7_EXAM_ID,
+  homeworkEnabled: true,
+  homeworkVideoOnly: true,
+  homeworkTitle: "فيديو واجب المحاضرة السابعة",
+  homeworkVideoUrl: "https://youtu.be/8j4LD4w9npk",
+  courseLectureKey: "second-secondary-lecture-7",
 };
 
 /*
@@ -1534,6 +1555,10 @@ function AllCourses({
         const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "second-secondary-lecture-6");
         if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...SECOND_SECONDARY_SIXTH_LECTURE, courseLectureKey: "second-secondary-lecture-6" };
         else lessons.push({ ...SECOND_SECONDARY_SIXTH_LECTURE, courseLectureKey: "second-secondary-lecture-6" });
+
+        const seventhLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "second-secondary-lecture-7");
+        if (seventhLessonIndex >= 0) lessons[seventhLessonIndex] = { ...lessons[seventhLessonIndex], ...SECOND_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "second-secondary-lecture-7" };
+        else lessons.push({ ...SECOND_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "second-secondary-lecture-7" });
       }
 
       // مراجعة أكتوبر: فيديو فقط في كورس الشهر الثاني وكورس الترم.
@@ -2886,19 +2911,22 @@ function AllCourses({
       return false;
     }
 
-    // المحاضرتان الخامسة والسادسة في كورس تانية ثانوي: الاشتراك الفعّال
-    // في الكورس يغني عن كود تفعيل المحاضرة، مع بقاء شروط الامتحانات داخل openLesson.
-    const isSecondSecondaryFifthOrSixthLesson =
+    // المحاضرات الخامسة والسادسة والسابعة في كورس تانية ثانوي:
+    // الاشتراك الفعّال في الكورس يغني عن كود تفعيل المحاضرة.
+    // يظل امتحان ما قبل المحاضرة السابعة شرطًا لفتح فيديو الشرح داخل openLesson.
+    const isSecondSecondaryFifthSixthOrSeventhLesson =
       SECOND_SECONDARY_COURSE_IDS.has(course.id) &&
       (
-        ["lesson-5", "lesson-6"].includes(String(lesson.id || "")) ||
-        ["second-secondary-lecture-5", "second-secondary-lecture-6"].includes(
-          String(lesson.courseLectureKey || "")
-        )
+        ["lesson-5", "lesson-6", "lesson-7"].includes(String(lesson.id || "")) ||
+        [
+          "second-secondary-lecture-5",
+          "second-secondary-lecture-6",
+          "second-secondary-lecture-7",
+        ].includes(String(lesson.courseLectureKey || ""))
       );
 
     if (
-      isSecondSecondaryFifthOrSixthLesson &&
+      isSecondSecondaryFifthSixthOrSeventhLesson &&
       hasComprehensiveCourseSubscription(course)
     ) {
       return true;
@@ -6102,6 +6130,10 @@ function AllCourses({
       ["second-month-2-course", "second-term-course"].includes(course.id) &&
       (finalExamKey === SECOND_LECTURE_4_EXAM_KEY || examKey === SECOND_LECTURE_4_EXAM_KEY);
 
+    const isSecondLectureSevenExam =
+      ["second-month-2-course", "second-term-course"].includes(course.id) &&
+      (finalExamKey === SECOND_LECTURE_7_EXAM_KEY || examKey === SECOND_LECTURE_7_EXAM_KEY);
+
     const isThirdLectureFiveExam =
       THIRD_SECONDARY_COURSE_IDS.has(
         course.id
@@ -6357,6 +6389,8 @@ function AllCourses({
     } else if (isSecondLectureFourExam) {
       // امتحان ما قبل المحاضرة الخامسة يجب أن يفتح قبل تفعيل/فتح المحاضرة الخامسة.
       // لا نطلب صلاحية المحاضرة الخامسة هنا لأن الامتحان يسبقها.
+    } else if (isSecondLectureSevenExam) {
+      // امتحان ما قبل المحاضرة السابعة يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
     } else if (
       isThirdLectureFiveExam
     ) {
@@ -7384,6 +7418,9 @@ function AllCourses({
           )}
           isSecondLecture4ExamCompleted={isExamCompleted(
             SECOND_LECTURE_4_EXAM_ID
+          )}
+          isSecondLecture7ExamCompleted={isExamCompleted(
+            SECOND_LECTURE_7_EXAM_ID
           )}
           isSecondComprehensiveExamCompleted={
             isExamCompleted("secondMonthComprehensiveExam") ||
