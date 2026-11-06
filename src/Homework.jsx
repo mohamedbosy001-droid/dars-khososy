@@ -1391,6 +1391,38 @@ const THIRD_CENTER_HOMEWORK_8 =
    بيانات الواجبات
 ========================================================= */
 
+
+const FIRST_CENTER_ISTIARA_HOMEWORK = {
+  ...(homeworkData?.["first-center-lesson-istiara-homework-video"] || {}),
+  id: "first-center-lesson-istiara-homework-video",
+  title: "واجب درس الاستعارة",
+  grade: "الأول الثانوي",
+  studentType: "center",
+  centerOnly: true,
+  videoOnly: true,
+  videoId: "6p-4jC9D-Es",
+  questions: [],
+};
+
+const THIRD_CENTER_DIWAN_HOMEWORK_SOURCE =
+  homeworkData?.["third-center-diwan-homework"] || null;
+
+const THIRD_CENTER_DIWAN_HOMEWORK = THIRD_CENTER_DIWAN_HOMEWORK_SOURCE
+  ? {
+      ...THIRD_CENTER_DIWAN_HOMEWORK_SOURCE,
+      id: "third-center-diwan-homework",
+      title: "تسليم واجب المحاضرة التاسعة (أدب مدرسة الديوان)",
+      grade: "الثالث الثانوي",
+      studentType: "center",
+      centerOnly: true,
+      videoId: "54lUQe-nk3E",
+      videoTitle: "فيديو واجب أدب مدرسة الديوان",
+      questions: Array.isArray(THIRD_CENTER_DIWAN_HOMEWORK_SOURCE.questions)
+        ? THIRD_CENTER_DIWAN_HOMEWORK_SOURCE.questions
+        : [],
+    }
+  : null;
+
 const HOMEWORKS = [
   {
     id: "homework-1",
@@ -1500,7 +1532,11 @@ const HOMEWORKS = [
 
   FIRST_CENTER_ISLAMIC_LITERATURE_HOMEWORK,
 
+  ...(THIRD_CENTER_DIWAN_HOMEWORK ? [THIRD_CENTER_DIWAN_HOMEWORK] : []),
+
   FIRST_CENTER_ACTIVE_PARTICIPLE_HOMEWORK,
+
+  FIRST_CENTER_ISTIARA_HOMEWORK,
 
   SECOND_CENTER_VIDEO_ONLY,
 

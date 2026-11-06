@@ -2417,6 +2417,37 @@ videoId: "g4oIr06pQjI",
     }
   ]
 }
+,
+  "first-center-lesson-istiara-homework-video": {
+    id: "first-center-lesson-istiara-homework-video",
+    title: "واجب درس الاستعارة",
+    grade: "الأول الثانوي",
+    studentType: "center",
+    centerOnly: true,
+    videoOnly: true,
+    videoId: "6p-4jC9D-Es",
+    questions: [],
+  },
+  "third-center-diwan-homework": {
+    id: "third-center-diwan-homework",
+    title: "تسليم واجب المحاضرة التاسعة (أدب مدرسة الديوان)",
+    grade: "الثالث الثانوي",
+    studentType: "center",
+    centerOnly: true,
+    videoId: "54lUQe-nk3E",
+    videoTitle: "فيديو واجب أدب مدرسة الديوان",
+    questions: [
+      0, 2, 3, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 2, 3, 1, 3
+    ].map((answer, index) => ({
+      id: `third-center-diwan-homework-q${index + 1}`,
+      number: index + 1,
+      type: "choice",
+      question: `السؤال ${index + 1} - اختر الإجابة من كتابك`,
+      options: ["أ", "ب", "ج", "د"],
+      correctAnswer: answer,
+    })),
+  }
+
 };
 
 export default homeworkData;
