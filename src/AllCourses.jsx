@@ -6163,7 +6163,7 @@ function AllCourses({
       (finalExamKey === FIRST_LECTURE_5_EXAM_KEY || examKey === FIRST_LECTURE_5_EXAM_KEY);
 
     const isFirstLectureSixExam =
-      course.id === "first-month-2-course" &&
+      (course.id === "first-month-2-course" || course.id === "first-term-course") &&
       (finalExamKey === FIRST_LECTURE_6_EXAM_KEY || examKey === FIRST_LECTURE_6_EXAM_KEY);
 
     if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
