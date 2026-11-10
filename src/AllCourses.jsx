@@ -133,6 +133,8 @@ const SECOND_LECTURE_4_EXAM_KEY = "secondLecture4Exam";
 const SECOND_LECTURE_4_EXAM_ID = "second-lecture-4-exam";
 const SECOND_LECTURE_7_EXAM_KEY = "secondLecture7Exam";
 const SECOND_LECTURE_7_EXAM_ID = "second-lecture-7-exam";
+const SECOND_LECTURE_8_EXAM_KEY = "secondLecture8Exam";
+const SECOND_LECTURE_8_EXAM_ID = "second-lecture-8-exam";
 
 /*
   ============================
@@ -566,6 +568,25 @@ const SECOND_SECONDARY_SEVENTH_LECTURE = {
   homeworkTitle: "فيديو واجب المحاضرة السابعة",
   homeworkVideoUrl: "https://youtu.be/8j4LD4w9npk",
   courseLectureKey: "second-secondary-lecture-7",
+};
+
+const SECOND_SECONDARY_EIGHTH_LECTURE = {
+  id: "lesson-8",
+  title: "المحاضرة الثامنة شرح نص بين الذوق والعقل",
+  description: "سلّم امتحان ما قبل المحاضرة الثامنة أولًا لفتح فيديو المحاضرة، وبعد مشاهدة 30% يفتح فيديو الواجب.",
+  youtubeUrl: "https://youtu.be/7cjx3yIyOEM?si=1P56l-81EvUEA80m",
+  videoUrl: "https://youtu.be/7cjx3yIyOEM?si=1P56l-81EvUEA80m",
+  videoTitle: "المحاضرة الثامنة شرح نص بين الذوق والعقل",
+  exam1: true,
+  exam1Key: SECOND_LECTURE_8_EXAM_KEY,
+  exam1Title: "امتحان قبل المحاضرة الثامنة",
+  requiresPreviousExam: true,
+  requiredExamId: SECOND_LECTURE_8_EXAM_ID,
+  homeworkEnabled: true,
+  homeworkVideoOnly: true,
+  homeworkTitle: "واجب بين الذوق والعقل",
+  homeworkVideoUrl: "https://youtu.be/U1KHouneduU?si=beIrez25hVEYZYL4",
+  courseLectureKey: "second-secondary-lecture-8",
 };
 
 /*
@@ -1559,6 +1580,10 @@ function AllCourses({
         const seventhLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "second-secondary-lecture-7");
         if (seventhLessonIndex >= 0) lessons[seventhLessonIndex] = { ...lessons[seventhLessonIndex], ...SECOND_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "second-secondary-lecture-7" };
         else lessons.push({ ...SECOND_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "second-secondary-lecture-7" });
+
+        const eighthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-8" || lesson?.courseLectureKey === "second-secondary-lecture-8");
+        if (eighthLessonIndex >= 0) lessons[eighthLessonIndex] = { ...lessons[eighthLessonIndex], ...SECOND_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "second-secondary-lecture-8" };
+        else lessons.push({ ...SECOND_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "second-secondary-lecture-8" });
       }
 
       // مراجعة أكتوبر: فيديو فقط في كورس الشهر الثاني وكورس الترم.
@@ -2917,11 +2942,12 @@ function AllCourses({
     const isSecondSecondaryFifthSixthOrSeventhLesson =
       SECOND_SECONDARY_COURSE_IDS.has(course.id) &&
       (
-        ["lesson-5", "lesson-6", "lesson-7"].includes(String(lesson.id || "")) ||
+        ["lesson-5", "lesson-6", "lesson-7", "lesson-8"].includes(String(lesson.id || "")) ||
         [
           "second-secondary-lecture-5",
           "second-secondary-lecture-6",
           "second-secondary-lecture-7",
+          "second-secondary-lecture-8",
         ].includes(String(lesson.courseLectureKey || ""))
       );
 
@@ -6134,6 +6160,10 @@ function AllCourses({
       ["second-month-2-course", "second-term-course"].includes(course.id) &&
       (finalExamKey === SECOND_LECTURE_7_EXAM_KEY || examKey === SECOND_LECTURE_7_EXAM_KEY);
 
+    const isSecondLectureEightExam =
+      ["second-month-2-course", "second-term-course"].includes(course.id) &&
+      (finalExamKey === SECOND_LECTURE_8_EXAM_KEY || examKey === SECOND_LECTURE_8_EXAM_KEY);
+
     const isThirdLectureFiveExam =
       THIRD_SECONDARY_COURSE_IDS.has(
         course.id
@@ -6391,6 +6421,8 @@ function AllCourses({
       // لا نطلب صلاحية المحاضرة الخامسة هنا لأن الامتحان يسبقها.
     } else if (isSecondLectureSevenExam) {
       // امتحان ما قبل المحاضرة السابعة يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
+    } else if (isSecondLectureEightExam) {
+      // امتحان ما قبل المحاضرة الثامنة يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
     } else if (
       isThirdLectureFiveExam
     ) {
@@ -7421,6 +7453,9 @@ function AllCourses({
           )}
           isSecondLecture7ExamCompleted={isExamCompleted(
             SECOND_LECTURE_7_EXAM_ID
+          )}
+          isSecondLecture8ExamCompleted={isExamCompleted(
+            SECOND_LECTURE_8_EXAM_ID
           )}
           isSecondComprehensiveExamCompleted={
             isExamCompleted("secondMonthComprehensiveExam") ||
