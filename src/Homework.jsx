@@ -1039,6 +1039,29 @@ const SECOND_CENTER_LECTURE_8_VIDEO_ONLY = {
   questions: [],
 };
 
+/* =========================================================
+   واجب بين الذوق والعقل - تانية ثانوي سنتر
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_DHAWQ_AQL_VIDEO_ONLY = {
+  id: "second-center-dhawq-aql-video-only",
+
+  title: "واجب بين الذوق والعقل",
+
+  grade: "الثاني الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "U1KHouneduU",
+
+  questions: [],
+};
+
 
 /* =========================================================
    واجب المحاضرة الخامسة - تالتة ثانوي
@@ -1551,6 +1574,8 @@ const HOMEWORKS = [
   SECOND_CENTER_LECTURE_7_VIDEO_ONLY,
 
   SECOND_CENTER_LECTURE_8_VIDEO_ONLY,
+
+  SECOND_CENTER_DHAWQ_AQL_VIDEO_ONLY,
 
 ];
 
