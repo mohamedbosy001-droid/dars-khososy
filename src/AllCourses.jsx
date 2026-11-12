@@ -33,6 +33,7 @@ import {
 
 import CourseContent from "./CourseContent";
 import Exam from "./Exam";
+import useVideoWatchTracking from "./useVideoWatchTracking";
 import examsData from "./examData";
 import homeworkData from "./homeworkData";
 import courseHomeworkData from "./courseHomeworkData";
@@ -5159,6 +5160,38 @@ function AllCourses({
 
   /*
     ============================
+    تسجيل مدة المشاهدة الفعلية
+    (محاضرات + فيديو الواجب + حل الواجب)
+    ============================
+  */
+
+  const watchTrackKind =
+    activeLesson?.mode === "lesson"
+      ? "lecture"
+      : activeLesson?.mode === "homework-video"
+        ? "homework"
+        : activeLesson?.mode === "solution"
+          ? "solution"
+          : "";
+
+  useVideoWatchTracking({
+    player: youtubePlayer,
+    isPlaying: videoIsPlaying,
+    studentUid,
+    track: watchTrackKind
+      ? {
+          key: `${activeLesson.course?.id}__${activeLesson.lesson?.id}__${watchTrackKind}`,
+          title: activeLesson.lesson?.title || "",
+          courseId: activeLesson.course?.id || "",
+          courseName: activeLesson.course?.title || "",
+          lessonId: activeLesson.lesson?.id || "",
+          kind: watchTrackKind,
+        }
+      : null,
+  });
+
+  /*
+    ============================
     PDF
     ============================
   */
@@ -6674,7 +6707,9 @@ function AllCourses({
                     event
                   ) => {
                     if (
-                      isMainLesson
+                      isMainLesson ||
+                      activeLesson.mode === "homework-video" ||
+                      activeLesson.mode === "solution"
                     ) {
                       setVideoIsPlaying(
                         event.data ===

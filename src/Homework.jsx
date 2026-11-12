@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 
 import { auth, db } from "./firebase";
+import useVideoWatchTracking from "./useVideoWatchTracking";
 
 import homeworkData from "./homeworkData";
 
@@ -1814,6 +1815,44 @@ function Homework({
       ]
     );
 
+  /*
+    تسجيل مدة مشاهدة فيديو الواجب (للداشبورد)
+  */
+
+  const [
+    homeworkVideoPlayer,
+    setHomeworkVideoPlayer,
+  ] = useState(null);
+
+  const [
+    homeworkVideoPlaying,
+    setHomeworkVideoPlaying,
+  ] = useState(false);
+
+  useVideoWatchTracking({
+    player: homeworkVideoPlayer,
+    isPlaying: homeworkVideoPlaying,
+    studentUid,
+    track:
+      openedSection === "video" &&
+      activeHomework
+        ? {
+            key: `homework__${activeHomework.id}`,
+            title:
+              activeHomework.videoOnly === true
+                ? activeHomework.title
+                : activeHomework.videoTitle ||
+                  `فيديو شرح ${activeHomework.title}`,
+            courseId: "center-homework",
+            courseName: activeHomework.grade
+              ? `واجبات السنتر - ${activeHomework.grade}`
+              : "واجبات السنتر",
+            lessonId: activeHomework.id,
+            kind: "homework",
+          }
+        : null,
+  });
+
   const questions =
     activeHomework?.questions ||
     [];
@@ -3560,6 +3599,13 @@ function Homework({
                 height: "100%",
               }}
               iframeClassName="homework-youtube-player"
+              onReady={(event) => {
+                setHomeworkVideoPlayer(event.target);
+                setHomeworkVideoPlaying(false);
+              }}
+              onStateChange={(event) =>
+                setHomeworkVideoPlaying(event.data === 1)
+              }
             />
           </div>
         </section>
