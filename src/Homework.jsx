@@ -1447,6 +1447,29 @@ const THIRD_CENTER_DIWAN_HOMEWORK = THIRD_CENTER_DIWAN_HOMEWORK_SOURCE
     }
   : null;
 
+/* =========================================================
+   فيديو واجب محاضرة القراءة والنصوص - تالتة ثانوي سنتر
+   فيديو فقط: يفتح مباشرة بدون تسليم واجب قبله
+========================================================= */
+
+const THIRD_CENTER_READING_TEXTS_VIDEO_ONLY = {
+  id: "third-center-reading-texts-video-only",
+
+  title: "فيديو واجب محاضرة القراءة والنصوص",
+
+  grade: "الثالث الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "eg4xMgPwzUw",
+
+  questions: [],
+};
+
 const HOMEWORKS = [
   {
     id: "homework-1",
@@ -1577,6 +1600,8 @@ const HOMEWORKS = [
   SECOND_CENTER_LECTURE_8_VIDEO_ONLY,
 
   SECOND_CENTER_DHAWQ_AQL_VIDEO_ONLY,
+
+  THIRD_CENTER_READING_TEXTS_VIDEO_ONLY,
 
 ];
 

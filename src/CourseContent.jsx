@@ -67,6 +67,7 @@ function CourseContent({
   isFirstLecture4ExamCompleted = false,
   isFirstLecture5ExamCompleted = false,
   isFirstLecture6ExamCompleted = false,
+  isFirstLecture7ExamCompleted = false,
 
   /*
     هل امتحان المحاضرة الأولى
@@ -95,6 +96,7 @@ function CourseContent({
     في تالتة ثانوي تم تسليمه؟
   */
   isThirdLecture5ExamCompleted = false,
+  isThirdLecture8ExamCompleted = false,
   isThirdComprehensiveExamCompleted = false,
   isCenterStudent = false,
 
@@ -675,6 +677,10 @@ function CourseContent({
                 (course.id === "first-month-2-course" || course.id === "first-term-course") &&
                 (lesson.id === "lesson-6" || lesson.courseLectureKey === "first-secondary-lecture-6");
 
+              const isFirstSeventhLesson =
+                (course.id === "first-month-2-course" || course.id === "first-term-course") &&
+                (lesson.id === "lesson-7" || lesson.courseLectureKey === "first-secondary-lecture-7");
+
               /*
                 =====================================
                 المحاضرة الثانية لتانية ثانوي
@@ -756,6 +762,10 @@ function CourseContent({
                 isThirdSecondaryCourse &&
                 lesson.id === "lesson-6";
 
+              const isThirdEighthLesson =
+                ["third-month-2-course", "third-term-course"].includes(course?.id) &&
+                (lesson.id === "lesson-8" || lesson.courseLectureKey === "third-lecture-8");
+
               // مراجعة أكتوبر تفتح مباشرة بدون امتحانات أو واجبات سابقة.
               const isOctoberReviewLesson =
                 lesson?.id === "october-review" ||
@@ -784,6 +794,7 @@ function CourseContent({
                     !isFirstFourthLesson &&
                     !isFirstFifthLesson &&
                     !isFirstSixthLesson &&
+                    !isFirstSeventhLesson &&
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
@@ -795,7 +806,8 @@ function CourseContent({
                     !isThirdThirdLesson &&
                     !isThirdFourthLesson &&
                     !isThirdFifthLesson &&
-                    !isThirdSixthLesson
+                    !isThirdSixthLesson &&
+                    !isThirdEighthLesson
                   ) ||
                   (
                     isFirstSecondLesson &&
@@ -816,6 +828,10 @@ function CourseContent({
                   (
                     isFirstSixthLesson &&
                     isFirstLecture6ExamCompleted
+                  ) ||
+                  (
+                    isFirstSeventhLesson &&
+                    isFirstLecture7ExamCompleted
                   ) ||
                   (
                     isSecondSecondLesson &&
@@ -865,6 +881,10 @@ function CourseContent({
                   (
                     isThirdSixthLesson &&
                     isThirdLecture5ExamCompleted
+                  ) ||
+                  (
+                    isThirdEighthLesson &&
+                    isThirdLecture8ExamCompleted
                   )
                   )
                 );
@@ -1517,6 +1537,58 @@ function CourseContent({
                             </p>
                           </div>
                           {isFirstLecture6ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
+                      {/* امتحان المحاضرة السابعة - أولى ثانوي */}
+                      {isFirstSeventhLesson && hasValue(lesson.exam1Key) && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.exam1Key || "firstLecture7Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isFirstLecture7ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان المحاضرة السابعة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة السابعة بالكود أولًا"
+                                : isFirstLecture7ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك مراجعة النتيجة"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة السابعة"}
+                            </p>
+                          </div>
+                          {isFirstLecture7ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
+                      {/* امتحان المحاضرة الثامنة - تالتة ثانوي: يظهر قبل فيديو الشرح */}
+                      {isThirdEighthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.entryExamKey || "thirdLecture8Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isThirdLecture8ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.entryExamTitle || "امتحان المحاضرة الثامنة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الثامنة بالكود أولًا"
+                                : isThirdLecture8ExamCompleted
+                                  ? "تم تسليم الامتحان - فيديو الشرح متاح الآن"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة الثامنة"}
+                            </p>
+                          </div>
+                          {isThirdLecture8ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
                         </button>
                       )}
 
@@ -2209,7 +2281,13 @@ function CourseContent({
                                             : isSecondEighthLesson &&
                                                 !isSecondLecture8ExamCompleted
                                               ? "سلّم امتحان ما قبل المحاضرة الثامنة أولًا لفتح فيديو الشرح"
-                                              : isThirdSecondLesson &&
+                                              : isFirstSeventhLesson &&
+                                                  !isFirstLecture7ExamCompleted
+                                                ? "سلّم امتحان المحاضرة السابعة أولًا لفتح فيديو الشرح"
+                                                : isThirdEighthLesson &&
+                                                    !isThirdLecture8ExamCompleted
+                                                  ? "سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو الشرح"
+                                                  : isThirdSecondLesson &&
                                             !isThirdLecture1ExamCompleted
                                           ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
                                           : isThirdThirdLesson &&
@@ -2657,6 +2735,7 @@ function CourseContent({
                           !isSecondEighthLesson &&
                           !hideExam1InSourceLesson &&
                           !isFirstSixthLesson &&
+                          !isFirstSeventhLesson &&
                           !isSecondFifthLesson &&
                           !isSecondSixthLesson &&
                           !showFirstSecondaryExamBeforeFourthLesson && (
@@ -2710,7 +2789,7 @@ function CourseContent({
                             الامتحان الثاني القديم
                         ========================= */}
 
-                        {hasExam2 && !isFirstSixthLesson && !isSecondFifthLesson && !isSecondSixthLesson && (
+                        {hasExam2 && !isFirstSixthLesson && !isFirstSeventhLesson && !isSecondFifthLesson && !isSecondSixthLesson && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${

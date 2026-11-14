@@ -2446,7 +2446,23 @@ videoId: "g4oIr06pQjI",
       options: ["أ", "ب", "ج", "د"],
       correctAnswer: answer,
     })),
-  }
+  },
+
+  thirdLecture8Homework: {
+    id: "third-lecture-8-homework",
+    title: "تسليم واجب المحاضرة الثامنة (أدب مدرسة الديوان)",
+    grade: "الثالث الثانوي",
+    questions: [
+      0, 2, 3, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 2, 3, 1, 3
+    ].map((answer, index) => ({
+      id: `third-lecture-8-homework-q${index + 1}`,
+      number: index + 1,
+      type: "choice",
+      question: `السؤال ${index + 1} - اختر الإجابة من كتابك`,
+      options: ["أ", "ب", "ج", "د"],
+      correctAnswer: answer,
+    })),
+  },
 
 };
 

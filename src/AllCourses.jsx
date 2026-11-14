@@ -110,6 +110,8 @@ const FIRST_LECTURE_5_EXAM_KEY = "firstLecture5Exam";
 const FIRST_LECTURE_5_EXAM_ID = "first-lecture-5-exam";
 const FIRST_LECTURE_6_EXAM_KEY = "firstLecture6Exam";
 const FIRST_LECTURE_6_EXAM_ID = "first-lecture-6-exam";
+const FIRST_LECTURE_7_EXAM_KEY = "firstLecture7Exam";
+const FIRST_LECTURE_7_EXAM_ID = "first-lecture-7-exam";
 
 /*
   ============================
@@ -168,6 +170,8 @@ const THIRD_LECTURE_4_EXAM_ID =
   "third-lecture-4-exam";
 const THIRD_LECTURE_5_EXAM_KEY = "thirdLecture5Exam";
 const THIRD_LECTURE_5_EXAM_ID = "third-lecture-5-exam";
+const THIRD_LECTURE_8_EXAM_KEY = "thirdLecture8Exam";
+const THIRD_LECTURE_8_EXAM_ID = "third-lecture-8-exam";
 
 /*
   الكورسات المجانية القديمة تظل موجودة في الكود/Firestore
@@ -384,6 +388,21 @@ const FIRST_SECONDARY_SIXTH_LECTURE = {
   courseLectureKey: "first-secondary-lecture-6",
   requiresPreviousExam: true,
   requiredExamId: FIRST_LECTURE_6_EXAM_ID,
+};
+
+const FIRST_SECONDARY_SEVENTH_LECTURE = {
+  id: "lesson-7",
+  title: "المحاضرة السابعة شرح اسم الفاعل وصيغة المبالغة وحل تدريبات",
+  description: "سلّم امتحان المحاضرة السابعة أولًا، وبعد التسليم فقط سيفتح فيديو الشرح.",
+  youtubeUrl: "https://youtu.be/ttTYGf_upxs?si=sqxDewZHk5TrpA_p",
+  videoUrl: "https://youtu.be/ttTYGf_upxs?si=sqxDewZHk5TrpA_p",
+  videoTitle: "المحاضرة السابعة شرح اسم الفاعل وصيغة المبالغة وحل تدريبات",
+  exam1: true,
+  exam1Key: FIRST_LECTURE_7_EXAM_KEY,
+  exam1Title: "امتحان المحاضرة السابعة",
+  courseLectureKey: "first-secondary-lecture-7",
+  requiresPreviousExam: true,
+  requiredExamId: FIRST_LECTURE_7_EXAM_ID,
 };
 
 /*
@@ -818,6 +837,29 @@ const THIRD_SEVENTH_LECTURE = {
   entryExamKey: "",
   entryExamTitle: "",
   courseLectureKey: "third-lecture-7",
+};
+
+const THIRD_EIGHTH_LECTURE = {
+  id: "lesson-8",
+  title: "المحاضرة الثامنة شرح أدب الديوان",
+  description: "سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو المحاضرة، وشاهد 30% من المحاضرة لفتح الواجب، وبعد تسليم الواجب يفتح فيديو الواجب.",
+  youtubeUrl: "https://youtu.be/9SIIiWvtOxw?si=SZm8Y-ECbwtxatRr",
+  videoUrl: "https://youtu.be/9SIIiWvtOxw?si=SZm8Y-ECbwtxatRr",
+  videoTitle: "المحاضرة الثامنة شرح أدب الديوان",
+  exam1: false,
+  exam1Key: "",
+  exam1Title: "",
+  homeworkEnabled: true,
+  homeworkKey: "thirdLecture8Homework",
+  homeworkTitle: "تسليم واجب المحاضرة الثامنة (أدب مدرسة الديوان)",
+  homeworkSolutionUrl: "https://youtu.be/54lUQe-nk3E?si=YSYYskBhkdvnfkrC",
+  solutionVideoUrl: "https://youtu.be/54lUQe-nk3E?si=YSYYskBhkdvnfkrC",
+  homeworkSolutionTitle: "فيديو الواجب",
+  requiresPreviousExam: true,
+  requiredExamId: THIRD_LECTURE_8_EXAM_ID,
+  entryExamKey: THIRD_LECTURE_8_EXAM_KEY,
+  entryExamTitle: "امتحان المحاضرة الثامنة",
+  courseLectureKey: "third-lecture-8",
 };
 
 function renderUnderlinedQuestionText(text) {
@@ -1305,6 +1347,10 @@ function AllCourses({
             ...FIRST_SECONDARY_SIXTH_LECTURE,
             courseLectureKey: "first-secondary-lecture-6",
           },
+          {
+            ...FIRST_SECONDARY_SEVENTH_LECTURE,
+            courseLectureKey: "first-secondary-lecture-7",
+          },
         ],
       };
     }
@@ -1412,6 +1458,11 @@ function AllCourses({
         const sixthLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-6" || lesson?.courseLectureKey === "first-secondary-lecture-6");
         if (sixthLessonIndex >= 0) lessons[sixthLessonIndex] = { ...lessons[sixthLessonIndex], ...FIRST_SECONDARY_SIXTH_LECTURE, courseLectureKey: "first-secondary-lecture-6" };
         else lessons.push({ ...FIRST_SECONDARY_SIXTH_LECTURE, courseLectureKey: "first-secondary-lecture-6" });
+
+        // المحاضرة السابعة تظهر أيضًا داخل كورس الترم الأول لأولى ثانوي.
+        const seventhFirstLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "first-secondary-lecture-7");
+        if (seventhFirstLessonIndex >= 0) lessons[seventhFirstLessonIndex] = { ...lessons[seventhFirstLessonIndex], ...FIRST_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "first-secondary-lecture-7" };
+        else lessons.push({ ...FIRST_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "first-secondary-lecture-7" });
       }
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
@@ -1671,6 +1722,10 @@ function AllCourses({
             courseLectureKey: "third-lecture-7",
           },
           {
+            ...THIRD_EIGHTH_LECTURE,
+            courseLectureKey: "third-lecture-8",
+          },
+          {
             id: "october-review",
             title: "مراجعة شهر أكتوبر",
             description: "على جميع ما سبق شرحه",
@@ -1901,6 +1956,11 @@ function AllCourses({
       const seventhLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7");
       if (seventhLessonIndex >= 0) lessons[seventhLessonIndex] = { ...lessons[seventhLessonIndex], ...THIRD_SEVENTH_LECTURE };
       else lessons.push({ ...THIRD_SEVENTH_LECTURE });
+
+      // المحاضرة الثامنة: امتحان أولًا، ثم الفيديو، ثم واجب بعد 30%، ثم فيديو الواجب بعد التسليم.
+      const eighthThirdLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-8" || lesson?.courseLectureKey === "third-lecture-8");
+      if (eighthThirdLessonIndex >= 0) lessons[eighthThirdLessonIndex] = { ...lessons[eighthThirdLessonIndex], ...THIRD_EIGHTH_LECTURE, courseLectureKey: "third-lecture-8" };
+      else lessons.push({ ...THIRD_EIGHTH_LECTURE, courseLectureKey: "third-lecture-8" });
 
       // مراجعة شهر أكتوبر: تفتح مباشرة دون امتحان أو واجب.
       const octoberReviewIndex = lessons.findIndex(
@@ -2306,6 +2366,10 @@ function AllCourses({
                     {
                       ...FIRST_SECONDARY_SIXTH_LECTURE,
                       courseLectureKey: "first-secondary-lecture-6",
+                    },
+                    {
+                      ...FIRST_SECONDARY_SEVENTH_LECTURE,
+                      courseLectureKey: "first-secondary-lecture-7",
                     },
                   ],
                 };
@@ -2935,6 +2999,20 @@ function AllCourses({
       )
     ) {
       return false;
+    }
+
+    // المحاضرة الثامنة ومراجعة أكتوبر في تالتة ثانوي: يكفي اشتراك الكورس.
+    if (
+      THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
+      (
+        lesson.id === "lesson-8" ||
+        lesson.courseLectureKey === "third-lecture-8" ||
+        lesson.id === "october-review" ||
+        lesson.courseLectureKey === "third-october-review"
+      ) &&
+      hasComprehensiveCourseSubscription(course)
+    ) {
+      return true;
     }
 
     // المحاضرات الخامسة والسادسة والسابعة في كورس تانية ثانوي:
@@ -4635,6 +4713,26 @@ function AllCourses({
         window.alert(
           "سلّم امتحان المحاضرة الثالثة أولًا لفتح فيديو المحاضرة الرابعة."
         );
+      }
+
+      /*
+        أولى ثانوي - المحاضرة السابعة
+      */
+      else if (
+        FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+        lesson.id === "lesson-7"
+      ) {
+        window.alert("سلّم امتحان المحاضرة السابعة أولًا لفتح فيديو المحاضرة.");
+      }
+
+      /*
+        تالتة ثانوي - المحاضرة الثامنة
+      */
+      else if (
+        THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
+        lesson.id === "lesson-8"
+      ) {
+        window.alert("سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو المحاضرة.");
       } else {
         window.alert(
           "سلّم الامتحان السابق أولًا لفتح فيديو المحاضرة."
@@ -6229,6 +6327,14 @@ function AllCourses({
       (course.id === "first-month-2-course" || course.id === "first-term-course") &&
       (finalExamKey === FIRST_LECTURE_6_EXAM_KEY || examKey === FIRST_LECTURE_6_EXAM_KEY);
 
+    const isFirstLectureSevenExam =
+      (course.id === "first-month-2-course" || course.id === "first-term-course") &&
+      (finalExamKey === FIRST_LECTURE_7_EXAM_KEY || examKey === FIRST_LECTURE_7_EXAM_KEY);
+
+    const isThirdLectureEightExam =
+      ["third-month-2-course", "third-term-course"].includes(course.id) &&
+      (finalExamKey === THIRD_LECTURE_8_EXAM_KEY || examKey === THIRD_LECTURE_8_EXAM_KEY);
+
     if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
       const courseAccess = getCourseAccess(course);
       const hasFullCourseAccess =
@@ -6239,8 +6345,8 @@ function AllCourses({
         window.alert("اشتركي في الشهر أو فعّلي الامتحان الشامل بكود الحصة أولًا.");
         return;
       }
-    } else if (isFirstLectureFourExam || isFirstLectureFiveExam || isFirstLectureSixExam) {
-      // امتحانات أولى ثانوي قبل المحاضرات الرابعة والخامسة والسادسة؛ لا تشترط مشاهدة الفيديو أولًا.
+    } else if (isFirstLectureFourExam || isFirstLectureFiveExam || isFirstLectureSixExam || isFirstLectureSevenExam) {
+      // امتحانات أولى ثانوي قبل المحاضرات الرابعة والخامسة والسادسة والسابعة؛ لا تشترط مشاهدة الفيديو أولًا.
     } else if (
       isSecondLectureOneExam
     ) {
@@ -6456,6 +6562,8 @@ function AllCourses({
       // امتحان ما قبل المحاضرة السابعة يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
     } else if (isSecondLectureEightExam) {
       // امتحان ما قبل المحاضرة الثامنة يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
+    } else if (isThirdLectureEightExam) {
+      // امتحان المحاضرة الثامنة لتالتة ثانوي يفتح قبل المحاضرة ولا يتطلب مشاهدتها.
     } else if (
       isThirdLectureFiveExam
     ) {
@@ -7474,6 +7582,9 @@ function AllCourses({
           isFirstLecture6ExamCompleted={isExamCompleted(
             FIRST_LECTURE_6_EXAM_ID
           )}
+          isFirstLecture7ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_7_EXAM_ID
+          )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID
           )}
@@ -7499,6 +7610,9 @@ function AllCourses({
           }
           isThirdLecture5ExamCompleted={isExamCompleted(
             THIRD_LECTURE_5_EXAM_ID
+          )}
+          isThirdLecture8ExamCompleted={isExamCompleted(
+            THIRD_LECTURE_8_EXAM_ID
           )}
           isThirdComprehensiveExamCompleted={
             isExamCompleted("comprehensive-exam") ||
