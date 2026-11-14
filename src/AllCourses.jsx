@@ -1722,10 +1722,6 @@ function AllCourses({
             courseLectureKey: "third-lecture-7",
           },
           {
-            ...THIRD_EIGHTH_LECTURE,
-            courseLectureKey: "third-lecture-8",
-          },
-          {
             id: "october-review",
             title: "مراجعة شهر أكتوبر",
             description: "على جميع ما سبق شرحه",
@@ -1736,6 +1732,10 @@ function AllCourses({
             exam1Title: "",
             homeworkEnabled: false,
             courseLectureKey: "third-october-review",
+          },
+          {
+            ...THIRD_EIGHTH_LECTURE,
+            courseLectureKey: "third-lecture-8",
           },
         ],
       };
@@ -1987,6 +1987,13 @@ function AllCourses({
         };
       } else {
         lessons.push(octoberReviewLesson);
+      }
+
+      // المحاضرة الثامنة تكون دائمًا آخر عنصر في الكورس (تحت المحاضرة السابعة).
+      const eighthLastIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-8" || lesson?.courseLectureKey === "third-lecture-8");
+      if (eighthLastIndex >= 0 && eighthLastIndex !== lessons.length - 1) {
+        const [eighthLesson] = lessons.splice(eighthLastIndex, 1);
+        lessons.push(eighthLesson);
       }
     }
 
@@ -3001,14 +3008,12 @@ function AllCourses({
       return false;
     }
 
-    // المحاضرة الثامنة ومراجعة أكتوبر في تالتة ثانوي: يكفي اشتراك الكورس.
+    // المحاضرة الثامنة في تالتة ثانوي: يكفي اشتراك الكورس.
     if (
       THIRD_SECONDARY_COURSE_IDS.has(course.id) &&
       (
         lesson.id === "lesson-8" ||
-        lesson.courseLectureKey === "third-lecture-8" ||
-        lesson.id === "october-review" ||
-        lesson.courseLectureKey === "third-october-review"
+        lesson.courseLectureKey === "third-lecture-8"
       ) &&
       hasComprehensiveCourseSubscription(course)
     ) {

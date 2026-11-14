@@ -335,7 +335,33 @@ function CourseContent({
     });
     if (comprehensiveIndex >= 0) ordered.splice(comprehensiveIndex + 1, 0, seventhLesson);
     else ordered.push(seventhLesson);
-    return ordered;
+
+    // الترتيب النهائي: ... السادسة، الامتحان الشامل، السابعة، الثامنة، ثم مراجعة أكتوبر في الآخر.
+    const isEighthLessonItem = (lesson) =>
+      lesson?.id === "lesson-8" || lesson?.courseLectureKey === "third-lecture-8";
+    const isOctoberReviewItem = (lesson) =>
+      lesson?.id === "october-review" || lesson?.courseLectureKey === "third-october-review";
+
+    const eighthLessonItem = ordered.find(isEighthLessonItem);
+    const octoberReviewItem = ordered.find(isOctoberReviewItem);
+    const finalOrdered = ordered.filter(
+      (lesson) => !isEighthLessonItem(lesson) && !isOctoberReviewItem(lesson)
+    );
+
+    if (eighthLessonItem) {
+      const seventhPosition = finalOrdered.findIndex(
+        (lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7"
+      );
+      finalOrdered.splice(
+        seventhPosition >= 0 ? seventhPosition + 1 : finalOrdered.length,
+        0,
+        eighthLessonItem
+      );
+    }
+
+    if (octoberReviewItem) finalOrdered.push(octoberReviewItem);
+
+    return finalOrdered;
   })();
 
   /*
@@ -1072,6 +1098,8 @@ function CourseContent({
 
               const showFirstExamBeforeSecondLesson =
                 !isOctoberReviewLesson &&
+                !isThirdSeventhLesson &&
+                !isThirdEighthLesson &&
                 !isSecondLectureFiveSixCourse &&
                 (isThirdSecondaryCourse &&
                   lesson.id !== "lesson-6" &&
@@ -1087,6 +1115,8 @@ function CourseContent({
 
               const showSecondExamBeforeThirdLesson =
                 !isOctoberReviewLesson &&
+                !isThirdSeventhLesson &&
+                !isThirdEighthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 2 &&
@@ -1101,6 +1131,8 @@ function CourseContent({
 
               const showThirdExamBeforeFourthLesson =
                 !isOctoberReviewLesson &&
+                !isThirdSeventhLesson &&
+                !isThirdEighthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 3 &&
@@ -1108,6 +1140,8 @@ function CourseContent({
 
               const showFourthExamBeforeFifthLesson =
                 !isOctoberReviewLesson &&
+                !isThirdSeventhLesson &&
+                !isThirdEighthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lesson.id ===
@@ -1161,6 +1195,8 @@ function CourseContent({
 
               const showThirdExamBeforeSixthLesson =
                 !isOctoberReviewLesson &&
+                !isThirdSeventhLesson &&
+                !isThirdEighthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id === "lesson-6");
 
