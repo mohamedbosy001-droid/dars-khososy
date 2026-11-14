@@ -97,6 +97,7 @@ function CourseContent({
   */
   isThirdLecture5ExamCompleted = false,
   isThirdLecture8ExamCompleted = false,
+  isThirdLecture9ExamCompleted = false,
   isThirdComprehensiveExamCompleted = false,
   isCenterStudent = false,
 
@@ -342,10 +343,17 @@ function CourseContent({
     const isOctoberReviewItem = (lesson) =>
       lesson?.id === "october-review" || lesson?.courseLectureKey === "third-october-review";
 
+    const isNinthLessonItem = (lesson) =>
+      lesson?.id === "lesson-9" || lesson?.courseLectureKey === "third-lecture-9";
+
     const eighthLessonItem = ordered.find(isEighthLessonItem);
+    const ninthLessonItem = ordered.find(isNinthLessonItem);
     const octoberReviewItem = ordered.find(isOctoberReviewItem);
     const finalOrdered = ordered.filter(
-      (lesson) => !isEighthLessonItem(lesson) && !isOctoberReviewItem(lesson)
+      (lesson) =>
+        !isEighthLessonItem(lesson) &&
+        !isNinthLessonItem(lesson) &&
+        !isOctoberReviewItem(lesson)
     );
 
     if (eighthLessonItem) {
@@ -357,6 +365,20 @@ function CourseContent({
         0,
         eighthLessonItem
       );
+    }
+
+    if (ninthLessonItem) {
+      const eighthPosition = finalOrdered.findIndex(isEighthLessonItem);
+      const seventhPosition = finalOrdered.findIndex(
+        (lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7"
+      );
+      const ninthPosition =
+        eighthPosition >= 0
+          ? eighthPosition + 1
+          : seventhPosition >= 0
+            ? seventhPosition + 1
+            : finalOrdered.length;
+      finalOrdered.splice(ninthPosition, 0, ninthLessonItem);
     }
 
     if (octoberReviewItem) finalOrdered.push(octoberReviewItem);
@@ -792,6 +814,10 @@ function CourseContent({
                 ["third-month-2-course", "third-term-course"].includes(course?.id) &&
                 (lesson.id === "lesson-8" || lesson.courseLectureKey === "third-lecture-8");
 
+              const isThirdNinthLesson =
+                ["third-month-3-course", "third-term-course"].includes(course?.id) &&
+                (lesson.id === "lesson-9" || lesson.courseLectureKey === "third-lecture-9");
+
               // مراجعة أكتوبر تفتح مباشرة بدون امتحانات أو واجبات سابقة.
               const isOctoberReviewLesson =
                 lesson?.id === "october-review" ||
@@ -833,7 +859,8 @@ function CourseContent({
                     !isThirdFourthLesson &&
                     !isThirdFifthLesson &&
                     !isThirdSixthLesson &&
-                    !isThirdEighthLesson
+                    !isThirdEighthLesson &&
+                    !isThirdNinthLesson
                   ) ||
                   (
                     isFirstSecondLesson &&
@@ -911,6 +938,10 @@ function CourseContent({
                   (
                     isThirdEighthLesson &&
                     isThirdLecture8ExamCompleted
+                  ) ||
+                  (
+                    isThirdNinthLesson &&
+                    isThirdLecture9ExamCompleted
                   )
                   )
                 );
@@ -1100,6 +1131,7 @@ function CourseContent({
                 !isOctoberReviewLesson &&
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
+                !isThirdNinthLesson &&
                 !isSecondLectureFiveSixCourse &&
                 (isThirdSecondaryCourse &&
                   lesson.id !== "lesson-6" &&
@@ -1117,6 +1149,7 @@ function CourseContent({
                 !isOctoberReviewLesson &&
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
+                !isThirdNinthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 2 &&
@@ -1133,6 +1166,7 @@ function CourseContent({
                 !isOctoberReviewLesson &&
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
+                !isThirdNinthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 3 &&
@@ -1142,6 +1176,7 @@ function CourseContent({
                 !isOctoberReviewLesson &&
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
+                !isThirdNinthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lesson.id ===
@@ -1197,6 +1232,7 @@ function CourseContent({
                 !isOctoberReviewLesson &&
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
+                !isThirdNinthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id === "lesson-6");
 
@@ -1599,6 +1635,32 @@ function CourseContent({
                             </p>
                           </div>
                           {isFirstLecture7ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
+                      {/* امتحان المحاضرة التاسعة - تالتة ثانوي: يظهر قبل فيديو الشرح */}
+                      {isThirdNinthLesson && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.entryExamKey || "thirdLecture9Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isThirdLecture9ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.entryExamTitle || "امتحان المحاضرة التاسعة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة التاسعة بالكود أولًا"
+                                : isThirdLecture9ExamCompleted
+                                  ? "تم تسليم الامتحان - فيديو الشرح متاح الآن"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة التاسعة"}
+                            </p>
+                          </div>
+                          {isThirdLecture9ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
                         </button>
                       )}
 
@@ -2323,7 +2385,10 @@ function CourseContent({
                                                 : isThirdEighthLesson &&
                                                     !isThirdLecture8ExamCompleted
                                                   ? "سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو الشرح"
-                                                  : isThirdSecondLesson &&
+                                                  : isThirdNinthLesson &&
+                                                      !isThirdLecture9ExamCompleted
+                                                    ? "سلّم امتحان المحاضرة التاسعة أولًا لفتح فيديو الشرح"
+                                                    : isThirdSecondLesson &&
                                             !isThirdLecture1ExamCompleted
                                           ? "سلّم امتحان المحاضرة الأولى أولًا لفتح الفيديو"
                                           : isThirdThirdLesson &&

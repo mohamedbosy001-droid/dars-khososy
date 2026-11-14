@@ -106,6 +106,17 @@ const gradesData = [
     month2Prefix: "TM2",
 
     /*
+      الشهر الثالث
+    */
+    month3CourseId:
+      "third-month-3-course",
+
+    month3CourseTitle:
+      "كورس الشهر الثالث - الصف الثالث الثانوي",
+
+    month3Prefix: "TM3",
+
+    /*
       الترم
     */
     termCourseId:
@@ -217,6 +228,10 @@ function GenerateAccessCodes() {
       return "الشهر الثاني";
     }
 
+    if (type === "month3") {
+      return "الشهر الثالث";
+    }
+
     if (type === "term") {
       return "ترم";
     }
@@ -256,6 +271,13 @@ function GenerateAccessCodes() {
       return (
         gradeData.month2Prefix ||
         "M2"
+      );
+    }
+
+    if (type === "month3") {
+      return (
+        gradeData.month3Prefix ||
+        "M3"
       );
     }
 
@@ -322,6 +344,20 @@ function GenerateAccessCodes() {
 
         courseTitle:
           gradeData.month2CourseTitle,
+      };
+    }
+
+    /*
+      الشهر الثالث
+      موجود حاليًا لتالتة ثانوي
+    */
+    if (type === "month3") {
+      return {
+        courseId:
+          gradeData.month3CourseId,
+
+        courseTitle:
+          gradeData.month3CourseTitle,
       };
     }
 
@@ -435,7 +471,8 @@ function GenerateAccessCodes() {
         يفضل شغال كما هو.
       */
       accessType:
-        type === "month2"
+        type === "month2" ||
+        type === "month3"
           ? "month"
           : type,
 
@@ -452,7 +489,8 @@ function GenerateAccessCodes() {
         false,
 
       targetScope:
-        type === "month2"
+        type === "month2" ||
+        type === "month3"
           ? "month"
           : type,
 
@@ -490,6 +528,16 @@ function GenerateAccessCodes() {
       !gradesData.find((item) => item.grade === newGrade)?.month2CourseId &&
       accessType ===
         "month2"
+    ) {
+      setAccessType(
+        "month"
+      );
+    }
+
+    if (
+      !gradesData.find((item) => item.grade === newGrade)?.month3CourseId &&
+      accessType ===
+        "month3"
     ) {
       setAccessType(
         "month"
@@ -644,6 +692,17 @@ function GenerateAccessCodes() {
     ) {
       setMessage(
         "❌ كود الشهر الثاني غير مهيأ لهذه السنة الدراسية."
+      );
+
+      return;
+    }
+
+    if (
+      accessType === "month3" &&
+      !selectedGradeData.month3CourseId
+    ) {
+      setMessage(
+        "❌ كود الشهر الثالث غير مهيأ لهذه السنة الدراسية."
       );
 
       return;
@@ -1170,6 +1229,12 @@ ${finishedGroups} / ${totalGroups}`
               grade === "الثالث الثانوي") && (
               <option value="month2">
                 كود الشهر الثاني
+              </option>
+            )}
+
+            {grade === "الثالث الثانوي" && (
+              <option value="month3">
+                كود الشهر الثالث
               </option>
             )}
 
