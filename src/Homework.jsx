@@ -1470,6 +1470,29 @@ const THIRD_CENTER_READING_TEXTS_VIDEO_ONLY = {
   questions: [],
 };
 
+/* =========================================================
+   فيديو حل واجب نص أثر الكلمة وحفظ اللسان - تانية ثانوي سنتر
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_ATHAR_KALIMA_VIDEO_ONLY = {
+  id: "second-center-athar-kalima-video-only",
+
+  title: "فيديو حل واجب نص أثر الكلمة وحفظ اللسان",
+
+  grade: "الثاني الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "59gUB9ybko8",
+
+  questions: [],
+};
+
 const HOMEWORKS = [
   {
     id: "homework-1",
@@ -1602,6 +1625,8 @@ const HOMEWORKS = [
   SECOND_CENTER_DHAWQ_AQL_VIDEO_ONLY,
 
   THIRD_CENTER_READING_TEXTS_VIDEO_ONLY,
+
+  SECOND_CENTER_ATHAR_KALIMA_VIDEO_ONLY,
 
 ];
 
