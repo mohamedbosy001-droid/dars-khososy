@@ -68,6 +68,7 @@ function CourseContent({
   isFirstLecture5ExamCompleted = false,
   isFirstLecture6ExamCompleted = false,
   isFirstLecture7ExamCompleted = false,
+  isFirstLecture8ExamCompleted = false,
 
   /*
     هل امتحان المحاضرة الأولى
@@ -552,7 +553,9 @@ function CourseContent({
               type="button"
               onClick={() => onOpenExam?.(
                 { id: "comprehensive-exam", title: "الامتحان الشامل" },
-                course.id.startsWith("second-") ? "secondMonthComprehensiveExam" : "thirdMonthComprehensiveExam"
+                course.id.startsWith("first-")
+                  ? "firstMonthComprehensiveExam"
+                  : course.id.startsWith("second-") ? "secondMonthComprehensiveExam" : "thirdMonthComprehensiveExam"
               )}
               style={{
                 marginTop: 12, minHeight: 44, padding: "10px 16px", borderRadius: 10,
@@ -729,6 +732,10 @@ function CourseContent({
                 (course.id === "first-month-2-course" || course.id === "first-term-course") &&
                 (lesson.id === "lesson-7" || lesson.courseLectureKey === "first-secondary-lecture-7");
 
+              const isFirstEighthLesson =
+                (course.id === "first-month-2-course" || course.id === "first-term-course") &&
+                (lesson.id === "lesson-8" || lesson.courseLectureKey === "first-secondary-lecture-8");
+
               /*
                 =====================================
                 المحاضرة الثانية لتانية ثانوي
@@ -847,6 +854,7 @@ function CourseContent({
                     !isFirstFifthLesson &&
                     !isFirstSixthLesson &&
                     !isFirstSeventhLesson &&
+                    !isFirstEighthLesson &&
                     !isSecondSecondLesson &&
                     !isSecondThirdLessonForExam &&
                     !isSecondFourthLesson &&
@@ -885,6 +893,10 @@ function CourseContent({
                   (
                     isFirstSeventhLesson &&
                     isFirstLecture7ExamCompleted
+                  ) ||
+                  (
+                    isFirstEighthLesson &&
+                    isFirstLecture8ExamCompleted
                   ) ||
                   (
                     isSecondSecondLesson &&
@@ -1239,6 +1251,7 @@ function CourseContent({
               return (
                 <div key={lessonId} style={{ display: "contents" }}>
                   {isThirdSeventhLesson && renderComprehensiveExamCard()}
+                  {isFirstEighthLesson && renderComprehensiveExamCard()}
                   {isSecondFifthLesson && renderComprehensiveExamCard()}
                   <div
                   style={{
@@ -1609,6 +1622,32 @@ function CourseContent({
                             </p>
                           </div>
                           {isFirstLecture6ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
+                        </button>
+                      )}
+
+                      {/* امتحان المحاضرة الثامنة - أولى ثانوي */}
+                      {isFirstEighthLesson && hasValue(lesson.exam1Key) && (
+                        <button
+                          type="button"
+                          className={`course-content-card exam-card ${unlocked ? "available" : "locked"}`}
+                          disabled={!unlocked}
+                          onClick={() => onOpenExam?.(lesson, lesson.exam1Key || "firstLecture8Exam")}
+                          style={{ width: "100%", marginBottom: "14px" }}
+                        >
+                          <div className="course-content-card-icon">
+                            {unlocked ? (isFirstLecture8ExamCompleted ? <FaCheckCircle /> : <FaClipboardCheck />) : <FaLock />}
+                          </div>
+                          <div className="course-content-card-info">
+                            <h3>{lesson.exam1Title || "امتحان المحاضرة الثامنة"}</h3>
+                            <p>
+                              {!unlocked
+                                ? "فعّل المحاضرة الثامنة بالكود أولًا"
+                                : isFirstLecture8ExamCompleted
+                                  ? "تم تسليم الامتحان - يمكنك مراجعة النتيجة"
+                                  : "سلّم الامتحان أولًا لفتح فيديو المحاضرة الثامنة"}
+                            </p>
+                          </div>
+                          {isFirstLecture8ExamCompleted && <FaCheckCircle className="course-content-completed-icon" />}
                         </button>
                       )}
 
@@ -2382,7 +2421,10 @@ function CourseContent({
                                               : isFirstSeventhLesson &&
                                                   !isFirstLecture7ExamCompleted
                                                 ? "سلّم امتحان المحاضرة السابعة أولًا لفتح فيديو الشرح"
-                                                : isThirdEighthLesson &&
+                                                : isFirstEighthLesson &&
+                                                    !isFirstLecture8ExamCompleted
+                                                  ? "سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو الشرح"
+                                                  : isThirdEighthLesson &&
                                                     !isThirdLecture8ExamCompleted
                                                   ? "سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو الشرح"
                                                   : isThirdNinthLesson &&
@@ -2837,6 +2879,7 @@ function CourseContent({
                           !hideExam1InSourceLesson &&
                           !isFirstSixthLesson &&
                           !isFirstSeventhLesson &&
+                          !isFirstEighthLesson &&
                           !isSecondFifthLesson &&
                           !isSecondSixthLesson &&
                           !showFirstSecondaryExamBeforeFourthLesson && (
@@ -2890,7 +2933,7 @@ function CourseContent({
                             الامتحان الثاني القديم
                         ========================= */}
 
-                        {hasExam2 && !isFirstSixthLesson && !isFirstSeventhLesson && !isSecondFifthLesson && !isSecondSixthLesson && (
+                        {hasExam2 && !isFirstSixthLesson && !isFirstSeventhLesson && !isFirstEighthLesson && !isSecondFifthLesson && !isSecondSixthLesson && (
                           <button
                             type="button"
                             className={`course-content-card exam-card ${

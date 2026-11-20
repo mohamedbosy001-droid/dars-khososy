@@ -114,6 +114,8 @@ const FIRST_LECTURE_6_EXAM_KEY = "firstLecture6Exam";
 const FIRST_LECTURE_6_EXAM_ID = "first-lecture-6-exam";
 const FIRST_LECTURE_7_EXAM_KEY = "firstLecture7Exam";
 const FIRST_LECTURE_7_EXAM_ID = "first-lecture-7-exam";
+const FIRST_LECTURE_8_EXAM_KEY = "firstLecture8Exam";
+const FIRST_LECTURE_8_EXAM_ID = "first-lecture-8-exam";
 
 /*
   ============================
@@ -407,6 +409,21 @@ const FIRST_SECONDARY_SEVENTH_LECTURE = {
   courseLectureKey: "first-secondary-lecture-7",
   requiresPreviousExam: true,
   requiredExamId: FIRST_LECTURE_7_EXAM_ID,
+};
+
+const FIRST_SECONDARY_EIGHTH_LECTURE = {
+  id: "lesson-8",
+  title: "المحاضرة الثامنة شرح الاستعارة فرع البلاغة",
+  description: "سلّم امتحان المحاضرة الثامنة أولًا، وبعد التسليم فقط سيفتح فيديو الشرح.",
+  youtubeUrl: "https://youtu.be/I1vg2AN6a1s",
+  videoUrl: "https://youtu.be/I1vg2AN6a1s",
+  videoTitle: "المحاضرة الثامنة شرح الاستعارة فرع البلاغة",
+  exam1: true,
+  exam1Key: FIRST_LECTURE_8_EXAM_KEY,
+  exam1Title: "امتحان المحاضرة الثامنة",
+  courseLectureKey: "first-secondary-lecture-8",
+  requiresPreviousExam: true,
+  requiredExamId: FIRST_LECTURE_8_EXAM_ID,
 };
 
 /*
@@ -1376,6 +1393,10 @@ function AllCourses({
             ...FIRST_SECONDARY_SEVENTH_LECTURE,
             courseLectureKey: "first-secondary-lecture-7",
           },
+          {
+            ...FIRST_SECONDARY_EIGHTH_LECTURE,
+            courseLectureKey: "first-secondary-lecture-8",
+          },
         ],
       };
     }
@@ -1488,6 +1509,11 @@ function AllCourses({
         const seventhFirstLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "first-secondary-lecture-7");
         if (seventhFirstLessonIndex >= 0) lessons[seventhFirstLessonIndex] = { ...lessons[seventhFirstLessonIndex], ...FIRST_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "first-secondary-lecture-7" };
         else lessons.push({ ...FIRST_SECONDARY_SEVENTH_LECTURE, courseLectureKey: "first-secondary-lecture-7" });
+
+        // المحاضرة الثامنة تظهر أيضًا داخل كورس الترم الأول لأولى ثانوي.
+        const eighthFirstLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-8" || lesson?.courseLectureKey === "first-secondary-lecture-8");
+        if (eighthFirstLessonIndex >= 0) lessons[eighthFirstLessonIndex] = { ...lessons[eighthFirstLessonIndex], ...FIRST_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "first-secondary-lecture-8" };
+        else lessons.push({ ...FIRST_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "first-secondary-lecture-8" });
       }
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
@@ -2421,6 +2447,10 @@ function AllCourses({
                     {
                       ...FIRST_SECONDARY_SEVENTH_LECTURE,
                       courseLectureKey: "first-secondary-lecture-7",
+                    },
+                    {
+                      ...FIRST_SECONDARY_EIGHTH_LECTURE,
+                      courseLectureKey: "first-secondary-lecture-8",
                     },
                   ],
                 };
@@ -4810,6 +4840,16 @@ function AllCourses({
       }
 
       /*
+        أولى ثانوي - المحاضرة الثامنة
+      */
+      else if (
+        FIRST_SECONDARY_COURSE_IDS.has(course.id) &&
+        lesson.id === "lesson-8"
+      ) {
+        window.alert("سلّم امتحان المحاضرة الثامنة أولًا لفتح فيديو المحاضرة.");
+      }
+
+      /*
         تالتة ثانوي - المحاضرة الثامنة
       */
       else if (
@@ -6293,6 +6333,10 @@ function AllCourses({
       finalExamKey === "thirdMonthComprehensiveExam" &&
       ["third-month-2-course", "third-term-course"].includes(course.id);
 
+    const isComprehensiveFirstExam =
+      finalExamKey === "firstMonthComprehensiveExam" &&
+      ["first-month-2-course", "first-term-course"].includes(course.id);
+
     const isSecondLectureOneExam =
       SECOND_SECONDARY_COURSE_IDS.has(
         course.id
@@ -6425,6 +6469,10 @@ function AllCourses({
       (course.id === "first-month-2-course" || course.id === "first-term-course") &&
       (finalExamKey === FIRST_LECTURE_7_EXAM_KEY || examKey === FIRST_LECTURE_7_EXAM_KEY);
 
+    const isFirstLectureEightExam =
+      (course.id === "first-month-2-course" || course.id === "first-term-course") &&
+      (finalExamKey === FIRST_LECTURE_8_EXAM_KEY || examKey === FIRST_LECTURE_8_EXAM_KEY);
+
     const isThirdLectureEightExam =
       ["third-month-2-course", "third-term-course"].includes(course.id) &&
       (finalExamKey === THIRD_LECTURE_8_EXAM_KEY || examKey === THIRD_LECTURE_8_EXAM_KEY);
@@ -6433,7 +6481,7 @@ function AllCourses({
       ["third-month-3-course", "third-term-course"].includes(course.id) &&
       (finalExamKey === THIRD_LECTURE_9_EXAM_KEY || examKey === THIRD_LECTURE_9_EXAM_KEY);
 
-    if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam) {
+    if (isComprehensiveSecondMonthExam || isComprehensiveThirdExam || isComprehensiveFirstExam) {
       const courseAccess = getCourseAccess(course);
       const hasFullCourseAccess =
         hasComprehensiveCourseSubscription(course);
@@ -6443,8 +6491,8 @@ function AllCourses({
         window.alert("اشتركي في الشهر أو فعّلي الامتحان الشامل بكود الحصة أولًا.");
         return;
       }
-    } else if (isFirstLectureFourExam || isFirstLectureFiveExam || isFirstLectureSixExam || isFirstLectureSevenExam) {
-      // امتحانات أولى ثانوي قبل المحاضرات الرابعة والخامسة والسادسة والسابعة؛ لا تشترط مشاهدة الفيديو أولًا.
+    } else if (isFirstLectureFourExam || isFirstLectureFiveExam || isFirstLectureSixExam || isFirstLectureSevenExam || isFirstLectureEightExam) {
+      // امتحانات أولى ثانوي قبل المحاضرات الرابعة والخامسة والسادسة والسابعة والثامنة؛ لا تشترط مشاهدة الفيديو أولًا.
     } else if (
       isSecondLectureOneExam
     ) {
@@ -6713,7 +6761,7 @@ function AllCourses({
 
         return;
       }
-    } else if (!isComprehensiveSecondMonthExam && !isComprehensiveThirdExam) {
+    } else if (!isComprehensiveSecondMonthExam && !isComprehensiveThirdExam && !isComprehensiveFirstExam) {
       if (
         !hasLessonAccess(
           course,
@@ -7684,6 +7732,9 @@ function AllCourses({
           )}
           isFirstLecture7ExamCompleted={isExamCompleted(
             FIRST_LECTURE_7_EXAM_ID
+          )}
+          isFirstLecture8ExamCompleted={isExamCompleted(
+            FIRST_LECTURE_8_EXAM_ID
           )}
           isSecondLecture1ExamCompleted={isExamCompleted(
             SECOND_LECTURE_1_EXAM_ID

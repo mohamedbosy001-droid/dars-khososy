@@ -243,7 +243,7 @@ function Exam({
   // التصحيح اليدوي مخصص لامتحاني الشامل فقط.
   const isComprehensiveExam =
     exam?.isComprehensiveExam === true ||
-    /^(second|third)-month-comprehensive$/.test(String(exam?.id || ""));
+    /^(first|second|third)-month-comprehensive$/.test(String(exam?.id || ""));
 
   const studentUid =
     currentStudent?.uid ||
