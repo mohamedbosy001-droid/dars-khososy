@@ -338,7 +338,7 @@ function CourseContent({
     if (comprehensiveIndex >= 0) ordered.splice(comprehensiveIndex + 1, 0, seventhLesson);
     else ordered.push(seventhLesson);
 
-    // الترتيب النهائي: ... السادسة، الامتحان الشامل، السابعة، الثامنة، ثم مراجعة أكتوبر في الآخر.
+    // الترتيب النهائي: ... السادسة، الامتحان الشامل، السابعة، الثامنة، التاسعة، العاشرة، ثم مراجعة أكتوبر في الآخر.
     const isEighthLessonItem = (lesson) =>
       lesson?.id === "lesson-8" || lesson?.courseLectureKey === "third-lecture-8";
     const isOctoberReviewItem = (lesson) =>
@@ -347,13 +347,18 @@ function CourseContent({
     const isNinthLessonItem = (lesson) =>
       lesson?.id === "lesson-9" || lesson?.courseLectureKey === "third-lecture-9";
 
+    const isTenthLessonItem = (lesson) =>
+      lesson?.id === "lesson-10" || lesson?.courseLectureKey === "third-lecture-10";
+
     const eighthLessonItem = ordered.find(isEighthLessonItem);
     const ninthLessonItem = ordered.find(isNinthLessonItem);
+    const tenthLessonItem = ordered.find(isTenthLessonItem);
     const octoberReviewItem = ordered.find(isOctoberReviewItem);
     const finalOrdered = ordered.filter(
       (lesson) =>
         !isEighthLessonItem(lesson) &&
         !isNinthLessonItem(lesson) &&
+        !isTenthLessonItem(lesson) &&
         !isOctoberReviewItem(lesson)
     );
 
@@ -380,6 +385,23 @@ function CourseContent({
             ? seventhPosition + 1
             : finalOrdered.length;
       finalOrdered.splice(ninthPosition, 0, ninthLessonItem);
+    }
+
+    if (tenthLessonItem) {
+      const ninthPosition = finalOrdered.findIndex(isNinthLessonItem);
+      const eighthPosition = finalOrdered.findIndex(isEighthLessonItem);
+      const seventhPosition = finalOrdered.findIndex(
+        (lesson) => lesson?.id === "lesson-7" || lesson?.courseLectureKey === "third-lecture-7"
+      );
+      const tenthPosition =
+        ninthPosition >= 0
+          ? ninthPosition + 1
+          : eighthPosition >= 0
+            ? eighthPosition + 1
+            : seventhPosition >= 0
+              ? seventhPosition + 1
+              : finalOrdered.length;
+      finalOrdered.splice(tenthPosition, 0, tenthLessonItem);
     }
 
     if (octoberReviewItem) finalOrdered.push(octoberReviewItem);
@@ -825,6 +847,10 @@ function CourseContent({
                 ["third-month-3-course", "third-term-course"].includes(course?.id) &&
                 (lesson.id === "lesson-9" || lesson.courseLectureKey === "third-lecture-9");
 
+              const isThirdTenthLesson =
+                ["third-month-3-course", "third-term-course"].includes(course?.id) &&
+                (lesson.id === "lesson-10" || lesson.courseLectureKey === "third-lecture-10");
+
               // مراجعة أكتوبر تفتح مباشرة بدون امتحانات أو واجبات سابقة.
               const isOctoberReviewLesson =
                 lesson?.id === "october-review" ||
@@ -1144,6 +1170,7 @@ function CourseContent({
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
                 !isThirdNinthLesson &&
+                !isThirdTenthLesson &&
                 !isSecondLectureFiveSixCourse &&
                 (isThirdSecondaryCourse &&
                   lesson.id !== "lesson-6" &&
@@ -1162,6 +1189,7 @@ function CourseContent({
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
                 !isThirdNinthLesson &&
+                !isThirdTenthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 2 &&
@@ -1179,6 +1207,7 @@ function CourseContent({
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
                 !isThirdNinthLesson &&
+                !isThirdTenthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lessonIndex === 3 &&
@@ -1189,6 +1218,7 @@ function CourseContent({
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
                 !isThirdNinthLesson &&
+                !isThirdTenthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id !== "lesson-6" &&
                 lesson.id ===
@@ -1245,6 +1275,7 @@ function CourseContent({
                 !isThirdSeventhLesson &&
                 !isThirdEighthLesson &&
                 !isThirdNinthLesson &&
+                !isThirdTenthLesson &&
                 (                isThirdSecondaryCourse &&
                 lesson.id === "lesson-6");
 

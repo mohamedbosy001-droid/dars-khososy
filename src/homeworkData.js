@@ -2464,6 +2464,30 @@ videoId: "g4oIr06pQjI",
     })),
   },
 
+  thirdLecture10Homework: {
+    id: "third-lecture-10-homework",
+    title: "تسليم واجب المحاضرة العاشرة (اسم الفاعل وصيغة المبالغة)",
+    grade: "الثالث الثانوي",
+    questions: [
+      ...[1, 1, 2, 2, 3, 2, 0, 0, 2, 0, 3, 1, 3, 2, 1, 2, 3, 1, 0, 2, 2, 0, 2, 1, 1, 2, 1, 0, 0, 3].map((answer, index) => ({
+        id: `third-lecture-10-homework-q${index + 1}`,
+        number: index + 1,
+        type: "choice",
+        question: `السؤال ${index + 1} - اختر الإجابة من كتابك`,
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: answer,
+      })),
+      ...[1, 1, 1, 3, 2, 1, 0, 0, 1, 2, 2, 0, 3, 0, 0, 1, 3, 2, 0, 1, 3, 1, 1, 2, 1, 0, 1, 1, 0, 1, 2, 1, 0, 2, 2, 0].map((answer, index) => ({
+        id: `third-lecture-10-homework-q${index + 31}`,
+        number: index + 31,
+        type: "choice",
+        question: `تدريبات على صيغة المبالغة - السؤال ${index + 1} - اختر الإجابة من كتابك`,
+        options: ["أ", "ب", "ج", "د"],
+        correctAnswer: answer,
+      })),
+    ],
+  },
+
 };
 
 export default homeworkData;

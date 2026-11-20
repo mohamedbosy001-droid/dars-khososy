@@ -921,6 +921,25 @@ const THIRD_NINTH_LECTURE = {
   courseLectureKey: "third-lecture-9",
 };
 
+const THIRD_TENTH_LECTURE = {
+  id: "lesson-10",
+  title: "المحاضرة العاشرة اسم الفاعل وصيغة المبالغة",
+  description: "شاهد 30% من المحاضرة لفتح الواجب، وبعد تسليم الواجب يفتح فيديو الواجب.",
+  youtubeUrl: "https://youtu.be/_KKFBmZFtdI",
+  videoUrl: "https://youtu.be/_KKFBmZFtdI",
+  videoTitle: "المحاضرة العاشرة اسم الفاعل وصيغة المبالغة",
+  exam1: false,
+  exam1Key: "",
+  exam1Title: "",
+  homeworkEnabled: true,
+  homeworkKey: "thirdLecture10Homework",
+  homeworkTitle: "تسليم واجب المحاضرة العاشرة (اسم الفاعل وصيغة المبالغة)",
+  homeworkSolutionUrl: "https://youtu.be/0kjcfazlf_8?si=02wC1iI8v9mx-Olg",
+  solutionVideoUrl: "https://youtu.be/0kjcfazlf_8?si=02wC1iI8v9mx-Olg",
+  homeworkSolutionTitle: "ڤيديو واجب المحاضرة العاشرة اسم الفاعل وصيغة المبالغة",
+  courseLectureKey: "third-lecture-10",
+};
+
 function renderUnderlinedQuestionText(text) {
   if (
     typeof text !== "string" ||
@@ -1793,6 +1812,10 @@ function AllCourses({
             ...THIRD_NINTH_LECTURE,
             courseLectureKey: "third-lecture-9",
           },
+          {
+            ...THIRD_TENTH_LECTURE,
+            courseLectureKey: "third-lecture-10",
+          },
         ],
       };
     }
@@ -2064,6 +2087,11 @@ function AllCourses({
       if (ninthThirdLessonIndex >= 0) lessons[ninthThirdLessonIndex] = { ...lessons[ninthThirdLessonIndex], ...THIRD_NINTH_LECTURE, courseLectureKey: "third-lecture-9" };
       else lessons.push({ ...THIRD_NINTH_LECTURE, courseLectureKey: "third-lecture-9" });
 
+      // المحاضرة العاشرة: واجب بعد 30%، وفيديو الواجب يفتح بعد تسليم الواجب.
+      const tenthThirdLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-10" || lesson?.courseLectureKey === "third-lecture-10");
+      if (tenthThirdLessonIndex >= 0) lessons[tenthThirdLessonIndex] = { ...lessons[tenthThirdLessonIndex], ...THIRD_TENTH_LECTURE, courseLectureKey: "third-lecture-10" };
+      else lessons.push({ ...THIRD_TENTH_LECTURE, courseLectureKey: "third-lecture-10" });
+
       // مراجعة شهر أكتوبر: تفتح مباشرة دون امتحان أو واجب.
       const octoberReviewIndex = lessons.findIndex(
         (lesson) =>
@@ -2091,8 +2119,8 @@ function AllCourses({
         lessons.push(octoberReviewLesson);
       }
 
-      // المحاضرة الثامنة ثم التاسعة تكونان دائمًا آخر عناصر الكورس.
-      for (const lectureNumber of ["8", "9"]) {
+      // المحاضرات الثامنة ثم التاسعة ثم العاشرة تكون دائمًا آخر عناصر الكورس.
+      for (const lectureNumber of ["8", "9", "10"]) {
         const lastIndex = lessons.findIndex((lesson) => lesson?.id === `lesson-${lectureNumber}` || lesson?.courseLectureKey === `third-lecture-${lectureNumber}`);
         if (lastIndex >= 0 && lastIndex !== lessons.length - 1) {
           const [movedLesson] = lessons.splice(lastIndex, 1);
@@ -3202,7 +3230,9 @@ function AllCourses({
         lesson.id === "lesson-8" ||
         lesson.courseLectureKey === "third-lecture-8" ||
         lesson.id === "lesson-9" ||
-        lesson.courseLectureKey === "third-lecture-9"
+        lesson.courseLectureKey === "third-lecture-9" ||
+        lesson.id === "lesson-10" ||
+        lesson.courseLectureKey === "third-lecture-10"
       ) &&
       hasComprehensiveCourseSubscription(course)
     ) {
