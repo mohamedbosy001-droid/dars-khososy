@@ -1493,6 +1493,96 @@ const SECOND_CENTER_ATHAR_KALIMA_VIDEO_ONLY = {
   questions: [],
 };
 
+/* =========================================================
+   واجب المحاضرة العاشرة (اسم الفاعل وصيغة المبالغة) - تالتة ثانوي سنتر
+   لازم الطالب يسلم الواجب أولًا، وبعد التسليم يفتح فيديو الواجب
+========================================================= */
+
+const THIRD_CENTER_LECTURE_10_PART_1_ANSWERS = [1, 1, 2, 2, 3, 2, 0, 0, 2, 0, 3, 1, 3, 2, 1, 2, 3, 1, 0, 2, 2, 0, 2, 1, 1, 2, 1, 0, 0, 3];
+
+const THIRD_CENTER_LECTURE_10_PART_2_ANSWERS = [1, 1, 1, 3, 2, 1, 0, 0, 1, 2, 2, 0, 3, 0, 0, 1, 3, 2, 0, 1, 3, 1, 1, 2, 1, 0, 1, 1, 0, 1, 2, 1, 0, 2, 2, 0];
+
+const THIRD_CENTER_LECTURE_10_HOMEWORK = {
+  id: "third-center-lecture-10-homework",
+
+  title: "تسليم واجب المحاضرة العاشرة (اسم الفاعل وصيغة المبالغة)",
+
+  grade: "الثالث الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoId: "0kjcfazlf_8",
+
+  videoTitle: "ڤيديو واجب المحاضرة العاشرة اسم الفاعل وصيغة المبالغة",
+
+  questions: [
+    ...THIRD_CENTER_LECTURE_10_PART_1_ANSWERS.map((answer, index) => ({
+      id: `third-center-lecture-10-homework-q${index + 1}`,
+      number: index + 1,
+      type: "choice",
+      question: `السؤال ${index + 1} - اختر الإجابة من كتابك`,
+      options: ["أ", "ب", "ج", "د"],
+      correctAnswer: answer,
+    })),
+    ...THIRD_CENTER_LECTURE_10_PART_2_ANSWERS.map((answer, index) => ({
+      id: `third-center-lecture-10-homework-q${index + 31}`,
+      number: index + 31,
+      type: "choice",
+      question: `تدريبات على صيغة المبالغة - السؤال ${index + 1} - اختر الإجابة من كتابك`,
+      options: ["أ", "ب", "ج", "د"],
+      correctAnswer: answer,
+    })),
+  ],
+};
+
+/* =========================================================
+   واجب درس المحسنات البديعية وصيغة المبالغة - أولى ثانوي سنتر
+   فيديو فقط
+========================================================= */
+
+const FIRST_CENTER_BADI_MUBALAGHA_VIDEO_ONLY = {
+  id: "first-center-badi-mubalagha-video-only",
+
+  title: "واجب درس المحسنات البديعية وصيغة المبالغة",
+
+  grade: "الأول الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "lpwmKculoGU",
+
+  questions: [],
+};
+
+/* =========================================================
+   واجب الإيجاز والإطناب المحاضرة الحادية عشرة - تانية ثانوي سنتر
+   فيديو فقط
+========================================================= */
+
+const SECOND_CENTER_LECTURE_11_VIDEO_ONLY = {
+  id: "second-center-lecture-11-video-only",
+
+  title: "واجب الإيجاز والإطناب المحاضرة الحادية عشرة",
+
+  grade: "الثاني الثانوي",
+
+  studentType: "center",
+
+  centerOnly: true,
+
+  videoOnly: true,
+
+  videoId: "kuFBKE0heP0",
+
+  questions: [],
+};
+
 const HOMEWORKS = [
   {
     id: "homework-1",
@@ -1627,6 +1717,12 @@ const HOMEWORKS = [
   THIRD_CENTER_READING_TEXTS_VIDEO_ONLY,
 
   SECOND_CENTER_ATHAR_KALIMA_VIDEO_ONLY,
+
+  THIRD_CENTER_LECTURE_10_HOMEWORK,
+
+  FIRST_CENTER_BADI_MUBALAGHA_VIDEO_ONLY,
+
+  SECOND_CENTER_LECTURE_11_VIDEO_ONLY,
 
 ];
 

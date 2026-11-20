@@ -39,6 +39,17 @@ const gradesData = [
 
     month2Prefix: "FM2",
 
+    /*
+      الشهر الثالث
+    */
+    month3CourseId:
+      "first-month-3-course",
+
+    month3CourseTitle:
+      "كورس الشهر الثالث - الصف الأول الثانوي",
+
+    month3Prefix: "FM3",
+
     termCourseId:
       "first-term-course",
 
@@ -68,6 +79,17 @@ const gradesData = [
       "كورس الشهر الثاني - الصف الثاني الثانوي",
 
     month2Prefix: "SM2",
+
+    /*
+      الشهر الثالث
+    */
+    month3CourseId:
+      "second-month-3-course",
+
+    month3CourseTitle:
+      "كورس الشهر الثالث - الصف الثاني الثانوي",
+
+    month3Prefix: "SM3",
 
     termCourseId:
       "second-term-course",
@@ -1232,7 +1254,9 @@ ${finishedGroups} / ${totalGroups}`
               </option>
             )}
 
-            {grade === "الثالث الثانوي" && (
+            {(grade === "الأول الثانوي" ||
+              grade === "الثاني الثانوي" ||
+              grade === "الثالث الثانوي") && (
               <option value="month3">
                 كود الشهر الثالث
               </option>

@@ -58,6 +58,8 @@ import thirdMonthCourse from "./assets/third-month.jpeg";
 import thirdMonth2Course from "./assets/coursemonth2.jpeg";
 import thirdTermCourse from "./assets/third-term.jpeg";
 import thirdMonth3Course from "./assets/third-month-3.jpeg";
+import firstMonth3Course from "./assets/third-month-1.jpeg";
+import secondMonth3Course from "./assets/third-month-2.jpeg";
 
 import "./AllCourses.css";
 import "./Exam.css";
@@ -424,6 +426,21 @@ const FIRST_SECONDARY_EIGHTH_LECTURE = {
   courseLectureKey: "first-secondary-lecture-8",
   requiresPreviousExam: true,
   requiredExamId: FIRST_LECTURE_8_EXAM_ID,
+};
+
+const FIRST_SECONDARY_NINTH_LECTURE = {
+  id: "lesson-9",
+  title: "المحاضرة التاسعة شرح المحسنات البديعية وحل تدريبات عليها",
+  description: "",
+  youtubeUrl: "https://youtu.be/qp6YYG6eWJQ?si=tYC9xQQsHw7aGRpH",
+  videoUrl: "https://youtu.be/qp6YYG6eWJQ?si=tYC9xQQsHw7aGRpH",
+  videoTitle: "المحاضرة التاسعة شرح المحسنات البديعية وحل تدريبات عليها",
+  exam1: false,
+  exam1Key: "",
+  exam1Title: "",
+  homeworkEnabled: false,
+  homeworkKey: "",
+  courseLectureKey: "first-secondary-lecture-9",
 };
 
 /*
@@ -1377,6 +1394,18 @@ function AllCourses({
       ============================
     */
 
+    if (course.id === "first-month-3-course") {
+      return {
+        ...course,
+        lessons: [
+          {
+            ...FIRST_SECONDARY_NINTH_LECTURE,
+            courseLectureKey: "first-secondary-lecture-9",
+          },
+        ],
+      };
+    }
+
     if (course.id === "first-month-2-course") {
       return {
         ...course,
@@ -1514,6 +1543,11 @@ function AllCourses({
         const eighthFirstLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-8" || lesson?.courseLectureKey === "first-secondary-lecture-8");
         if (eighthFirstLessonIndex >= 0) lessons[eighthFirstLessonIndex] = { ...lessons[eighthFirstLessonIndex], ...FIRST_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "first-secondary-lecture-8" };
         else lessons.push({ ...FIRST_SECONDARY_EIGHTH_LECTURE, courseLectureKey: "first-secondary-lecture-8" });
+
+        // المحاضرة التاسعة تظهر أيضًا داخل كورس الترم الأول لأولى ثانوي.
+        const ninthFirstLessonIndex = lessons.findIndex((lesson) => lesson?.id === "lesson-9" || lesson?.courseLectureKey === "first-secondary-lecture-9");
+        if (ninthFirstLessonIndex >= 0) lessons[ninthFirstLessonIndex] = { ...lessons[ninthFirstLessonIndex], ...FIRST_SECONDARY_NINTH_LECTURE, courseLectureKey: "first-secondary-lecture-9" };
+        else lessons.push({ ...FIRST_SECONDARY_NINTH_LECTURE, courseLectureKey: "first-secondary-lecture-9" });
       }
 
       // مراجعة شهر أكتوبر - فيديو فقط بدون امتحان أو واجب
@@ -2455,6 +2489,31 @@ function AllCourses({
                   ],
                 };
 
+          const firstMonthThreeExists =
+            loadedCourses.some(
+              (course) => course.id === "first-month-3-course"
+            );
+
+          const firstMonthThreeCourse =
+            firstMonthThreeExists
+              ? null
+              : {
+                  id: "first-month-3-course",
+                  title: "كورس الشهر الثالث - الصف الأول الثانوي",
+                  grade: "الأول الثانوي",
+                  description: "شرح الشهر الثالث للصف الأول الثانوي مع التدريبات والاختبارات.",
+                  price: firstMonthOneCourse?.price ?? 100,
+                  active: true,
+                  isPublished: true,
+                  status: "active",
+                  lessons: [
+                    {
+                      ...FIRST_SECONDARY_NINTH_LECTURE,
+                      courseLectureKey: "first-secondary-lecture-9",
+                    },
+                  ],
+                };
+
           const secondMonthOneCourse =
             loadedCourses.find(
               (course) =>
@@ -2496,6 +2555,26 @@ function AllCourses({
                       courseLectureKey: "second-october-review",
                     },
                   ],
+                };
+
+          const secondMonthThreeExists =
+            loadedCourses.some(
+              (course) => course.id === "second-month-3-course"
+            );
+
+          const secondMonthThreeCourse =
+            secondMonthThreeExists
+              ? null
+              : {
+                  id: "second-month-3-course",
+                  title: "كورس الشهر الثالث - الصف الثاني الثانوي",
+                  grade: "الثاني الثانوي",
+                  description: "كورس الشهر الثالث للصف الثاني الثانوي.",
+                  price: secondMonthOneCourse?.price ?? 150,
+                  active: true,
+                  isPublished: true,
+                  status: "active",
+                  lessons: [],
                 };
 
           const thirdMonthOneCourse =
@@ -2565,8 +2644,14 @@ function AllCourses({
             ...(firstMonthTwoCourse
               ? [firstMonthTwoCourse]
               : []),
+            ...(firstMonthThreeCourse
+              ? [firstMonthThreeCourse]
+              : []),
             ...(secondMonthTwoCourse
               ? [secondMonthTwoCourse]
+              : []),
+            ...(secondMonthThreeCourse
+              ? [secondMonthThreeCourse]
               : []),
             ...(thirdMonthTwoCourse
               ? [
@@ -2742,6 +2827,7 @@ function AllCourses({
               "first-term-course": 0,
               "first-month-course": 1,
               "first-month-2-course": 2,
+              "first-month-3-course": 3,
             };
 
             return (
@@ -2758,7 +2844,8 @@ function AllCourses({
               "second-term-course": 0,
               "second-month-course": 1,
               "second-month-2-course": 2,
-              "second-free-intro-course": 3,
+              "second-month-3-course": 3,
+              "second-free-intro-course": 4,
             };
 
             return (
@@ -4384,6 +4471,13 @@ function AllCourses({
 
     if (
       course.id ===
+      "first-month-3-course"
+    ) {
+      return firstMonth3Course;
+    }
+
+    if (
+      course.id ===
       "first-term-course"
     ) {
       return firstTermCourse;
@@ -4401,6 +4495,13 @@ function AllCourses({
       "second-month-2-course"
     ) {
       return secondMonth2Course;
+    }
+
+    if (
+      course.id ===
+      "second-month-3-course"
+    ) {
+      return secondMonth3Course;
     }
 
     if (
